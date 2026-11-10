@@ -5,6 +5,8 @@ import android.os.IBinder
 import android.os.Parcel
 import android.util.Log
 import kotlin.concurrent.thread
+import org.json.JSONArray
+import org.json.JSONObject
 
 /**
  * Free 4-corner keystone.
@@ -24,11 +26,7 @@ class Corners(private val context: Context) {
     /** Writes the corners and applies them live; restarts SurfaceFlinger only if needed. */
     @Synchronized
     fun apply(params: Map<String, String>): String {
-        val next = KEYS.associateWith { key ->
-            val v = params[key]?.toIntOrNull() ?: throw IllegalArgumentException("$key missing")
-            require(v in 0..MAX) { "$key must be 0..$MAX" }
-            v
-        }
+        val next = valuesOf(params)
         val current = read()
         prefs.edit().putString("undo", KEYS.joinToString(",") { current.getValue(it).toString() }).apply()
         write(next)
@@ -47,6 +45,71 @@ class Corners(private val context: Context) {
         val values = saved.split(",").map { it.toInt() }
         return apply(KEYS.zip(values.map { it.toString() }).toMap())
     }
+
+    fun presets(): String {
+        val store = presetStore()
+        val arr = JSONArray()
+        store.keys().asSequence().sorted().forEach { name ->
+            val values = store.getJSONObject(name)
+            val o = JSONObject().put("name", name)
+            KEYS.forEach { o.put(it, values.optInt(it, 0)) }
+            arr.put(o)
+        }
+        return """{"presets":$arr}"""
+    }
+
+    /** Saves the values in [params] under [rawName] (1..24 characters). */
+    @Synchronized
+    fun savePreset(rawName: String?, params: Map<String, String>): String {
+        val name = nameOf(rawName)
+        val values = valuesOf(params)
+        val store = presetStore()
+        val o = JSONObject()
+        KEYS.forEach { o.put(it, values.getValue(it)) }
+        store.put(name, o)
+        saveStore(store)
+        return presets()
+    }
+
+    @Synchronized
+    fun applyPreset(rawName: String?): String {
+        val name = nameOf(rawName)
+        val store = presetStore()
+        require(store.has(name)) { "no preset named $name" }
+        val values = store.getJSONObject(name)
+        return apply(KEYS.associateWith { k -> values.optInt(k, 0).toString() })
+    }
+
+    @Synchronized
+    fun deletePreset(rawName: String?): String {
+        val name = nameOf(rawName)
+        val store = presetStore()
+        store.remove(name)
+        saveStore(store)
+        return presets()
+    }
+
+    /** The corners from the first snapshot, before any manual edits. */
+    @Synchronized
+    fun factory(): String = apply(FACTORY.mapValues { it.value.toString() })
+
+    private fun valuesOf(params: Map<String, String>): Map<String, Int> =
+        KEYS.associateWith { key ->
+            val v = params[key]?.toIntOrNull() ?: throw IllegalArgumentException("$key missing")
+            require(v in 0..MAX) { "$key must be 0..$MAX" }
+            v
+        }
+
+    private fun nameOf(raw: String?): String {
+        val name = raw?.trim().orEmpty()
+        require(name.length in 1..24) { "name must be 1..24 characters" }
+        return name
+    }
+
+    private fun presetStore(): JSONObject = JSONObject(prefs.getString("presets", "{}") ?: "{}")
+
+    private fun saveStore(store: JSONObject) =
+        prefs.edit().putString("presets", store.toString()).apply()
 
     private fun read(): Map<String, Int> =
         KEYS.associateWith { Props.get(PREFIX + it).toIntOrNull() ?: 0 }
@@ -104,5 +167,9 @@ class Corners(private val context: Context) {
         private const val TRANSACT_KEYSTONE = 1050
         private const val MAX = 450
         private const val RESTART_SECONDS = 25
+        private val FACTORY = linkedMapOf(
+            "ltx" to 166, "lty" to 165, "rtx" to 165, "rty" to 165,
+            "lbx" to 222, "lby" to 287, "rbx" to 222, "rby" to 287,
+        )
     }
 }

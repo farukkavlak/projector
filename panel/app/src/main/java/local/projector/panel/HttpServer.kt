@@ -36,18 +36,45 @@ class HttpServer(
         val out = it.getOutputStream()
         try {
             when {
-                route == "/" -> reply(out, 200, "text/html; charset=utf-8",
-                    assets.open("index.html").readBytes())
                 route.startsWith("/api/") -> {
                     val body = actions.run(route.removePrefix("/api/"), parse(query))
                     reply(out, 200, "application/json", body.toByteArray())
                 }
-                else -> reply(out, 404, "text/plain", "not found".toByteArray())
+                else -> serveAsset(out, route)
             }
         } catch (e: Exception) {
             Log.w("Panel", "request failed: $target", e)
             reply(out, 400, "text/plain", (e.message ?: "error").toByteArray())
         }
+    }
+
+    /** Serves index.html for the app and /share, and the other files straight from assets. */
+    private fun serveAsset(out: java.io.OutputStream, route: String) {
+        val path = when (route) {
+            "/", "/share" -> "index.html"
+            else -> route.removePrefix("/")
+        }
+        if (path.isEmpty() || path.contains("..")) {
+            reply(out, 404, "text/plain", "not found".toByteArray())
+            return
+        }
+        val bytes = runCatching { assets.open(path).use { it.readBytes() } }.getOrNull()
+        if (bytes == null) {
+            reply(out, 404, "text/plain", "not found".toByteArray())
+            return
+        }
+        reply(out, 200, contentType(path), bytes)
+    }
+
+    private fun contentType(path: String): String = when (path.substringAfterLast('.', "")) {
+        "html" -> "text/html; charset=utf-8"
+        "js" -> "application/javascript; charset=utf-8"
+        "webmanifest" -> "application/manifest+json"
+        "json" -> "application/json"
+        "png" -> "image/png"
+        "svg" -> "image/svg+xml"
+        "css" -> "text/css"
+        else -> "application/octet-stream"
     }
 
     private fun parse(query: String): Map<String, String> =

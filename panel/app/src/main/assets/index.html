@@ -6,7 +6,10 @@
 <meta name="theme-color" content="#16142a">
 <meta name="color-scheme" content="dark">
 <title>Projector</title>
-<link rel="icon" href="data:,">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
 <style>
   :root {
     --night: #16142a;      /* page */
@@ -127,6 +130,29 @@
   .apply:disabled { background: var(--dusk); color: var(--muted); border: 1px solid var(--line); opacity: 1; }
   .note { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
 
+  /* Saved keystone shapes */
+  .presets { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .preset-save { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+  .preset-save input {
+    font: inherit; color: var(--text); background: var(--dusk); border: 1px solid var(--line);
+    border-radius: var(--radius-s); padding: 10px 12px; min-width: 0;
+  }
+  .preset-save input::placeholder { color: #77729a; }
+  .preset-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .preset-list .hint { font-size: 13px; color: var(--muted); }
+  .preset { display: inline-flex; align-items: stretch; border: 1px solid var(--line); border-radius: var(--radius-s); overflow: hidden; }
+  .preset button { border: 0; border-radius: 0; background: var(--dusk); padding: 8px 10px; }
+  .preset .del { color: var(--muted); border-left: 1px solid var(--line); padding: 8px 9px; }
+  .factory { margin-top: 10px; width: 100%; color: var(--muted); }
+
+  /* Status */
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stat { padding: 10px 12px; background: var(--dusk); border: 1px solid var(--line); border-radius: var(--radius-s); min-width: 0; }
+  .stat span { display: block; font-size: 12px; color: var(--muted); }
+  .stat b { display: block; font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .stat.wide { grid-column: 1 / -1; }
+  .stat b.hot { color: var(--bad); }
+
   .slider { margin-top: 20px; }
   .slider label { display: flex; justify-content: space-between; font-size: 15px; }
   .slider label output { color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -229,6 +255,23 @@
       </div>
     </section>
 
+    <section>
+      <h2>Status</h2>
+      <div class="stats" id="stats">
+        <div class="stat"><span>CPU</span><b id="st-cpu">–</b></div>
+        <div class="stat"><span>GPU</span><b id="st-gpu">–</b></div>
+        <div class="stat"><span>Memory</span><b id="st-ram">–</b></div>
+        <div class="stat"><span>Storage</span><b id="st-storage">–</b></div>
+        <div class="stat"><span>Uptime</span><b id="st-uptime">–</b></div>
+        <div class="stat"><span>Tilt</span><b id="st-tilt">–</b></div>
+        <div class="stat"><span>Wi-Fi</span><b id="st-wifi">–</b></div>
+        <div class="stat"><span>Lamp</span><b id="st-lamp">–</b></div>
+        <div class="stat"><span>Fan guard</span><b id="st-fan">–</b></div>
+        <div class="stat"><span>Version</span><b id="st-version">–</b></div>
+        <div class="stat wide"><span>In front</span><b id="st-app">–</b></div>
+      </div>
+    </section>
+
     <p class="keys"><kbd>Space</kbd> play/pause, <kbd>+</kbd> <kbd>−</kbd> volume, <kbd>M</kbd> mute. Arrows move the selected corner, <kbd>Shift</kbd> for bigger steps.</p>
   </div>
 
@@ -258,6 +301,15 @@
       <button id="undo">Undo last</button>
     </div>
     <p class="note">Applying is live. If the app cannot reach the display directly, the screen restarts for about 25 seconds and open apps close.</p>
+
+    <div class="presets">
+      <div class="preset-save">
+        <input id="preset-name" maxlength="24" placeholder="Name this shape" autocomplete="off">
+        <button id="preset-save">Save</button>
+      </div>
+      <div class="preset-list" id="preset-list"></div>
+      <button class="factory" id="factory">Reset to factory corners</button>
+    </div>
 
     <div class="slider">
       <label for="tilt">Trapezoid <output id="tilt-v"></output></label>
@@ -554,6 +606,74 @@
   });
   $('undo').addEventListener('click', () => applyCorners('corners-undo'));
 
+  // ---- Keystone presets
+  let presets = [];
+  function renderPresets() {
+    const box = $('preset-list');
+    box.textContent = '';
+    if (!presets.length) {
+      const hint = document.createElement('span');
+      hint.className = 'hint';
+      hint.textContent = 'No presets yet. Save the current shape.';
+      box.append(hint);
+      return;
+    }
+    presets.forEach(p => {
+      const wrap = document.createElement('span');
+      wrap.className = 'preset';
+      const apply = document.createElement('button');
+      apply.textContent = p.name;
+      apply.title = 'Apply ' + p.name;
+      apply.addEventListener('click', () => applyPreset(p.name));
+      const del = document.createElement('button');
+      del.className = 'del';
+      del.textContent = '×';
+      del.title = 'Delete ' + p.name;
+      del.addEventListener('click', () => deletePreset(p.name));
+      wrap.append(apply, del);
+      box.append(wrap);
+    });
+  }
+  async function loadPresets() {
+    try { presets = (await api('presets')).presets || []; } catch { presets = []; }
+    renderPresets();
+  }
+  async function applyPreset(name) {
+    try {
+      await api('preset-apply?name=' + encodeURIComponent(name));
+      await loadCorners();
+      toast('Applied ' + name);
+    } catch (e) { fail(e); }
+  }
+  async function deletePreset(name) {
+    if (!confirm('Delete preset "' + name + '"?')) return;
+    try {
+      presets = (await api('preset-delete?name=' + encodeURIComponent(name))).presets || [];
+      renderPresets();
+    } catch (e) { fail(e); }
+  }
+  $('preset-save').addEventListener('click', async () => {
+    const name = $('preset-name').value.trim();
+    if (!name) { toast('Give the preset a name', true); return; }
+    if (!edit) return;
+    const q = new URLSearchParams({ name });
+    KEYS.forEach(k => q.set(k, edit[k]));
+    try {
+      presets = (await api('preset-save?' + q)).presets || [];
+      $('preset-name').value = '';
+      renderPresets();
+      toast('Saved ' + name);
+    } catch (e) { fail(e); }
+  });
+  $('factory').addEventListener('click', async () => {
+    if (!confirm('Reset the corners to the factory values?')) return;
+    try {
+      await api('corners-factory');
+      await loadCorners();
+      toast('Factory corners applied');
+    } catch (e) { fail(e); }
+  });
+
   // ---- Trapezoid and size: live. One request at a time, the latest value wins.
   const tilt = $('tilt'), scale = $('scale');
   const labels = () => { $('tilt-v').textContent = tilt.value; $('scale-v').textContent = scale.value + '%'; };
@@ -593,15 +713,66 @@
     else if (e.key === 'Escape') { selected = null; draw(); }
   });
 
+  // ---- Status
+  const fmtBytes = n => {
+    if (!n) return '–';
+    const units = ['B', 'KB', 'MB', 'GB'];
+    let v = n, i = 0;
+    while (v >= 1024 && i < units.length - 1) { v /= 1024; i++; }
+    return (v >= 10 || i === 0 ? Math.round(v) : v.toFixed(1)) + ' ' + units[i];
+  };
+  const fmtUptime = s => {
+    const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
+    return d ? d + 'd ' + h + 'h' : h ? h + 'h ' + m + 'm' : m + 'm';
+  };
+  const appLabel = p => !p ? '–' : p.includes('smarttube') ? 'SmartTube' : p === 'local.projector.panel' ? 'Panel' : p.split('.').pop();
+  async function loadSystem() {
+    try {
+      const s = await api('system');
+      $('st-cpu').textContent = s.cpu == null ? '–' : s.cpu.toFixed(0) + ' °C';
+      $('st-gpu').textContent = s.gpu == null ? '–' : s.gpu.toFixed(0) + ' °C';
+      $('st-cpu').classList.toggle('hot', s.cpu >= 75);
+      $('st-gpu').classList.toggle('hot', s.gpu >= 75);
+      $('st-ram').textContent = s.ramTotal ? fmtBytes(s.ramUsed) + ' / ' + fmtBytes(s.ramTotal) : '–';
+      $('st-storage').textContent = s.storageTotal ? fmtBytes(s.storageFree) + ' free' : '–';
+      $('st-uptime').textContent = s.uptime ? fmtUptime(s.uptime) : '–';
+      $('st-tilt').textContent = s.angle == null ? '–' : s.angle + '°';
+      $('st-wifi').textContent = s.wifiRssi ? s.wifiRssi + ' dBm' + (s.ip ? ' · ' + s.ip : '') : (s.ip || '–');
+      $('st-lamp').textContent = s.lamp === 'on' ? 'On' : s.lamp === 'off' ? 'Off' : '–';
+      $('st-fan').textContent = s.lamp === 'on' ? (s.fanGuard ? 'On' : 'Bypassed') : 'Off';
+      $('st-app').textContent = appLabel(s.app);
+      $('st-version').textContent = s.version || '–';
+    } catch { /* keep the last values */ }
+  }
+
   // ---- Start
   loadNow();
   setInterval(tickNow, 1000);
   setInterval(() => { if (!document.hidden) loadNow(); }, 5000);
+  loadSystem();
+  setInterval(() => { if (!document.hidden) loadSystem(); }, 10000);
+  loadPresets();
   api('status').then(showVolume).catch(fail);
   api('lamp').then(s => showLamp(s.lamp)).catch(fail);
   loadTimer();
   api('keystone-get').then(s => { tilt.value = s.tilt; scale.value = s.scale; labels(); }).catch(fail);
   loadCorners().catch(fail);
+
+  // A share from the phone opens /share?url=...; send the first link to SmartTube.
+  if (location.pathname === '/share') {
+    const q = new URLSearchParams(location.search);
+    const raw = [q.get('url'), q.get('text'), q.get('title')].filter(Boolean).join('\n');
+    const link = raw.match(/https?:\/\/[^\s]+/);
+    history.replaceState({}, '', '/');
+    if (link) {
+      api('open?url=' + encodeURIComponent(link[0]))
+        .then(() => toast('Opening in SmartTube'))
+        .catch(fail);
+    }
+  }
+  if ('serviceWorker' in navigator && window.isSecureContext) {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  }
 </script>
 </body>
 </html>

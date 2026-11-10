@@ -128,6 +128,23 @@ App in `panel/`, runs as a normal (non-system) app.
 - Only apps with a media session show up (SmartTube, VLC, ...). HDMI input and apps without
   a session do not.
 
+## Presets, status, PWA
+
+- Corner presets and the factory reset live in the app (`Corners.kt`, SharedPreferences).
+  Factory values are the first snapshot: `ltx lty rtx rty` = 166 165 165 165,
+  `lbx lby rbx rby` = 222 287 222 287.
+- Status (`SystemStatus.kt`): `thermal_zone0/1` (CPU/GPU, millidegrees), `/proc/meminfo`,
+  `StatFs`, Wi-Fi RSSI + local IP, `persist.sys.keystoneAngle`, lamp and fan guard props,
+  and the top activity via `ActivityManager.getRunningTasks` (`REAL_GET_TASKS`, signature).
+- `android.os.PrjScreen` is a stub on this build: `set_bright`/`get_bright` only log and return 0,
+  and the temperature getters read `/sys/devices/platform/2009800.fan/...`, which does not exist.
+  Do not use it for brightness or temperatures.
+- Brightness and color temperature are handled by `com.softwinner.a` (DisplayPQ) inside the OEM
+  settings app (`BrightnessActivity`, `ColorTemperatureActivity`). Not exposed to normal apps.
+- PWA: manifest, icons, service worker and `/share` are served, but install and share target need
+  a secure context. Over plain `http://192.168.1.112:8080` Chrome only adds a shortcut. Full
+  install needs HTTPS with a certificate the phone trusts (local CA); not done yet.
+
 ## Sleep timer
 
 - Panel app (`SleepTimer.kt`): at the end it sends media pause, then `Lamp.off()`.

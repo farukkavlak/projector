@@ -46,10 +46,14 @@ adb install -r app-platform.apk
 adb shell appops set local.projector.panel SYSTEM_ALERT_WINDOW allow
 ```
 
-Open "Panel" once from the launcher. It also shows the current video and position, and can seek,
-read from the device's media session. Needs the Android SDK (`sdk.dir` in `panel/local.properties`).
+Open "Panel" once from the launcher. It also shows the current video and position, can seek, keeps
+corner presets, and shows device status (temperatures, RAM, storage, Wi-Fi, front app). Needs the
+Android SDK (`sdk.dir` in `panel/local.properties`).
 The sign script downloads the public AOSP platform key once, to `~/.local/android/platform-key`.
 An unsigned build still works, but a 4-corner apply restarts the screen for ~25 seconds.
+
+The page ships a manifest and service worker. On plain HTTP Chrome only creates a home-screen
+shortcut; a full PWA install and the share target need HTTPS with a certificate the phone trusts.
 
 - Install [FLauncher](https://gitlab.com/flauncher/flauncher) first. Without it, the stock launcher stays.
 - Wait ~30 s after changes before rebooting, or they are lost.
