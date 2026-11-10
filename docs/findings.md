@@ -144,9 +144,25 @@ App in `panel/`, runs as a normal (non-system) app.
   Do not use it for brightness or temperatures.
 - Brightness and color temperature are handled by `com.softwinner.a` (DisplayPQ) inside the OEM
   settings app (`BrightnessActivity`, `ColorTemperatureActivity`). Not exposed to normal apps.
-- PWA: manifest, icons, service worker and `/share` are served, but install and share target need
-  a secure context. Over plain `http://192.168.1.112:8080` Chrome only adds a shortcut. Full
-  install needs HTTPS with a certificate the phone trusts (local CA); not done yet.
+- PWA: manifest, icons, service worker and `/share` are served. Install and share target need
+  HTTPS with a certificate the phone trusts; see below.
+
+## HTTPS and PWA
+
+- The Panel serves HTTPS on `8443` with a server certificate from a local CA
+  (`scripts/make-cert.sh`). The SAN contains the projector IP.
+- The CA private key stays in `~/.local/android/projector-cert`; the app assets hold the server
+  key/cert and the public CA. On a new machine or after an IP change, rerun the script. The CA
+  itself stays the same, so the phone does not need to install a new one.
+- On Android, install `ca.crt` as a CA certificate (Settings -> Security -> Encryption &
+  credentials -> Install a certificate; a screen lock is required), then open
+  `https://<ip>:8443/`. Chrome can install the PWA, and the share target sends links to
+  `/share`, which calls the `open` action.
+- A service worker only registers with a trusted certificate. Chrome still refuses it when the
+  page is opened through a certificate error (`--ignore-certificate-errors` or Playwright's
+  `ignoreHTTPSErrors`), even though `isSecureContext` is true. The CA must be installed.
+- `/server.key.der` is blocked by the web server, but it is still inside the APK: treat it as a
+  local key. The CA key is in neither the APK nor the repo.
 
 ## Sleep timer
 

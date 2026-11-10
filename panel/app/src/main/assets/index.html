@@ -186,6 +186,11 @@
   .fact.wide { grid-column: 1 / -1; }
   .fact b.hot { color: var(--bad); }
   .more { display: flex; gap: 8px; flex-wrap: wrap; }
+  .more .btn {
+    display: inline-flex; align-items: center; text-decoration: none; color: var(--text);
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px;
+  }
+  .more .btn:hover { border-color: #4a4576; }
 
   /* Tabs (mobile) */
   .tabs {
@@ -381,6 +386,16 @@
         <button data-a="settings" type="button">Android settings</button>
         <button data-a="keystone" type="button">Projector menu</button>
       </div>
+    </section>
+
+    <section class="block">
+      <h2>Phone app</h2>
+      <p class="note" id="pwa-state">Install and sharing need HTTPS.</p>
+      <div class="more">
+        <a class="btn" href="/ca.crt" download="projector-ca.crt">Certificate</a>
+        <a class="btn" id="https-link" href="#">Open HTTPS</a>
+      </div>
+      <p class="note">Install the certificate as a CA, then open HTTPS and use Chrome's Install app. Sharing a YouTube link to the installed app opens it in SmartTube.</p>
     </section>
   </section>
 </main>
@@ -865,6 +880,15 @@
   let startTab = 'remote';
   try { startTab = localStorage.getItem('panel.tab') || 'remote'; } catch {}
   showTab(['remote', 'picture', 'system'].includes(startTab) ? startTab : 'remote');
+
+  // ---- PWA: HTTPS on 8443, certificate download for the phone.
+  $('https-link').href = 'https://' + location.hostname + ':8443/';
+  if (window.isSecureContext) {
+    $('pwa-state').textContent = 'HTTPS is ready. Use Chrome\'s Install app.';
+    $('https-link').hidden = true;
+  } else {
+    $('pwa-state').textContent = 'Install and sharing need HTTPS. Trust the certificate first.';
+  }
 
   // ---- Start
   loadNow();

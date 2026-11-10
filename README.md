@@ -40,6 +40,7 @@ scripts/lamp.sh off|on|status   # lamp off, device stays online
 Panel app (phone remote at `http://<projector-ip>:8080`):
 
 ```sh
+scripts/make-cert.sh                    # local CA + HTTPS cert (once, or after an IP change)
 cd panel && ./gradlew assembleDebug
 ../scripts/sign-panel.sh                 # platform key: live corners, no screen restart
 adb install -r app-platform.apk
@@ -53,8 +54,11 @@ corner presets, and shows device status. Needs the Android SDK (`sdk.dir` in
 The sign script downloads the public AOSP platform key once, to `~/.local/android/platform-key`.
 An unsigned build still works, but a 4-corner apply restarts the screen for ~25 seconds.
 
-The page ships a manifest and service worker. On plain HTTP Chrome only creates a home-screen
-shortcut; a full PWA install and the share target need HTTPS with a certificate the phone trusts.
+HTTPS runs on `https://<projector-ip>:8443` for the installable phone app. Download the CA from
+`http://<projector-ip>:8080/ca.crt`, install it as a CA certificate (Android asks for the screen
+lock), then open the HTTPS page and use Chrome's Install app. Sharing a YouTube link to the
+installed app opens it in SmartTube. Rerun `scripts/make-cert.sh <ip>` if the IP changes; the CA
+stays the same, so the phone does not need to trust a new one.
 
 - Install [FLauncher](https://gitlab.com/flauncher/flauncher) first. Without it, the stock launcher stays.
 - Wait ~30 s after changes before rebooting, or they are lost.
@@ -63,7 +67,7 @@ shortcut; a full PWA install and the share target need HTTPS with a certificate 
 
 ```
 config/     packages and settings to change
-scripts/    apply, restore, snapshot, lamp, sign-panel
+scripts/    apply, restore, snapshot, lamp, sign-panel, make-cert
 snapshots/  device dumps
 panel/      Kotlin app: web remote on port 8080
 docs/       findings, images

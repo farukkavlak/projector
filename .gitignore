@@ -7,5 +7,10 @@ shots/
 
 .DS_Store
 
+# Generated HTTPS certificate for the local projector (scripts/make-cert.sh)
+panel/app/src/main/assets/ca.crt
+panel/app/src/main/assets/server.crt
+panel/app/src/main/assets/server.key.der
+
 # Local notes for Claude Code
 CLAUDE.md

@@ -5,6 +5,7 @@ import android.util.Log
 import java.net.ServerSocket
 import java.net.Socket
 import java.net.URLDecoder
+import javax.net.ssl.SSLContext
 import kotlin.concurrent.thread
 
 /** Tiny HTTP/1.0 server. GET / serves the page, GET /api/<action>?k=v runs an action. */
@@ -12,12 +13,16 @@ class HttpServer(
     private val port: Int,
     private val actions: Actions,
     private val assets: AssetManager,
+    private val ssl: SSLContext? = null,
 ) {
     private var socket: ServerSocket? = null
 
+    private val READ_TIMEOUT_MS = 5000
+
     fun start() {
-        val s = ServerSocket(port).also { socket = it }
-        thread(name = "http", isDaemon = true) {
+        val s = (ssl?.serverSocketFactory?.createServerSocket(port) ?: ServerSocket(port))
+            .also { socket = it }
+        thread(name = if (ssl == null) "http" else "https", isDaemon = true) {
             while (!s.isClosed) {
                 val client = runCatching { s.accept() }.getOrNull() ?: break
                 thread(isDaemon = true) { handle(client) }
@@ -29,22 +34,30 @@ class HttpServer(
         socket?.close()
     }
 
-    private fun handle(client: Socket) = client.use {
-        val line = it.getInputStream().bufferedReader().readLine() ?: return
-        val target = line.split(" ").getOrNull(1) ?: "/"
-        val (route, query) = target.split("?", limit = 2).let { p -> p[0] to p.getOrElse(1) { "" } }
-        val out = it.getOutputStream()
+    private fun handle(client: Socket) {
         try {
-            when {
-                route.startsWith("/api/") -> {
-                    val body = actions.run(route.removePrefix("/api/"), parse(query))
-                    reply(out, 200, "application/json", body.toByteArray())
+            client.use {
+                it.soTimeout = READ_TIMEOUT_MS
+                val line = it.getInputStream().bufferedReader().readLine() ?: return
+                val target = line.split(" ").getOrNull(1) ?: "/"
+                val (route, query) = target.split("?", limit = 2).let { p -> p[0] to p.getOrElse(1) { "" } }
+                val out = it.getOutputStream()
+                try {
+                    when {
+                        route.startsWith("/api/") -> {
+                            val body = actions.run(route.removePrefix("/api/"), parse(query))
+                            reply(out, 200, "application/json", body.toByteArray())
+                        }
+                        else -> serveAsset(out, route)
+                    }
+                } catch (e: Exception) {
+                    Log.w("Panel", "request failed: $target", e)
+                    reply(out, 400, "text/plain", (e.message ?: "error").toByteArray())
                 }
-                else -> serveAsset(out, route)
             }
         } catch (e: Exception) {
-            Log.w("Panel", "request failed: $target", e)
-            reply(out, 400, "text/plain", (e.message ?: "error").toByteArray())
+            // Bad TLS handshake, port scan, client gone: close quietly, keep serving.
+            Log.w("Panel", "connection closed: ${e.message}")
         }
     }
 
@@ -54,7 +67,7 @@ class HttpServer(
             "/", "/share" -> "index.html"
             else -> route.removePrefix("/")
         }
-        if (path.isEmpty() || path.contains("..")) {
+        if (path.isEmpty() || path.contains("..") || path == "server.key.der") {
             reply(out, 404, "text/plain", "not found".toByteArray())
             return
         }
@@ -74,6 +87,7 @@ class HttpServer(
         "png" -> "image/png"
         "svg" -> "image/svg+xml"
         "css" -> "text/css"
+        "crt" -> "application/x-x509-ca-cert"
         else -> "application/octet-stream"
     }
 
