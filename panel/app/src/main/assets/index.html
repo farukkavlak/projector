@@ -12,96 +12,127 @@
 <meta name="mobile-web-app-capable" content="yes">
 <style>
   :root {
-    --night: #16142a;      /* page */
-    --dusk: #211e3b;       /* raised controls */
-    --line: #36325a;       /* borders, frame */
+    --night: #16142a;
+    --surface: #1d1a33;
+    --line: #2e2a4a;
     --text: #ece9f8;
-    --muted: #a19cc0;
-    --beam: #8fd3ff;       /* projector light: shape, focus, main action */
-    --lamp: #ffc46b;       /* lamp state */
+    --muted: #9c97b8;
+    --beam: #8fd3ff;
+    --lamp: #ffc46b;
     --bad: #ff8f8f;
-    --radius-s: 10px;
-    --radius-l: 22px;
+    --radius: 16px;
   }
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   html { -webkit-text-size-adjust: 100%; }
   body {
     margin: 0; background: var(--night); color: var(--text);
-    font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    padding: max(16px, env(safe-area-inset-top)) 16px calc(88px + env(safe-area-inset-bottom));
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: 0 16px calc(88px + env(safe-area-inset-bottom));
   }
-  main { max-width: 1120px; margin: 0 auto; display: grid; gap: 28px; }
-  @media (min-width: 900px) {
-    body { padding: 32px 32px 96px; }
-    main { grid-template-columns: minmax(320px, 400px) 1fr; gap: 48px; align-items: start; }
-    .shape-col { position: sticky; top: 32px; }
-  }
-  .controls { display: grid; gap: 28px; }
-  h1 { font-size: 22px; font-weight: 650; margin: 0; letter-spacing: -0.01em; }
-  h2 { font-size: 15px; font-weight: 600; margin: 0 0 10px; color: var(--muted); }
-  section { min-width: 0; }
-
+  h1, h2, p { margin: 0; }
+  h2 { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
   button {
-    font: inherit; color: var(--text); background: var(--dusk);
-    border: 1px solid var(--line); border-radius: var(--radius-s);
-    padding: 12px 14px; cursor: pointer; touch-action: manipulation;
+    font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--line);
+    border-radius: 10px; padding: 10px 14px; cursor: pointer; touch-action: manipulation;
   }
   button:hover { border-color: #4a4576; }
-  button:active { background: #2c2850; }
-  button:disabled { opacity: .45; cursor: default; }
+  button:active { background: #282448; }
+  button:disabled { opacity: .5; cursor: default; }
   :focus-visible { outline: 2px solid var(--beam); outline-offset: 2px; }
-  input, button { -webkit-tap-highlight-color: transparent; }
+  input:not([type=range]) {
+    font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--line);
+    border-radius: 10px; padding: 10px 12px; min-width: 0;
+  }
+  input::placeholder { color: #77729a; }
+  input[type=range] { accent-color: var(--beam); }
+  .bar { -webkit-appearance: none; appearance: none; width: 100%; height: 24px; margin: 0; background: transparent; display: block; }
+  .bar::-webkit-slider-runnable-track {
+    height: 4px; border-radius: 2px;
+    background: linear-gradient(to right, var(--beam) var(--p, 0%), #2e2a4a var(--p, 0%));
+  }
+  .bar::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px; margin-top: -6px;
+    border-radius: 50%; background: var(--beam); border: 0;
+  }
+  .bar::-moz-range-track { height: 4px; border-radius: 2px; background: #2e2a4a; }
+  .bar::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--beam); }
+  .bar::-moz-range-thumb { width: 16px; height: 16px; border: 0; border-radius: 50%; background: var(--beam); }
+  .bar:disabled { opacity: .35; }
 
-  /* Playback: the round transport is the most used control */
-  .transport { display: flex; align-items: center; justify-content: center; gap: 18px; }
-  .transport button { width: 56px; height: 56px; border-radius: 50%; padding: 0; font-size: 20px; }
-  .transport .play { width: 76px; height: 76px; font-size: 28px; background: var(--beam); color: var(--night); border: 0; }
-  .volume { display: grid; grid-template-columns: 48px 1fr 48px 48px; gap: 10px; align-items: center; margin-top: 18px; }
-  .volume button { padding: 10px 0; font-size: 18px; }
-  .meter { height: 8px; border-radius: 4px; background: var(--dusk); overflow: hidden; }
-  .meter i { display: block; height: 100%; width: 0; background: var(--text); transition: width .15s; }
-  .meter.muted i { background: var(--muted); }
-  .vol-text { font-size: 13px; color: var(--muted); margin-top: 6px; text-align: center; }
+  /* Header */
+  .top {
+    position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; padding: max(14px, env(safe-area-inset-top)) 0 10px;
+    background: linear-gradient(var(--night) 72%, rgba(22, 20, 42, 0));
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 650; letter-spacing: -.01em; }
+  .brand img { width: 26px; height: 26px; border-radius: 7px; display: block; }
+  .lamp-pill {
+    display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px;
+    background: var(--surface); border: 1px solid var(--line); font-size: 13px;
+  }
+  .lamp-pill .dot { width: 9px; height: 9px; border-radius: 50%; background: #5b5677; }
+  .lamp-pill.on .dot { background: var(--lamp); box-shadow: 0 0 10px var(--lamp); }
+  .lamp-pill.warming { color: var(--lamp); }
+  .lamp-pill.warming .dot { background: var(--lamp); animation: pulse 1.2s infinite; }
+  .lamp-pill .what { font-weight: 600; }
+  @keyframes pulse { 50% { opacity: .35; } }
 
-  /* Lamp: one toggle that shows the real state */
-  .lamp { width: 100%; display: flex; align-items: center; gap: 14px; text-align: left; padding: 14px 16px; border-radius: var(--radius-l); }
-  .lamp .dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--muted); flex: none; }
-  .lamp.on .dot { background: var(--lamp); border-color: var(--lamp); box-shadow: 0 0 14px var(--lamp); }
-  .lamp .what { font-weight: 600; }
-  .lamp .why { display: block; font-size: 13px; color: var(--muted); }
+  /* Panels */
+  main { max-width: 1080px; margin: 0 auto; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .block { margin-top: 24px; }
 
-  /* Now playing: title, app and the clock, from the device's media session */
-  .now { margin-top: 18px; padding: 14px 16px; border-radius: var(--radius-l); background: var(--dusk); border: 1px solid var(--line); }
-  .now-head { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--muted); }
-  .now-title { font-weight: 600; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-  .now-artist { font-size: 14px; color: var(--muted); margin-top: 2px; }
-  .now-seek { width: 100%; height: 26px; margin-top: 10px; accent-color: var(--beam); }
-  .now-seek:disabled { opacity: .35; }
-  .now-times { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
-  .now-nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
-  .now-nav button { padding: 8px 4px; font-size: 13px; }
+  /* Player */
+  .player {
+    display: grid; grid-template-columns: 64px 1fr; gap: 12px;
+    padding: 14px; border-radius: var(--radius); background: var(--surface);
+  }
+  .player .art {
+    grid-column: 1; grid-row: 1; width: 64px; height: 64px; border-radius: 10px; overflow: hidden;
+    background: linear-gradient(135deg, #2b2750, #3a7bd5);
+  }
+  .player .art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .track { grid-column: 2; grid-row: 1; min-width: 0; }
+  .track-top { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .track-title {
+    margin-top: 3px; font-weight: 600; line-height: 1.3;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .track-artist { margin-top: 2px; font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .seek { grid-column: 1 / -1; grid-row: 2; margin-top: 6px; }
+  .times { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .seek-nav { grid-column: 1 / -1; grid-row: 3; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
+  .seek-nav button { padding: 8px 0; font-size: 12px; border-radius: 9px; color: var(--muted); background: transparent; }
 
-  /* Sleep timer: chips when off, countdown when running */
-  .sleep { margin-top: 14px; }
+  /* Transport and volume */
+  .transport { display: flex; align-items: center; justify-content: center; gap: 22px; margin: 20px 0 16px; }
+  .transport button { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; padding: 0; }
+  .transport .play { width: 68px; height: 68px; background: var(--beam); color: var(--night); border: 0; }
+  .transport svg { width: 22px; height: 22px; fill: currentColor; }
+  .transport .play svg { width: 26px; height: 26px; }
+  .volume { display: grid; grid-template-columns: 44px 1fr auto; gap: 12px; align-items: center; }
+  .volume button { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; padding: 0; }
+  .volume svg { width: 20px; height: 20px; fill: currentColor; }
+  .vol-text { font-size: 12px; color: var(--muted); min-width: 52px; text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* Sleep timer */
   .sleep .sleep-on, .sleep.active .sleep-off { display: none; }
   .sleep.active .sleep-on { display: block; }
   .chips { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-  .chips button { padding: 11px 4px; font-size: 15px; }
+  .chips button { padding: 10px 4px; font-size: 14px; }
   .countdown { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
-  .countdown b { font-size: 38px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; color: var(--lamp); }
-  .countdown span { font-size: 14px; color: var(--muted); text-align: right; }
+  .countdown b { font-size: 32px; font-weight: 600; color: var(--lamp); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+  .countdown span { font-size: 13px; color: var(--muted); text-align: right; }
+  .link { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
 
-  form.link { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
-  input[type=url] {
-    font: inherit; color: var(--text); background: var(--dusk); border: 1px solid var(--line);
-    border-radius: var(--radius-s); padding: 12px 14px; min-width: 0;
+  /* Picture */
+  .editor {
+    position: relative; border-radius: var(--radius); background: var(--surface);
+    border: 1px solid var(--line); padding: 10px;
   }
-  input[type=url]::placeholder { color: #77729a; }
-
-  .more { display: flex; gap: 8px; flex-wrap: wrap; }
-
-  /* Picture shape: the one bold element */
-  .editor { position: relative; border-radius: var(--radius-l); background: #0f0d20; border: 1px solid var(--line); padding: 10px; }
   .editor svg { display: block; width: 100%; height: auto; touch-action: none; user-select: none; -webkit-user-select: none; }
   .frame { fill: none; stroke: var(--line); stroke-width: 3; stroke-dasharray: 10 8; }
   .shape { fill: rgba(143, 211, 255, .14); stroke: var(--beam); stroke-width: 4; stroke-linejoin: round; }
@@ -110,118 +141,144 @@
   .handle.sel { fill: var(--beam); }
   .hit { fill: transparent; cursor: grab; }
   .busy-cover {
-    position: absolute; inset: 0; border-radius: var(--radius-l); display: none;
-    place-items: center; background: rgba(15, 13, 32, .85); text-align: center; padding: 20px;
+    position: absolute; inset: 0; border-radius: var(--radius); display: none;
+    place-items: center; background: rgba(22, 20, 42, .88); text-align: center; padding: 20px;
   }
   .editor.busy .busy-cover { display: grid; }
-  .busy-cover b { font-size: 34px; display: block; font-variant-numeric: tabular-nums; }
-
-  .corner-bar { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; margin-top: 12px; }
-  .corner-info { font-size: 14px; color: var(--muted); }
+  .busy-cover b { font-size: 32px; display: block; font-variant-numeric: tabular-nums; }
+  .corner-bar { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; margin-top: 12px; }
+  .corner-info { font-size: 13px; color: var(--muted); }
   .corner-info strong { color: var(--text); font-weight: 600; }
-  .pad { display: grid; grid-template-columns: repeat(3, 44px); grid-template-rows: repeat(2, 40px); gap: 4px; }
-  .pad button { padding: 0; font-size: 16px; }
+  .pad { display: grid; grid-template-columns: repeat(3, 42px); grid-template-rows: repeat(2, 38px); gap: 4px; }
+  .pad button { padding: 0; font-size: 15px; }
   .pad .up { grid-column: 2; }
   .pad .left { grid-column: 1; grid-row: 2; }
   .pad .down { grid-column: 2; grid-row: 2; }
   .pad .right { grid-column: 3; grid-row: 2; }
   .apply-row { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; margin-top: 12px; }
   .apply { background: var(--beam); color: var(--night); border: 0; font-weight: 600; }
-  .apply:disabled { background: var(--dusk); color: var(--muted); border: 1px solid var(--line); opacity: 1; }
-  .note { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
+  .apply:disabled { background: var(--surface); color: var(--muted); border: 1px solid var(--line); opacity: 1; }
+  .note { font-size: 12px; color: var(--muted); margin-top: 8px; }
 
-  /* Saved keystone shapes */
-  .presets { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+  /* Presets */
+  .presets { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
   .preset-save { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
-  .preset-save input {
-    font: inherit; color: var(--text); background: var(--dusk); border: 1px solid var(--line);
-    border-radius: var(--radius-s); padding: 10px 12px; min-width: 0;
-  }
-  .preset-save input::placeholder { color: #77729a; }
   .preset-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
   .preset-list .hint { font-size: 13px; color: var(--muted); }
-  .preset { display: inline-flex; align-items: stretch; border: 1px solid var(--line); border-radius: var(--radius-s); overflow: hidden; }
-  .preset button { border: 0; border-radius: 0; background: var(--dusk); padding: 8px 10px; }
+  .preset { display: inline-flex; align-items: stretch; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .preset button { border: 0; border-radius: 0; background: var(--surface); padding: 8px 10px; }
   .preset .del { color: var(--muted); border-left: 1px solid var(--line); padding: 8px 9px; }
-  .factory { margin-top: 10px; width: 100%; color: var(--muted); }
+  .factory { margin-top: 10px; width: 100%; color: var(--muted); background: transparent; }
+
+  /* Sliders */
+  .slider { margin-top: 22px; }
+  .slider label { display: flex; justify-content: space-between; font-size: 14px; }
+  .slider output { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .slider input { width: 100%; height: 28px; margin: 8px 0 2px; }
+  .ends { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
 
   /* Status */
-  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .stat { padding: 10px 12px; background: var(--dusk); border: 1px solid var(--line); border-radius: var(--radius-s); min-width: 0; }
-  .stat span { display: block; font-size: 12px; color: var(--muted); }
-  .stat b { display: block; font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .stat.wide { grid-column: 1 / -1; }
-  .stat b.hot { color: var(--bad); }
+  .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
+  .fact { display: flex; justify-content: space-between; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); min-width: 0; }
+  .fact span { color: var(--muted); font-size: 13px; }
+  .fact b { font-weight: 600; font-size: 13px; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .fact.wide { grid-column: 1 / -1; }
+  .fact b.hot { color: var(--bad); }
+  .more { display: flex; gap: 8px; flex-wrap: wrap; }
 
-  .slider { margin-top: 20px; }
-  .slider label { display: flex; justify-content: space-between; font-size: 15px; }
-  .slider label output { color: var(--muted); font-variant-numeric: tabular-nums; }
-  .slider input { width: 100%; margin: 10px 0 2px; accent-color: var(--beam); height: 28px; }
-  .ends { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+  /* Tabs (mobile) */
+  .tabs {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: grid; grid-template-columns: repeat(3, 1fr);
+    padding: 6px 10px calc(6px + env(safe-area-inset-bottom));
+    background: rgba(22, 20, 42, .96); border-top: 1px solid var(--line); backdrop-filter: blur(12px);
+  }
+  .tabs button { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 0; border: 0; background: none; color: var(--muted); font-size: 11px; }
+  .tabs button.active { color: var(--beam); }
+  .tabs svg { width: 22px; height: 22px; fill: currentColor; }
 
-  .keys { display: none; font-size: 13px; color: var(--muted); margin: 0; }
-  @media (min-width: 900px) and (hover: hover) { .keys { display: block; } }
+  .keys { display: none; font-size: 12px; color: var(--muted); margin-top: 14px; line-height: 1.7; }
   kbd { font: inherit; border: 1px solid var(--line); border-radius: 5px; padding: 0 5px; color: var(--text); }
 
   #toast {
-    position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateX(-50%);
-    max-width: calc(100% - 32px); background: var(--dusk); border: 1px solid var(--line);
+    position: fixed; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+    max-width: calc(100% - 32px); background: var(--surface); border: 1px solid var(--line);
     border-radius: 999px; padding: 10px 18px; font-size: 14px; opacity: 0; pointer-events: none;
-    transition: opacity .2s;
+    transition: opacity .2s; z-index: 40;
   }
   #toast.show { opacity: 1; }
   #toast.err { border-color: var(--bad); color: var(--bad); }
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+  @media (min-width: 900px) {
+    body { padding: 0 32px 48px; }
+    .top { max-width: 1080px; margin: 0 auto; }
+    main { display: grid; grid-template-columns: minmax(340px, 400px) 1fr; gap: 40px; align-items: start; }
+    .panel { display: block; }
+    [data-panel="remote"] { grid-column: 1; grid-row: 1; }
+    [data-panel="picture"] { grid-column: 2; grid-row: 1 / span 2; }
+    [data-panel="system"] { grid-column: 1; grid-row: 2; }
+    .tabs { display: none; }
+    .keys { display: block; }
+    #toast { bottom: 24px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 </head>
 <body>
+<header class="top">
+  <div class="brand"><img src="/icon-192.png" alt=""><span>Projector</span></div>
+  <button class="lamp-pill" id="lamp" type="button"><span class="dot"></span><span class="what">Lamp</span></button>
+</header>
+
 <main>
-  <div class="controls">
-    <h1>Projector</h1>
-
-    <section aria-label="Playback">
-      <div class="transport">
-        <button data-a="prev" aria-label="Previous">⏮</button>
-        <button data-a="play" class="play" aria-label="Play or pause">⏯</button>
-        <button data-a="next" aria-label="Next">⏭</button>
+  <section class="panel active" data-panel="remote" aria-label="Remote">
+    <div class="player" id="now" hidden>
+      <div class="art"><img id="now-art" alt="" hidden></div>
+      <div class="track">
+        <div class="track-top"><span id="now-state">Playing</span><span id="now-app">YouTube</span></div>
+        <div class="track-title" id="now-title"></div>
+        <div class="track-artist" id="now-artist"></div>
       </div>
-      <div class="volume">
-        <button data-a="vol-down" aria-label="Volume down">−</button>
-        <div class="meter" id="meter"><i></i></div>
-        <button data-a="vol-up" aria-label="Volume up">+</button>
-        <button data-a="mute" aria-label="Mute">🔇</button>
+      <div class="seek">
+        <input type="range" class="bar" id="now-seek" min="0" max="1" value="0" step="1" aria-label="Seek">
+        <div class="times"><span id="now-pos">0:00</span><span id="now-dur"></span></div>
       </div>
-      <div class="vol-text" id="vol-text">Volume</div>
-
-      <div class="now" id="now" hidden>
-        <div class="now-head"><span id="now-state">Playing</span><span id="now-app"></span></div>
-        <div class="now-title" id="now-title"></div>
-        <div class="now-artist" id="now-artist"></div>
-        <input type="range" class="now-seek" id="now-seek" min="0" max="1" value="0" step="1" aria-label="Seek">
-        <div class="now-times"><span id="now-pos">0:00</span><span id="now-dur"></span></div>
-        <div class="now-nav">
-          <button data-seek="-30">−30 s</button>
-          <button data-seek="-10">−10 s</button>
-          <button data-seek="10">+10 s</button>
-          <button data-seek="30">+30 s</button>
-        </div>
+      <div class="seek-nav">
+        <button data-seek="-30" type="button">−30 s</button>
+        <button data-seek="-10" type="button">−10 s</button>
+        <button data-seek="10" type="button">+10 s</button>
+        <button data-seek="30" type="button">+30 s</button>
       </div>
-    </section>
+    </div>
 
-    <section>
-      <button class="lamp" id="lamp">
-        <span class="dot"></span>
-        <span><span class="what">Lamp</span><span class="why">Checking…</span></span>
+    <div class="transport">
+      <button data-a="prev" type="button" aria-label="Previous">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2v14H6zM20 5v14l-10-7z"/></svg>
       </button>
+      <button data-a="play" class="play" type="button" aria-label="Play or pause">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l12-7z"/></svg>
+      </button>
+      <button data-a="next" type="button" aria-label="Next">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 5h2v14h-2zM4 5v14l10-7z"/></svg>
+      </button>
+    </div>
 
+    <div class="volume">
+      <button data-a="mute" type="button" aria-label="Mute">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zm12.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/></svg>
+      </button>
+      <input type="range" class="bar" id="vol" min="0" max="20" value="0" step="1" aria-label="Volume">
+      <span class="vol-text" id="vol-text">Volume</span>
+    </div>
+
+    <section class="block">
+      <h2>Sleep timer</h2>
       <div class="sleep" id="sleep">
         <div class="sleep-off">
-          <h2>Sleep timer</h2>
           <div class="chips">
-            <button data-start="15">15 min</button>
-            <button data-start="30">30 min</button>
-            <button data-start="60">1 h</button>
-            <button data-start="120">2 h</button>
+            <button data-start="15" type="button">15 min</button>
+            <button data-start="30" type="button">30 min</button>
+            <button data-start="60" type="button">1 h</button>
+            <button data-start="120" type="button">2 h</button>
           </div>
         </div>
         <div class="sleep-on">
@@ -230,52 +287,26 @@
             <span id="sleep-end">Lamp off at --:--</span>
           </div>
           <div class="chips">
-            <button data-add="15">+15 min</button>
-            <button data-add="60">+1 h</button>
-            <button id="sleep-restart">Restart</button>
-            <button id="sleep-cancel">Cancel</button>
+            <button data-add="15" type="button">+15 min</button>
+            <button data-add="60" type="button">+1 h</button>
+            <button id="sleep-restart" type="button">Restart</button>
+            <button id="sleep-cancel" type="button">Cancel</button>
           </div>
         </div>
       </div>
     </section>
 
-    <section>
-      <h2>Open a video</h2>
+    <section class="block">
+      <h2>Open a link</h2>
       <form class="link" id="link">
         <input id="url" type="url" placeholder="Paste a YouTube link" autocomplete="off" required>
         <button type="submit">Play</button>
       </form>
+      <p class="keys"><kbd>Space</kbd> play/pause, <kbd>+</kbd> <kbd>−</kbd> volume, <kbd>M</kbd> mute. Arrows move the selected corner, <kbd>Shift</kbd> for bigger steps.</p>
     </section>
+  </section>
 
-    <section>
-      <h2>More</h2>
-      <div class="more">
-        <button data-a="settings">Android settings</button>
-        <button data-a="keystone">Projector picture menu</button>
-      </div>
-    </section>
-
-    <section>
-      <h2>Status</h2>
-      <div class="stats" id="stats">
-        <div class="stat"><span>CPU</span><b id="st-cpu">–</b></div>
-        <div class="stat"><span>GPU</span><b id="st-gpu">–</b></div>
-        <div class="stat"><span>Memory</span><b id="st-ram">–</b></div>
-        <div class="stat"><span>Storage</span><b id="st-storage">–</b></div>
-        <div class="stat"><span>Uptime</span><b id="st-uptime">–</b></div>
-        <div class="stat"><span>Tilt</span><b id="st-tilt">–</b></div>
-        <div class="stat"><span>Wi-Fi</span><b id="st-wifi">–</b></div>
-        <div class="stat"><span>Lamp</span><b id="st-lamp">–</b></div>
-        <div class="stat"><span>Fan guard</span><b id="st-fan">–</b></div>
-        <div class="stat"><span>Version</span><b id="st-version">–</b></div>
-        <div class="stat wide"><span>In front</span><b id="st-app">–</b></div>
-      </div>
-    </section>
-
-    <p class="keys"><kbd>Space</kbd> play/pause, <kbd>+</kbd> <kbd>−</kbd> volume, <kbd>M</kbd> mute. Arrows move the selected corner, <kbd>Shift</kbd> for bigger steps.</p>
-  </div>
-
-  <section class="shape-col" aria-label="Picture shape">
+  <section class="panel" data-panel="picture" aria-label="Picture">
     <h2>Picture shape</h2>
     <div class="editor" id="editor">
       <svg id="svg" viewBox="-50 -50 1380 820" role="img" aria-label="Projected picture shape">
@@ -289,26 +320,28 @@
     <div class="corner-bar">
       <div class="corner-info" id="corner-info">Drag a corner, or tap one and use the arrows.</div>
       <div class="pad" aria-label="Move selected corner">
-        <button class="up" data-move="0,-1" aria-label="Move up">↑</button>
-        <button class="left" data-move="-1,0" aria-label="Move left">←</button>
-        <button class="down" data-move="0,1" aria-label="Move down">↓</button>
-        <button class="right" data-move="1,0" aria-label="Move right">→</button>
+        <button class="up" data-move="0,-1" type="button" aria-label="Move up">↑</button>
+        <button class="left" data-move="-1,0" type="button" aria-label="Move left">←</button>
+        <button class="down" data-move="0,1" type="button" aria-label="Move down">↓</button>
+        <button class="right" data-move="1,0" type="button" aria-label="Move right">→</button>
       </div>
     </div>
+
     <div class="apply-row">
-      <button class="apply" id="apply" disabled>Apply corners</button>
-      <button id="discard" disabled>Discard</button>
-      <button id="undo">Undo last</button>
+      <button class="apply" id="apply" type="button" disabled>Apply</button>
+      <button id="discard" type="button" disabled>Discard</button>
+      <button id="undo" type="button">Undo</button>
     </div>
-    <p class="note">Applying is live. If the app cannot reach the display directly, the screen restarts for about 25 seconds and open apps close.</p>
+    <p class="note">Applies live. Falls back to a 25 s restart if needed.</p>
 
     <div class="presets">
+      <h2>Presets</h2>
       <div class="preset-save">
         <input id="preset-name" maxlength="24" placeholder="Name this shape" autocomplete="off">
-        <button id="preset-save">Save</button>
+        <button id="preset-save" type="button">Save</button>
       </div>
       <div class="preset-list" id="preset-list"></div>
-      <button class="factory" id="factory">Reset to factory corners</button>
+      <button class="factory" id="factory" type="button">Reset to factory corners</button>
     </div>
 
     <div class="slider">
@@ -323,10 +356,52 @@
     </div>
     <p class="note">Trapezoid and size change the picture right away. They replace any corner edits.</p>
   </section>
+
+  <section class="panel" data-panel="system" aria-label="System">
+    <h2>Status</h2>
+    <div class="facts">
+      <div class="fact"><span>CPU</span><b id="st-cpu">–</b></div>
+      <div class="fact"><span>GPU</span><b id="st-gpu">–</b></div>
+      <div class="fact"><span>Memory</span><b id="st-ram">–</b></div>
+      <div class="fact"><span>Storage</span><b id="st-storage">–</b></div>
+      <div class="fact"><span>Uptime</span><b id="st-uptime">–</b></div>
+      <div class="fact"><span>Tilt</span><b id="st-tilt">–</b></div>
+      <div class="fact wide"><span>Wi-Fi</span><b id="st-wifi">–</b></div>
+      <div class="fact"><span>Lamp</span><b id="st-lamp">–</b></div>
+      <div class="fact"><span>Fan guard</span><b id="st-fan">–</b></div>
+      <div class="fact wide"><span>In front</span><b id="st-app">–</b></div>
+      <div class="fact wide"><span>Version</span><b id="st-version">–</b></div>
+    </div>
+
+    <section class="block">
+      <h2>Device</h2>
+      <div class="more">
+        <button data-a="settings" type="button">Android settings</button>
+        <button data-a="keystone" type="button">Projector menu</button>
+      </div>
+    </section>
+  </section>
 </main>
+
+<nav class="tabs" aria-label="Sections">
+  <button data-tab="remote" class="active" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-2 6l6 4-6 4V8z"/></svg>
+    Remote
+  </button>
+  <button data-tab="picture" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H4V4zm2 2v8h12V6H6zM2 18h20v2H2v-2z"/></svg>
+    Picture
+  </button>
+  <button data-tab="system" type="button">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h4v7H4v-7zm6-9h4v16h-4V4zm6 5h4v11h-4V9z"/></svg>
+    System
+  </button>
+</nav>
+
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script>
+
   const $ = id => document.getElementById(id);
   const sleep = ms => new Promise(r => setTimeout(r, ms));
 
@@ -345,11 +420,15 @@
   const fail = e => toast(e.message === 'Failed to fetch' ? 'Projector not reachable' : e.message, true);
 
   // ---- Playback and volume
+  let volDragging = false;
   function showVolume(s) {
     if (!s || s.volume === undefined) return;
-    $('meter').querySelector('i').style.width = (100 * s.volume / s.max) + '%';
-    $('meter').classList.toggle('muted', s.muted);
-    $('vol-text').textContent = s.muted ? 'Muted' : 'Volume ' + s.volume + ' of ' + s.max;
+    const el = $('vol');
+    el.max = String(s.max);
+    if (!volDragging) el.value = String(s.volume);
+    el.style.setProperty('--p', (100 * s.volume / Math.max(1, s.max)) + '%');
+    el.classList.toggle('muted', s.muted);
+    $('vol-text').textContent = s.muted ? 'Muted' : s.volume + ' / ' + s.max;
   }
   async function act(a) {
     try {
@@ -358,6 +437,15 @@
     } catch (e) { fail(e); }
   }
   document.querySelectorAll('[data-a]').forEach(b => b.addEventListener('click', () => act(b.dataset.a)));
+  $('vol').addEventListener('input', () => {
+    volDragging = true;
+    $('vol').style.setProperty('--p', (100 * $('vol').value / Math.max(1, $('vol').max)) + '%');
+    $('vol-text').textContent = $('vol').value + ' / ' + $('vol').max;
+  });
+  $('vol').addEventListener('change', async () => {
+    try { showVolume(await api('vol-set?level=' + $('vol').value)); } catch (e) { fail(e); }
+    volDragging = false;
+  });
   $('link').addEventListener('submit', async e => {
     e.preventDefault();
     try {
@@ -388,6 +476,9 @@
     $('now-app').textContent = appName(now.package);
     $('now-title').textContent = now.title || 'Unknown title';
     $('now-artist').textContent = now.artist || '';
+    const art = $('now-art');
+    if (now.art) { art.src = now.art; art.hidden = false; }
+    else { art.removeAttribute('src'); art.hidden = true; }
     tickNow();
   }
   function currentPos() {
@@ -405,6 +496,7 @@
     if (!seeking) {
       const pos = currentPos();
       seek.value = String(Math.round(pos));
+      seek.style.setProperty('--p', (now.duration > 0 ? 100 * pos / now.duration : 0) + '%');
       $('now-pos').textContent = clock(pos);
     }
     $('now-dur').textContent = now.duration > 0 ? clock(now.duration) : '';
@@ -426,7 +518,9 @@
   const seekBy = sec => { if (now && now.available) seekTo(currentPos() + sec * 1000); };
   $('now-seek').addEventListener('input', () => {
     seeking = true;
-    $('now-pos').textContent = clock(Number($('now-seek').value));
+    const v = Number($('now-seek').value);
+    $('now-pos').textContent = clock(v);
+    $('now-seek').style.setProperty('--p', (now && now.duration > 0 ? 100 * v / now.duration : 0) + '%');
   });
   $('now-seek').addEventListener('change', () => {
     seeking = false;
@@ -436,13 +530,13 @@
 
   // ---- Lamp
   let lampState = null;
-  function showLamp(state, why) {
+  function showLamp(state) {
     lampState = state;
     const b = $('lamp');
     b.classList.toggle('on', state === 'on');
-    b.querySelector('.what').textContent = state === 'on' ? 'Lamp is on' : state === 'off' ? 'Lamp is off' : 'Lamp';
-    b.querySelector('.why').textContent = why ||
-      (state === 'on' ? 'Tap to turn it off. The fan stops too.' : 'Tap to turn it on.');
+    b.classList.toggle('warming', state === 'warming');
+    b.querySelector('.what').textContent =
+      state === 'on' ? 'Lamp on' : state === 'off' ? 'Lamp off' : state === 'warming' ? 'Warming up…' : 'Lamp';
   }
   $('lamp').addEventListener('click', async () => {
     const b = $('lamp');
@@ -452,7 +546,8 @@
         showLamp((await api('lamp-off')).lamp);
         loadTimer(); // turning the lamp off cancels the timer
       } else {
-        showLamp((await api('lamp-on')).lamp, 'Warming up. Ready in 12 s.');
+        await api('lamp-on');
+        showLamp('warming');
         await sleep(12000);
         showLamp('on');
       }
@@ -702,7 +797,9 @@
   document.addEventListener('keydown', e => {
     if (e.target.matches('input[type=url]')) return;
     const arrows = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0] };
-    if (arrows[e.key] && selected && !e.target.matches('input[type=range]')) {
+    const pictureOpen = matchMedia('(min-width: 900px)').matches ||
+      document.querySelector('[data-panel="picture"]').classList.contains('active');
+    if (arrows[e.key] && selected && pictureOpen && !e.target.matches('input[type=range]')) {
       e.preventDefault(); nudge(...arrows[e.key], e.shiftKey); return;
     }
     if (e.target.matches('input')) return;
@@ -725,7 +822,7 @@
     const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
     return d ? d + 'd ' + h + 'h' : h ? h + 'h ' + m + 'm' : m + 'm';
   };
-  const appLabel = p => !p ? '–' : p.includes('smarttube') ? 'SmartTube' : p === 'local.projector.panel' ? 'Panel' : p.split('.').pop();
+  const appLabel = p => !p ? '–' : p.includes('smarttube') ? 'SmartTube' : p === 'local.projector.panel' ? 'Panel' : p.includes('flauncher') ? 'FLauncher' : p.split('.').pop();
   async function loadSystem() {
     try {
       const s = await api('system');
@@ -733,7 +830,7 @@
       $('st-gpu').textContent = s.gpu == null ? '–' : s.gpu.toFixed(0) + ' °C';
       $('st-cpu').classList.toggle('hot', s.cpu >= 75);
       $('st-gpu').classList.toggle('hot', s.gpu >= 75);
-      $('st-ram').textContent = s.ramTotal ? fmtBytes(s.ramUsed) + ' / ' + fmtBytes(s.ramTotal) : '–';
+      $('st-ram').textContent = s.ramTotal ? Math.round(s.ramUsed / 1048576) + ' / ' + Math.round(s.ramTotal / 1048576) + ' MB' : '–';
       $('st-storage').textContent = s.storageTotal ? fmtBytes(s.storageFree) + ' free' : '–';
       $('st-uptime').textContent = s.uptime ? fmtUptime(s.uptime) : '–';
       $('st-tilt').textContent = s.angle == null ? '–' : s.angle + '°';
@@ -744,6 +841,18 @@
       $('st-version').textContent = s.version || '–';
     } catch { /* keep the last values */ }
   }
+
+  // ---- Tabs: on desktop CSS shows every panel; on mobile only the active one.
+  const tabButtons = [...document.querySelectorAll('[data-tab]')];
+  function showTab(name) {
+    document.querySelectorAll('[data-panel]').forEach(p => p.classList.toggle('active', p.dataset.panel === name));
+    tabButtons.forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+    try { localStorage.setItem('panel.tab', name); } catch {}
+  }
+  tabButtons.forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
+  let startTab = 'remote';
+  try { startTab = localStorage.getItem('panel.tab') || 'remote'; } catch {}
+  showTab(['remote', 'picture', 'system'].includes(startTab) ? startTab : 'remote');
 
   // ---- Start
   loadNow();
@@ -773,6 +882,7 @@
   if ('serviceWorker' in navigator && window.isSecureContext) {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
   }
+
 </script>
 </body>
 </html>

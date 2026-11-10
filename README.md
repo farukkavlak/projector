@@ -46,9 +46,10 @@ adb install -r app-platform.apk
 adb shell appops set local.projector.panel SYSTEM_ALERT_WINDOW allow
 ```
 
-Open "Panel" once from the launcher. It also shows the current video and position, can seek, keeps
-corner presets, and shows device status (temperatures, RAM, storage, Wi-Fi, front app). Needs the
-Android SDK (`sdk.dir` in `panel/local.properties`).
+Open "Panel" once from the launcher. On a phone it has Remote, Picture and System tabs; on a
+wider screen it is a two-column layout. It shows the current video and position, can seek, keeps
+corner presets, and shows device status. Needs the Android SDK (`sdk.dir` in
+`panel/local.properties`).
 The sign script downloads the public AOSP platform key once, to `~/.local/android/platform-key`.
 An unsigned build still works, but a 4-corner apply restarts the screen for ~25 seconds.
 

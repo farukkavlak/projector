@@ -22,6 +22,7 @@ class Actions(private val context: Context) {
         "prev" -> media(KeyEvent.KEYCODE_MEDIA_PREVIOUS)
         "vol-up" -> volume(AudioManager.ADJUST_RAISE)
         "vol-down" -> volume(AudioManager.ADJUST_LOWER)
+        "vol-set" -> volumeSet(params["level"]?.toIntOrNull() ?: throw IllegalArgumentException("level missing"))
         "mute" -> volume(AudioManager.ADJUST_TOGGLE_MUTE)
         "open" -> open(params["url"].orEmpty())
         "settings" -> launch(Intent(Settings.ACTION_SETTINGS))
@@ -69,6 +70,12 @@ class Actions(private val context: Context) {
 
     private fun volume(direction: Int): String {
         audio.adjustStreamVolume(AudioManager.STREAM_MUSIC, direction, 0)
+        return status()
+    }
+
+    private fun volumeSet(level: Int): String {
+        val max = audio.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+        audio.setStreamVolume(AudioManager.STREAM_MUSIC, level.coerceIn(0, max), 0)
         return status()
     }
 

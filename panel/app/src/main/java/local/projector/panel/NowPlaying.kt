@@ -30,6 +30,10 @@ class NowPlaying(private val context: Context) {
         val meta = c.metadata
         val id = meta?.getString(MediaMetadata.METADATA_KEY_MEDIA_ID)
         val youtube = if (c.packageName == SMARTTUBE && !id.isNullOrBlank()) track(id) else null
+        val art = meta?.getString(MediaMetadata.METADATA_KEY_ALBUM_ART_URI)
+            ?: meta?.getString(MediaMetadata.METADATA_KEY_ART_URI)
+            ?: youtube?.art
+            ?: ""
         val state = playback?.state ?: PlaybackState.STATE_NONE
         val playing = state == PlaybackState.STATE_PLAYING
         val buffering = state == PlaybackState.STATE_BUFFERING
@@ -40,6 +44,7 @@ class NowPlaying(private val context: Context) {
             append(""","package":${json(c.packageName)}""")
             append(""","title":${json(title(meta) ?: youtube?.title ?: id ?: "")}""")
             append(""","artist":${json(artist(meta) ?: youtube?.artist ?: "")}""")
+            append(""","art":${json(art)}""")
             append(""","playing":$playing""")
             append(""","buffering":$buffering""")
             append(""","position":${at ?: position(playback)}""")
@@ -113,7 +118,7 @@ class NowPlaying(private val context: Context) {
             conn.setRequestProperty("User-Agent", "Panel/0.2")
             val body = conn.inputStream.bufferedReader().use { it.readText() }
             val o = JSONObject(body)
-            Track(o.optString("title"), o.optString("author_name")).also {
+            Track(o.optString("title"), o.optString("author_name"), o.optString("thumbnail_url")).also {
                 if (tracks.size >= 50) tracks.clear()
                 tracks[id] = it
             }
@@ -128,7 +133,7 @@ class NowPlaying(private val context: Context) {
     private fun json(s: String?): String =
         "\"" + (s ?: "").replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", " ") + "\""
 
-    private data class Track(val title: String, val artist: String)
+    private data class Track(val title: String, val artist: String, val art: String)
 
     companion object {
         private const val TAG = "Panel"
