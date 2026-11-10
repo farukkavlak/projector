@@ -58,7 +58,10 @@ App in `panel/`, runs as a normal (non-system) app.
   `appops set local.projector.panel SYSTEM_ALERT_WINDOW allow`. Both are needed.
 - SmartTube opens YouTube links with `ACTION_VIEW` + package `org.smarttube.stable`.
 - Starts on boot (`BOOT_COMPLETED`), verified.
-- Lamp needs shell rights. Not in the app yet.
+- Lamp works from the app (`Lamp.kt`), same order as `lamp.sh`. App uid can write `bl_power`
+  (mode 666) and run `setprop sys.*`; SELinux logs denials but allows them (permissive).
+  Checks the fan guard props before cutting the lamp.
+- Keystone screen opens with `setClassName("com.htc.htcsettings", "com.htc.activity.ProjectionActivity3")`.
 
 ## Performance
 

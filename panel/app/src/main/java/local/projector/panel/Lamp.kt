@@ -1,0 +1,62 @@
+package local.projector.panel
+
+import java.io.File
+import kotlin.concurrent.thread
+
+/**
+ * Lamp on/off. Same order as scripts/lamp.sh; see docs/findings.md.
+ * Lamp off stops the fan, and a fan guard then shuts the device down,
+ * so the guard is turned off first and re-armed after the fan spins up.
+ * Works because bl_power is world-writable and SELinux is permissive.
+ */
+object Lamp {
+    private val BL_POWER = File("/sys/devices/platform/soc@2900000/5240000.ge2d/backlight/tv/bl_power")
+    private const val OFF = "5"
+    private const val ON = "6"
+    private const val FAN_SPINUP_MS = 12_000L
+
+    @Volatile private var busy = false
+
+    fun status(): String = when (BL_POWER.readText().trim()) {
+        OFF -> "off"
+        "0", ON -> "on"
+        else -> "unknown"
+    }
+
+    @Synchronized
+    fun off(): String {
+        check(!busy) { "lamp is busy" }
+        setprop("sys.shutdown_backlight", "1")
+        setprop("sys.start_fan_fun", "0")
+        // Never cut the lamp unless the fan guard is surely off.
+        check(getprop("sys.shutdown_backlight") == "1" && getprop("sys.start_fan_fun") == "0") {
+            "fan guard still on, lamp not touched"
+        }
+        BL_POWER.writeText(OFF)
+        return "off"
+    }
+
+    @Synchronized
+    fun on(): String {
+        check(!busy) { "lamp is busy" }
+        BL_POWER.writeText(ON)
+        busy = true
+        thread(isDaemon = true) {
+            try {
+                Thread.sleep(FAN_SPINUP_MS)
+                setprop("sys.start_fan_fun", "1")
+                setprop("sys.shutdown_backlight", "0")
+            } finally {
+                busy = false
+            }
+        }
+        return "on"
+    }
+
+    private fun setprop(key: String, value: String) {
+        Runtime.getRuntime().exec(arrayOf("setprop", key, value)).waitFor()
+    }
+
+    private fun getprop(key: String): String =
+        Runtime.getRuntime().exec(arrayOf("getprop", key)).inputStream.bufferedReader().readText().trim()
+}

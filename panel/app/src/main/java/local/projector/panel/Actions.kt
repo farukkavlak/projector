@@ -20,6 +20,10 @@ class Actions(private val context: Context) {
         "mute" -> volume(AudioManager.ADJUST_TOGGLE_MUTE)
         "open" -> open(params["url"].orEmpty())
         "settings" -> launch(Intent(Settings.ACTION_SETTINGS))
+        "keystone" -> launch(Intent().setClassName(KEYSTONE_PKG, KEYSTONE_ACTIVITY))
+        "lamp" -> """{"lamp":"${Lamp.status()}"}"""
+        "lamp-off" -> """{"lamp":"${Lamp.off()}"}"""
+        "lamp-on" -> """{"lamp":"${Lamp.on()}"}"""
         "status" -> status()
         else -> throw IllegalArgumentException("unknown action: $name")
     }
@@ -55,5 +59,7 @@ class Actions(private val context: Context) {
 
     companion object {
         const val SMARTTUBE = "org.smarttube.stable"
+        const val KEYSTONE_PKG = "com.htc.htcsettings"
+        const val KEYSTONE_ACTIVITY = "com.htc.activity.ProjectionActivity3"
     }
 }

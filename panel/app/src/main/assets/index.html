@@ -35,6 +35,9 @@
 <input id="url" type="url" placeholder="YouTube link">
 <div class="grid">
   <button class="wide" id="open">Open in SmartTube</button>
+  <button data-a="lamp-off">Lamp off</button>
+  <button data-a="lamp-on">Lamp on</button>
+  <button data-a="keystone">Keystone</button>
   <button class="wide" data-a="settings">Settings</button>
 </div>
 
@@ -53,7 +56,8 @@
   }
   function show(t) {
     try { const s = JSON.parse(t);
-      status.textContent = 'Volume ' + s.volume + '/' + s.max + (s.muted ? ' (muted)' : '');
+      status.textContent = s.lamp ? 'Lamp ' + s.lamp
+        : 'Volume ' + s.volume + '/' + s.max + (s.muted ? ' (muted)' : '');
     } catch { status.textContent = t; }
   }
   document.querySelectorAll('[data-a]').forEach(b =>
