@@ -48,6 +48,11 @@ class HttpServer(
                             val body = actions.run(route.removePrefix("/api/"), parse(query))
                             reply(out, 200, "application/json", body.toByteArray())
                         }
+                        route == "/preview.png" -> {
+                            val png = actions.preview()
+                            if (png == null) reply(out, 503, "text/plain", "screenshot failed".toByteArray())
+                            else reply(out, 200, "image/png", png)
+                        }
                         else -> serveAsset(out, route)
                     }
                 } catch (e: Exception) {

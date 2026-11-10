@@ -64,7 +64,8 @@
   .top {
     position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between;
     gap: 12px; padding: max(14px, env(safe-area-inset-top)) 0 10px;
-    background: linear-gradient(var(--night) 72%, rgba(22, 20, 42, 0));
+    background: rgba(22, 20, 42, .96); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
   }
   .brand { display: flex; align-items: center; gap: 10px; font-weight: 650; letter-spacing: -.01em; }
   .brand img { width: 26px; height: 26px; border-radius: 7px; display: block; }
@@ -193,6 +194,9 @@
   .preset { display: inline-flex; align-items: stretch; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
   .preset button { border: 0; border-radius: 0; background: var(--surface); padding: 8px 10px; }
   .preset .del { color: var(--muted); border-left: 1px solid var(--line); padding: 8px 9px; }
+  .preset .ren { color: var(--muted); border-left: 1px solid var(--line); padding: 8px 8px; }
+  .preset-tools { display: flex; gap: 8px; margin-top: 8px; }
+  .preset-tools button { flex: 1; font-size: 13px; color: var(--muted); }
   .factory { margin-top: 10px; width: 100%; color: var(--muted); background: transparent; }
 
   /* Sliders */
@@ -201,6 +205,11 @@
   .slider output { color: var(--muted); font-variant-numeric: tabular-nums; }
   .slider input { width: 100%; height: 28px; margin: 8px 0 2px; }
   .ends { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+
+  /* Preview */
+  .preview { position: relative; aspect-ratio: 16 / 9; border-radius: var(--radius); overflow: hidden; background: var(--surface); border: 1px solid var(--line); display: grid; place-items: center; }
+  .preview img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .preview span { position: absolute; color: var(--muted); font-size: 13px; }
 
   /* Status */
   .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
@@ -389,6 +398,11 @@
         <button id="preset-save" type="button">Save</button>
       </div>
       <div class="preset-list" id="preset-list"></div>
+      <div class="preset-tools">
+        <button id="preset-export" type="button">Export</button>
+        <button id="preset-import" type="button">Import</button>
+        <input id="preset-file" type="file" accept="application/json,.json" hidden>
+      </div>
       <button class="factory" id="factory" type="button">Reset to factory corners</button>
     </div>
 
@@ -423,6 +437,13 @@
     </div>
 
     <section class="block">
+      <h2>Preview</h2>
+      <div class="preview"><img id="preview-img" alt=""><span id="preview-hint">Tap Refresh</span></div>
+      <div class="more"><button id="preview-refresh" type="button">Refresh</button></div>
+      <p class="note">Screenshot from the projector. The keystone warp is not included.</p>
+    </section>
+
+    <section class="block">
       <h2>Projector</h2>
       <div class="row"><span>Auto keystone</span><button class="switch" id="auto-keystone" type="button">–</button></div>
       <div class="row"><span>Auto focus</span><button class="switch" id="auto-focus" type="button">–</button></div>
@@ -438,6 +459,15 @@
           <button id="led-power" type="button">Pwr</button>
           <button id="led-status" type="button">Stat</button>
           <button id="led-blue" type="button">Blue</button>
+        </span>
+      </div>
+      <div class="row"><span>Brightness</span><output id="brightness-v">–</output></div>
+      <input type="range" class="bar" id="brightness" min="0" max="100" step="1" aria-label="Brightness">
+      <div class="row"><span>Colour</span>
+        <span class="leds">
+          <button data-color="0" type="button">Warm</button>
+          <button data-color="1" type="button">Standard</button>
+          <button data-color="2" type="button">Cool</button>
         </span>
       </div>
       <p class="note">Auto keystone off may let manual corners stick; test it on the wall.</p>
@@ -467,6 +497,7 @@
       <div class="more">
         <a class="btn" href="/ca.crt" download="projector-ca.crt">Certificate</a>
         <a class="btn" id="https-link" href="#">Open HTTPS</a>
+        <button id="install" type="button" hidden>Install app</button>
       </div>
       <p class="note">Install the certificate as a CA, then open HTTPS and use Chrome's Install app. Sharing a YouTube link to the installed app opens it in SmartTube.</p>
     </section>
@@ -820,12 +851,17 @@
       apply.textContent = p.name;
       apply.title = 'Apply ' + p.name;
       apply.addEventListener('click', () => applyPreset(p.name));
+      const rename = document.createElement('button');
+      rename.className = 'ren';
+      rename.textContent = '✎';
+      rename.title = 'Rename ' + p.name;
+      rename.addEventListener('click', () => renamePreset(p.name));
       const del = document.createElement('button');
       del.className = 'del';
       del.textContent = '×';
       del.title = 'Delete ' + p.name;
       del.addEventListener('click', () => deletePreset(p.name));
-      wrap.append(apply, del);
+      wrap.append(apply, rename, del);
       box.append(wrap);
     });
   }
@@ -847,6 +883,38 @@
       renderPresets();
     } catch (e) { fail(e); }
   }
+  async function renamePreset(name) {
+    const next = prompt('New name', name);
+    if (!next || !next.trim() || next.trim() === name) return;
+    try {
+      presets = (await api('preset-rename?from=' + encodeURIComponent(name) +
+        '&to=' + encodeURIComponent(next.trim()))).presets || [];
+      renderPresets();
+    } catch (e) { fail(e); }
+  }
+  $('preset-export').addEventListener('click', async () => {
+    try {
+      const data = await api('presets');
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'projector-presets.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } catch (e) { fail(e); }
+  });
+  $('preset-import').addEventListener('click', () => $('preset-file').click());
+  $('preset-file').addEventListener('change', async () => {
+    const file = $('preset-file').files[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      presets = (await api('preset-import?data=' + encodeURIComponent(text))).presets || [];
+      renderPresets();
+      toast('Presets imported');
+    } catch (e) { fail(e); }
+    $('preset-file').value = '';
+  });
   $('preset-save').addEventListener('click', async () => {
     const name = $('preset-name').value.trim();
     if (!name) { toast('Give the preset a name', true); return; }
@@ -954,6 +1022,8 @@
       setLed('led-power', s.ledPower);
       setLed('led-status', s.ledStatus);
       setLed('led-blue', s.ledBlue);
+      setBrightness(s.brightness);
+      setColor(s.color);
     } catch { /* keep the last values */ }
   }
 
@@ -1004,6 +1074,37 @@
   $('led-status').addEventListener('click', () => toggleLed('status', 'led-status'));
   $('led-blue').addEventListener('click', () => toggleLed('blue', 'led-blue'));
 
+  let brightnessDrag = false;
+  function setBrightness(v) {
+    const el = $('brightness');
+    if (v == null) {
+      el.disabled = true;
+      $('brightness-v').textContent = '–';
+      return;
+    }
+    el.disabled = false;
+    if (!brightnessDrag) el.value = String(v);
+    el.style.setProperty('--p', v + '%');
+    $('brightness-v').textContent = v + '%';
+  }
+  $('brightness').addEventListener('input', () => {
+    brightnessDrag = true;
+    $('brightness-v').textContent = $('brightness').value + '%';
+    $('brightness').style.setProperty('--p', $('brightness').value + '%');
+  });
+  $('brightness').addEventListener('change', async () => {
+    try { await api('brightness-set?value=' + $('brightness').value); } catch (e) { fail(e); }
+    brightnessDrag = false;
+    loadSystem();
+  });
+  function setColor(v) {
+    document.querySelectorAll('[data-color]').forEach(b =>
+      b.classList.toggle('on', Number(b.dataset.color) === v));
+  }
+  document.querySelectorAll('[data-color]').forEach(b => b.addEventListener('click', async () => {
+    try { await api('color-set?value=' + b.dataset.color); loadSystem(); } catch (e) { fail(e); }
+  }));
+
   async function power(action, question) {
     if (!confirm(question)) return;
     try {
@@ -1015,6 +1116,34 @@
   $('reboot').addEventListener('click', () => power('reboot', 'Reboot the projector?'));
   $('shutdown').addEventListener('click', () =>
     power('shutdown', 'Shut down? You must press the power button to turn it back on.'));
+
+  function refreshPreview() {
+    const img = $('preview-img');
+    img.src = '/preview.png?t=' + Date.now();
+    $('preview-hint').hidden = true;
+  }
+  $('preview-refresh').addEventListener('click', refreshPreview);
+  $('preview-img').addEventListener('error', () => { $('preview-hint').hidden = false; });
+  setInterval(() => {
+    if (document.hidden) return;
+    const open = window.innerWidth >= 900 ||
+      document.querySelector('[data-panel="system"]').classList.contains('active');
+    if (open) refreshPreview();
+  }, 10000);
+
+  let installPrompt = null;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    installPrompt = e;
+    $('install').hidden = false;
+  });
+  $('install').addEventListener('click', async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    await installPrompt.userChoice;
+    installPrompt = null;
+    $('install').hidden = true;
+  });
 
   // ---- Start
   loadNow();

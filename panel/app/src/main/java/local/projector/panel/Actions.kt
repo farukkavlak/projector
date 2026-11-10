@@ -17,6 +17,8 @@ class Actions(private val context: Context) {
     private val systemStatus = SystemStatus(context)
     private val power = Power(context)
 
+    fun preview(): ByteArray? = Preview.png()
+
     fun run(name: String, params: Map<String, String>): String = when (name) {
         "play" -> media(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
         "next" -> media(KeyEvent.KEYCODE_MEDIA_NEXT)
@@ -50,12 +52,27 @@ class Actions(private val context: Context) {
         "preset-save" -> corners.savePreset(params["name"], params)
         "preset-apply" -> corners.applyPreset(params["name"])
         "preset-delete" -> corners.deletePreset(params["name"])
+        "preset-rename" -> corners.renamePreset(params["from"], params["to"])
+        "preset-import" -> corners.importPresets(params["data"])
         "system" -> systemStatus.status()
         "key" -> Keys.press(params["name"])
         "power" -> power.run(params["action"])
         "focus" -> Focus.nudge(params["dir"])
         "led" -> Leds.set(params["name"], params["on"] == "1")
         "auto" -> Auto.set(params["name"], params["on"] == "1")
+        "brightness" -> Pq.brightness()?.let { """{"brightness":$it}""" }
+            ?: """{"brightness":null}"""
+        "brightness-set" -> {
+            val v = params["value"]?.toIntOrNull() ?: throw IllegalArgumentException("value missing")
+            Pq.setBrightness(v)
+            """{"brightness":${Pq.brightness()}}"""
+        }
+        "color" -> Pq.colorTemperature()?.let { """{"color":$it}""" } ?: """{"color":null}"""
+        "color-set" -> {
+            val v = params["value"]?.toIntOrNull() ?: throw IllegalArgumentException("value missing")
+            Pq.setColorTemperature(v)
+            """{"color":${Pq.colorTemperature()}}"""
+        }
         "keystone-set" -> keystone.apply(
             params["tilt"]?.toIntOrNull() ?: throw IllegalArgumentException("tilt missing"),
             params["scale"]?.toIntOrNull() ?: throw IllegalArgumentException("scale missing"),

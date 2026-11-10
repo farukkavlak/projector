@@ -37,7 +37,9 @@ class SystemStatus(private val context: Context) {
             append(""","focus":${Focus.position()}""")
             append(""","ledPower":${Leds.isOn("power")}""")
             append(""","ledStatus":${Leds.isOn("status")}""")
-            append(""","ledBlue":${Leds.isOn("blue")}}""")
+            append(""","ledBlue":${Leds.isOn("blue")}""")
+            append(""","brightness":${Pq.brightness() ?: "null"}""")
+            append(""","color":${Pq.colorTemperature() ?: "null"}}""")
         }
     }
 

@@ -89,6 +89,41 @@ class Corners(private val context: Context) {
         return presets()
     }
 
+    /** Import the JSON from an export; names are validated and merged into the store. */
+    @Synchronized
+    fun importPresets(raw: String?): String {
+        val text = raw ?: throw IllegalArgumentException("data missing")
+        val arr = JSONObject(text).optJSONArray("presets")
+            ?: throw IllegalArgumentException("presets missing")
+        val store = presetStore()
+        for (i in 0 until arr.length()) {
+            val o = arr.getJSONObject(i)
+            val name = nameOf(o.optString("name"))
+            val entry = JSONObject()
+            KEYS.forEach { key ->
+                val v = o.optInt(key, -1)
+                require(v in 0..MAX) { "$key must be 0..$MAX" }
+                entry.put(key, v)
+            }
+            store.put(name, entry)
+        }
+        saveStore(store)
+        return presets()
+    }
+
+    @Synchronized
+    fun renamePreset(rawFrom: String?, rawTo: String?): String {
+        val from = nameOf(rawFrom)
+        val to = nameOf(rawTo)
+        val store = presetStore()
+        require(store.has(from)) { "no preset named $from" }
+        val values = store.getJSONObject(from)
+        store.remove(from)
+        store.put(to, values)
+        saveStore(store)
+        return presets()
+    }
+
     /** The corners from the first snapshot, before any manual edits. */
     @Synchronized
     fun factory(): String = apply(FACTORY.mapValues { it.value.toString() })

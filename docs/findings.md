@@ -5,8 +5,9 @@ All verified on the device, 2026-11-10.
 ## Security
 
 - SELinux is permissive. Shell can `setprop` many `persist.*` values.
-- The platform signature also grants `INJECT_EVENTS`, `REBOOT`, `DEVICE_POWER` and
-  `READ_FRAME_BUFFER`, so the Panel can inject keys, reboot and take screenshots.
+- The platform signature also grants `INJECT_EVENTS`, `REBOOT`, `DEVICE_POWER`,
+  `READ_FRAME_BUFFER` and `ACCESS_SURFACE_FLINGER`, so the Panel can inject keys, reboot
+  and take screenshots.
 - The platform key is the public AOSP one (SHA-256 `c8:a2:e9:bc:...:2a:b8`), for
   `framework-res.apk`, HotackSettings and the other system apps. Any APK signed with
   `build/target/product/security/platform.pk8` gets signature permissions, e.g.
@@ -133,6 +134,14 @@ App in `panel/`, runs as a normal (non-system) app.
 - Focus nudge: one press writes 257 (up) or 513 (down), then 386/642 after 70 ms. One step moves
   the position by ~1-3 units.
 - LEDs: `/sys/class/leds/{pwr-r,status-g,led3-b}/brightness` are world-writable; 0/1 works.
+- Preview: `screencap` exits 1 from the app process (even with the permission). The hidden
+  `SurfaceControl.screenshot(Rect, 1280, 720, false, displayId)` via reflection works with
+  `READ_FRAME_BUFFER` + `ACCESS_SURFACE_FLINGER`; the result is a 1280x720 hardware bitmap,
+  copied to ARGB_8888 and compressed to PNG. It does not include the keystone warp.
+- Brightness/colour: vendor HIDL `vendor.aw.homlet.tvsystem.tvserver@1.0::ITvServer`, reached
+  through `HwBinder` reflection. Transact 98 reads, 97 writes. Type 1 = brightness (0..100),
+  type 12 = colour temperature (0..2). This is the path the OEM brightness screen uses.
+- Preset export/import/rename and the PWA install button are app-side only.
 
 ## Now playing
 
