@@ -1,0 +1,61 @@
+# Packages changed on the HY320. Single source of truth for apply.sh / restore.sh.
+#
+# action   remove  = pm uninstall --user 0   (system apps restore with install-existing;
+#                                             store apps must be reinstalled from Play Store)
+#          disable = pm disable-user --user 0 (restore with pm enable)
+#
+# action	package	reason
+
+# Preinstalled store apps (only YouTube was kept, later replaced by SmartTube)
+remove	com.tcl.browser	preinstalled browser
+remove	com.amazon.amazonvideo.livingroom	Prime Video
+remove	com.android.chrome	Chrome
+remove	com.netflix.mediaclient	Netflix
+remove	com.turkcell.ott	TV+
+
+# Bloat, telemetry and updaters
+remove	com.mobisystems.office	office suite, ~32 MB resident in background
+remove	com.htc.eventuploadservice	event uploader, starts on boot
+remove	com.htc.storeos	OEM app store
+remove	com.htc.htcotaupdate	OEM OTA updater
+remove	android.rockchip.update.service	Rockchip OTA updater on an Allwinner device
+
+# Factory test tools
+remove	com.softwinner.agingdragonbox	factory burn-in test
+remove	com.softwinner.dragonbox	factory test
+remove	com.softwinner.dragonatt	factory test
+remove	com.htc.hyk_test	factory test
+remove	com.hotack.writesn	serial number writer
+
+# Casting services
+remove	com.android.toofifi	runs as "com.huawei.connection", system uid, location + phone-state permissions
+remove	com.toofifi.lineserver	USBCastServer
+remove	com.mphotool.airplay	AirPlay receiver
+remove	com.mphotool.dlna	DLNA receiver
+remove	com.mphotool.usbcastserver	USB cast
+remove	com.softwinner.miracastReceiver	Miracast receiver
+
+# Stock launcher (ad SDK com.zeasn.ad inside); replaced by FLauncher
+disable	com.htc.htclauncherhighenglishd08	stock launcher, ~96 MB
+
+# Google services (no measurable RAM gain, kept off by choice)
+disable	com.google.android.gms	Play Services
+disable	com.google.android.gsf	Services Framework
+disable	com.android.vending	Play Store
+disable	com.google.android.youtube.tv	official YouTube, broken without GMS; SmartTube used instead
+
+# Unused system apps
+disable	com.android.printspooler	printing
+disable	com.softwinner.awlivetv	live TV, no tuner
+disable	com.htc.samescreen	cast UI, services removed
+disable	com.softwinner.update	OTA updater
+disable	com.softwinner.settingsassist	OTA / recovery helper
+disable	com.softwinner.awlogsettings	log settings
+disable	com.android.hotspot2.osulogin	Passpoint login
+disable	com.android.bluetoothmidiservice	Bluetooth MIDI
+disable	com.android.dreams.web	web screensaver
+disable	com.android.calculator2	calculator
+disable	com.android.music	music player
+disable	com.softwinner.TvdVideo	USB media player
+disable	com.softwinner.TvdFileManager	USB file manager
+disable	com.softwinner.ImageParser	USB image viewer

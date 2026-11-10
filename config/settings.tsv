@@ -1,0 +1,7 @@
+# Android settings changed on the HY320.
+#
+# namespace	key	value	stock_value
+global	window_animation_scale	0	1.0
+global	transition_animation_scale	0	1.0
+global	animator_duration_scale	0	1.0
+system	screen_off_timeout	2147483647	300000

@@ -1,0 +1,6 @@
+package:com.tcl.browser
+package:com.amazon.amazonvideo.livingroom
+package:com.android.chrome
+package:com.netflix.mediaclient
+package:com.turkcell.ott
+package:com.google.android.youtube.tv
