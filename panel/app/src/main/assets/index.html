@@ -159,6 +159,7 @@
   .apply { background: var(--beam); color: var(--night); border: 0; font-weight: 600; }
   .apply:disabled { background: var(--surface); color: var(--muted); border: 1px solid var(--line); opacity: 1; }
   .note { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .warn { color: var(--lamp); }
 
   /* Presets */
   .presets { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line); }
@@ -344,6 +345,7 @@
       <button class="factory" id="factory" type="button">Reset to factory corners</button>
     </div>
 
+    <p class="note warn" id="shape-note" hidden>The projector or a preset changed the shape. The sliders show the last manual setting.</p>
     <div class="slider">
       <label for="tilt">Trapezoid <output id="tilt-v"></output></label>
       <input id="tilt" type="range" min="-44" max="44" step="1">
@@ -670,6 +672,7 @@
 
   async function loadCorners() {
     saved = await api('corners'); edit = { ...saved }; draw();
+    loadShape();
   }
   $('discard').addEventListener('click', () => { edit = { ...saved }; draw(); });
 
@@ -793,6 +796,15 @@
     el.addEventListener('change', () => { clearTimeout(throttle); throttle = null; sendShape(); });
   });
 
+  /** The sliders show the last manual setting; the note says when the shape moved on its own. */
+  async function loadShape() {
+    try {
+      const s = await api('keystone-get');
+      if (!sending) { tilt.value = s.tilt; scale.value = s.scale; labels(); }
+      $('shape-note').hidden = !s.changed;
+    } catch {}
+  }
+
   // ---- Keyboard (desktop)
   document.addEventListener('keydown', e => {
     if (e.target.matches('input[type=url]')) return;
@@ -864,8 +876,8 @@
   api('status').then(showVolume).catch(fail);
   api('lamp').then(s => showLamp(s.lamp)).catch(fail);
   loadTimer();
-  api('keystone-get').then(s => { tilt.value = s.tilt; scale.value = s.scale; labels(); }).catch(fail);
   loadCorners().catch(fail);
+  setInterval(() => { if (!document.hidden && !sending) loadShape(); }, 15000);
 
   // A share from the phone opens /share?url=...; send the first link to SmartTube.
   if (location.pathname === '/share') {

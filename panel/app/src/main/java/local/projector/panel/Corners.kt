@@ -111,8 +111,7 @@ class Corners(private val context: Context) {
     private fun saveStore(store: JSONObject) =
         prefs.edit().putString("presets", store.toString()).apply()
 
-    private fun read(): Map<String, Int> =
-        KEYS.associateWith { Props.get(PREFIX + it).toIntOrNull() ?: 0 }
+    private fun read(): Map<String, Int> = readProps()
 
     private fun write(values: Map<String, Int>) =
         values.forEach { (k, v) -> Props.set(PREFIX + k, v.toString()) }
@@ -167,6 +166,10 @@ class Corners(private val context: Context) {
         private const val TRANSACT_KEYSTONE = 1050
         private const val MAX = 450
         private const val RESTART_SECONDS = 25
+
+        /** The corner values currently on the device. */
+        fun readProps(): Map<String, Int> =
+            KEYS.associateWith { Props.get(PREFIX + it).toIntOrNull() ?: 0 }
         private val FACTORY = linkedMapOf(
             "ltx" to 166, "lty" to 165, "rtx" to 165, "rty" to 165,
             "lbx" to 222, "lby" to 287, "rbx" to 222, "rby" to 287,

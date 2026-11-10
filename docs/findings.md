@@ -51,6 +51,9 @@ All verified on the device, 2026-11-10.
   No reload on `wm size`, `wm density`, `dumpsys`, or `persist.sys.keystone_vaf`.
 - `setprop ctl.restart surfaceflinger` works from shell (SELinux permissive). It restarts SF and
   zygote (soft reboot, kernel keeps running). Panel back in ~23 s. Network ADB must reconnect.
+- Auto keystone can override a manual tilt/scale. `persist.sys.keystoneAngle` can hold the sensor
+  angle even when the apply was skipped (`|angle| >= 45`). Panel compares the current corners and
+  that prop with the last manual apply, and shows a note instead of pretending the sliders match.
 - Free 4 corners, two ways (Panel app, `Corners.kt`):
   - Platform-signed app (current): write the props, then call `1050` directly. Live.
   - Any other build: write the props and set `ctl.restart surfaceflinger` from the app uid.

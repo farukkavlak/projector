@@ -2,6 +2,7 @@ package local.projector.panel
 
 import android.content.Context
 import android.content.Intent
+import kotlin.math.abs
 
 /**
  * Live keystone without reboot. See docs/findings.md.
@@ -18,8 +19,25 @@ import android.content.Intent
 class Keystone(private val context: Context) {
     private val prefs = context.getSharedPreferences("keystone", Context.MODE_PRIVATE)
 
-    fun status(): String =
-        """{"tilt":${prefs.getInt("tilt", DEFAULT_TILT)},"scale":${prefs.getInt("scale", DEFAULT_SCALE)}}"""
+    /**
+     * Returns the last manual tilt/scale plus `changed`: true when the corners on the device no
+     * longer match that manual setting (auto keystone, a preset or a corner edit changed them).
+     */
+    fun status(): String {
+        val tilt = prefs.getInt("tilt", DEFAULT_TILT)
+        val scale = prefs.getInt("scale", DEFAULT_SCALE)
+        return """{"tilt":$tilt,"scale":$scale,"changed":${changed(tilt)}}"""
+    }
+
+    private fun changed(tilt: Int): Boolean {
+        val angle = Props.get("persist.sys.keystoneAngle").toIntOrNull()
+        if (angle != null && abs(angle - tilt) > 1) return true
+        val saved = prefs.getString("corners", null) ?: return false
+        val last = saved.split(",").mapNotNull { it.toIntOrNull() }
+        if (last.size != Corners.KEYS.size) return true
+        val now = Corners.readProps()
+        return Corners.KEYS.withIndex().any { (i, key) -> abs((now[key] ?: 0) - last[i]) > 2 }
+    }
 
     @Synchronized
     fun apply(tilt: Int, scale: Int): String {
@@ -37,6 +55,11 @@ class Keystone(private val context: Context) {
         broadcast() // applies
 
         prefs.edit().putInt("tilt", tilt).putInt("scale", scale).apply()
+        Thread.sleep(WRITE_BACK_MS) // SurfaceFlinger writes the result back to the props
+        val current = Corners.readProps()
+        prefs.edit()
+            .putString("corners", Corners.KEYS.joinToString(",") { current.getValue(it).toString() })
+            .apply()
         return status()
     }
 
@@ -45,6 +68,7 @@ class Keystone(private val context: Context) {
     companion object {
         private const val ACTION = "android.intent.projective_mode"
         private const val BROADCAST_GAP_MS = 400L
+        private const val WRITE_BACK_MS = 500L
         const val MAX_TILT = 44
         const val MIN_SCALE = 50
         // Close to the factory setup before we touched it (ceiling, -47 deg sensor).
