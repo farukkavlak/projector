@@ -1,8 +1,9 @@
 # Ad-hoc screenshots taken while debugging; curated ones live in docs/img/
 shots/
 
-# Pulled or downloaded app packages
+# Pulled or downloaded app packages, plus apksigner output
 *.apk
+*.idsig
 
 .DS_Store
 

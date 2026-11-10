@@ -13,6 +13,7 @@ class Actions(private val context: Context) {
     private val keystone = Keystone(context)
     private val corners = Corners(context)
     private val timer = SleepTimer(context)
+    private val nowPlaying = NowPlaying(context)
 
     fun run(name: String, params: Map<String, String>): String = when (name) {
         "play" -> media(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
@@ -32,6 +33,11 @@ class Actions(private val context: Context) {
         "timer-add" -> timer.add(minutes(params))
         "timer-restart" -> timer.restart()
         "timer-cancel" -> timer.cancel()
+        "now" -> nowPlaying.status()
+        "seek" -> nowPlaying.seek(
+            toMs = params["to"]?.toLongOrNull(),
+            bySec = params["by"]?.toIntOrNull(),
+        )
         "keystone-get" -> keystone.status()
         "corners" -> corners.status()
         "corners-set" -> corners.apply(params)

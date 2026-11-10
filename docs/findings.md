@@ -5,6 +5,11 @@ All verified on the device, 2026-11-10.
 ## Security
 
 - SELinux is permissive. Shell can `setprop` many `persist.*` values.
+- The platform key is the public AOSP one (SHA-256 `c8:a2:e9:bc:...:2a:b8`), for
+  `framework-res.apk`, HotackSettings and the other system apps. Any APK signed with
+  `build/target/product/security/platform.pk8` gets signature permissions, e.g.
+  `HARDWARE_TEST`. That is what makes the live 4-corner apply in the Panel app possible.
+  It also means anyone can sign a system-privileged app for this device.
 - ADB over network is on by default (port 5555). Connect still needs approval on screen.
 - Security patch: 2022-02-05. Bootloader locked, `oem_unlock_supported=1`.
 - Fingerprint claims to be Google ADT-3.
@@ -27,6 +32,10 @@ All verified on the device, 2026-11-10.
   Triggers `com.htc.auto_keystone` and `android.intent.hotack_keystone` are protected broadcasts.
 - SurfaceFlinger `1050` = token `android.ui.ISurfaceComposer` + 8 floats (lb, lt, rt, rb; x,y; value/1000).
   Needs `HARDWARE_TEST` (signature). Shell has `ACCESS_SURFACE_FLINGER` but that is not enough.
+- Signing the Panel app with the AOSP platform key grants `HARDWARE_TEST`, so the app can
+  call `1050` itself (`Corners.kt`, `scripts/sign-panel.sh`). Result: live 4 corners, no restart.
+  The installed app reports `{"applied":true,"live":true}` and SurfaceFlinger logs the 8 floats.
+- `screencap` shows the unwarped buffer, so a screenshot does not prove the corners were applied.
 - `android.intent.projective_mode` is NOT protected. It runs `recognizesKeystone(angle)`:
   manual corners from `persist.sys.zoom.value` + auto tilt correction, then applies live.
   Only if `persist.sys.tpryauto=1` and |angle| < 45.
@@ -42,8 +51,10 @@ All verified on the device, 2026-11-10.
   No reload on `wm size`, `wm density`, `dumpsys`, or `persist.sys.keystone_vaf`.
 - `setprop ctl.restart surfaceflinger` works from shell (SELinux permissive). It restarts SF and
   zygote (soft reboot, kernel keeps running). Panel back in ~23 s. Network ADB must reconnect.
-- Free 4 corners: Panel app (`Corners.kt`) writes `persist.display.keystone_*` and sets
-  `ctl.restart surfaceflinger` from the app uid. Works; SF logs the new `mKeystoneTran` values.
+- Free 4 corners, two ways (Panel app, `Corners.kt`):
+  - Platform-signed app (current): write the props, then call `1050` directly. Live.
+  - Any other build: write the props and set `ctl.restart surfaceflinger` from the app uid.
+    Works, but it is a ~23 s soft reboot and closes open apps.
 
 ![Projection settings](img/projection-settings.png)
 
@@ -104,6 +115,18 @@ App in `panel/`, runs as a normal (non-system) app.
   (mode 666) and run `setprop sys.*`; SELinux logs denials but allows them (permissive).
   Checks the fan guard props before cutting the lamp.
 - Keystone screen opens with `setClassName("com.htc.htcsettings", "com.htc.activity.ProjectionActivity3")`.
+
+## Now playing
+
+- `dumpsys media_session` lists the sessions. SmartTube publishes playback state
+  (position, speed), `DURATION` and `MEDIA_ID` (the YouTube video id). `TITLE` and `ARTIST`
+  are present but null.
+- Panel app (`NowPlaying.kt`) reads them with `MediaSessionManager.getActiveSessions(null)`.
+  Needs `MEDIA_CONTENT_CONTROL` (signature|privileged), granted by the platform signature.
+- Title and channel come from YouTube's public oEmbed endpoint, cached per video.
+  Position is advanced with `PlaybackState` speed from the last update time.
+- Only apps with a media session show up (SmartTube, VLC, ...). HDMI input and apps without
+  a session do not.
 
 ## Sleep timer
 

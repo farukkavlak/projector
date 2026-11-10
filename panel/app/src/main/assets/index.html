@@ -67,6 +67,17 @@
   .lamp .what { font-weight: 600; }
   .lamp .why { display: block; font-size: 13px; color: var(--muted); }
 
+  /* Now playing: title, app and the clock, from the device's media session */
+  .now { margin-top: 18px; padding: 14px 16px; border-radius: var(--radius-l); background: var(--dusk); border: 1px solid var(--line); }
+  .now-head { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--muted); }
+  .now-title { font-weight: 600; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .now-artist { font-size: 14px; color: var(--muted); margin-top: 2px; }
+  .now-seek { width: 100%; height: 26px; margin-top: 10px; accent-color: var(--beam); }
+  .now-seek:disabled { opacity: .35; }
+  .now-times { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .now-nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
+  .now-nav button { padding: 8px 4px; font-size: 13px; }
+
   /* Sleep timer: chips when off, countdown when running */
   .sleep { margin-top: 14px; }
   .sleep .sleep-on, .sleep.active .sleep-off { display: none; }
@@ -155,6 +166,20 @@
         <button data-a="mute" aria-label="Mute">🔇</button>
       </div>
       <div class="vol-text" id="vol-text">Volume</div>
+
+      <div class="now" id="now" hidden>
+        <div class="now-head"><span id="now-state">Playing</span><span id="now-app"></span></div>
+        <div class="now-title" id="now-title"></div>
+        <div class="now-artist" id="now-artist"></div>
+        <input type="range" class="now-seek" id="now-seek" min="0" max="1" value="0" step="1" aria-label="Seek">
+        <div class="now-times"><span id="now-pos">0:00</span><span id="now-dur"></span></div>
+        <div class="now-nav">
+          <button data-seek="-30">−30 s</button>
+          <button data-seek="-10">−10 s</button>
+          <button data-seek="10">+10 s</button>
+          <button data-seek="30">+30 s</button>
+        </div>
+      </div>
     </section>
 
     <section>
@@ -232,7 +257,7 @@
       <button id="discard" disabled>Discard</button>
       <button id="undo">Undo last</button>
     </div>
-    <p class="note">Applying restarts the screen for about 25 seconds and closes open apps.</p>
+    <p class="note">Applying is live. If the app cannot reach the display directly, the screen restarts for about 25 seconds and open apps close.</p>
 
     <div class="slider">
       <label for="tilt">Trapezoid <output id="tilt-v"></output></label>
@@ -275,7 +300,10 @@
     $('vol-text').textContent = s.muted ? 'Muted' : 'Volume ' + s.volume + ' of ' + s.max;
   }
   async function act(a) {
-    try { showVolume(await api(a)); } catch (e) { fail(e); }
+    try {
+      showVolume(await api(a));
+      if (a === 'play' || a === 'next' || a === 'prev') setTimeout(loadNow, 600);
+    } catch (e) { fail(e); }
   }
   document.querySelectorAll('[data-a]').forEach(b => b.addEventListener('click', () => act(b.dataset.a)));
   $('link').addEventListener('submit', async e => {
@@ -285,6 +313,74 @@
       toast('Opening in SmartTube'); $('url').value = '';
     } catch (err) { fail(err); }
   });
+
+  // ---- Now playing. The projector reports the session; the page ticks the clock.
+  let now = null, nowAt = 0;
+  const clock = ms => {
+    const s = Math.max(0, Math.round(ms / 1000));
+    const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), sec = s % 60;
+    const pad = n => String(n).padStart(2, '0');
+    return (h ? h + ':' + pad(m) : m) + ':' + pad(sec);
+  };
+  const appName = p => p === 'org.smarttube.stable' ? 'YouTube' : (p || '').split('.').pop();
+  async function loadNow() {
+    try { now = await api('now'); nowAt = Date.now(); }
+    catch { now = null; }
+    renderNow();
+  }
+  function renderNow() {
+    const box = $('now');
+    if (!now || !now.available) { box.hidden = true; return; }
+    box.hidden = false;
+    $('now-state').textContent = now.buffering ? 'Buffering…' : now.playing ? 'Playing' : 'Paused';
+    $('now-app').textContent = appName(now.package);
+    $('now-title').textContent = now.title || 'Unknown title';
+    $('now-artist').textContent = now.artist || '';
+    tickNow();
+  }
+  function currentPos() {
+    let pos = now.position;
+    if (now.playing && now.speed > 0) pos += (Date.now() - nowAt) * now.speed;
+    if (now.duration > 0) pos = Math.min(pos, now.duration);
+    return Math.max(0, pos);
+  }
+  let seeking = false;
+  function tickNow() {
+    if (!now || !now.available || $('now').hidden) return;
+    const seek = $('now-seek');
+    seek.max = String(Math.max(1, now.duration || 0));
+    seek.disabled = !(now.duration > 0);
+    if (!seeking) {
+      const pos = currentPos();
+      seek.value = String(Math.round(pos));
+      $('now-pos').textContent = clock(pos);
+    }
+    $('now-dur').textContent = now.duration > 0 ? clock(now.duration) : '';
+  }
+  async function seekTo(ms) {
+    if (!now || !now.available) return;
+    const target = Math.max(0, now.duration > 0 ? Math.min(ms, now.duration) : ms);
+    now.position = target; nowAt = Date.now(); tickNow(); // optimistic
+    try {
+      const r = await api('seek?to=' + Math.round(target));
+      if (r && r.available) {
+        // SmartTube can report the old position for a moment; keep the target then.
+        if (Math.abs((r.position || 0) - target) > 3000) r.position = target;
+        now = r; nowAt = Date.now();
+      }
+    } catch (e) { fail(e); }
+    renderNow();
+  }
+  const seekBy = sec => { if (now && now.available) seekTo(currentPos() + sec * 1000); };
+  $('now-seek').addEventListener('input', () => {
+    seeking = true;
+    $('now-pos').textContent = clock(Number($('now-seek').value));
+  });
+  $('now-seek').addEventListener('change', () => {
+    seeking = false;
+    seekTo(Number($('now-seek').value));
+  });
+  document.querySelectorAll('[data-seek]').forEach(b => b.addEventListener('click', () => seekBy(Number(b.dataset.seek))));
 
   // ---- Lamp
   let lampState = null;
@@ -430,10 +526,16 @@
   }
   $('discard').addEventListener('click', () => { edit = { ...saved }; draw(); });
 
-  async function restartAndWait(call) {
+  async function applyCorners(call) {
     const editor = $('editor');
     try {
       const r = await api(call);
+      if (r.live) {
+        await sleep(400);
+        await loadCorners();
+        toast('Corners applied');
+        return;
+      }
       editor.classList.add('busy');
       const start = Date.now();
       await sleep(4000);
@@ -444,13 +546,13 @@
       await loadCorners();
       toast('Corners applied');
     } catch (e) { fail(e); }
-    editor.classList.remove('busy');
+    finally { editor.classList.remove('busy'); }
   }
   $('apply').addEventListener('click', () => {
     const q = new URLSearchParams(); KEYS.forEach(k => q.set(k, edit[k]));
-    restartAndWait('corners-set?' + q);
+    applyCorners('corners-set?' + q);
   });
-  $('undo').addEventListener('click', () => restartAndWait('corners-undo'));
+  $('undo').addEventListener('click', () => applyCorners('corners-undo'));
 
   // ---- Trapezoid and size: live. One request at a time, the latest value wins.
   const tilt = $('tilt'), scale = $('scale');
@@ -492,6 +594,9 @@
   });
 
   // ---- Start
+  loadNow();
+  setInterval(tickNow, 1000);
+  setInterval(() => { if (!document.hidden) loadNow(); }, 5000);
   api('status').then(showVolume).catch(fail);
   api('lamp').then(s => showLamp(s.lamp)).catch(fail);
   loadTimer();
