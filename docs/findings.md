@@ -57,6 +57,7 @@ App in `panel/`, runs as a normal (non-system) app.
   Fix: declare `SYSTEM_ALERT_WINDOW` in the manifest and run
   `appops set local.projector.panel SYSTEM_ALERT_WINDOW allow`. Both are needed.
 - SmartTube opens YouTube links with `ACTION_VIEW` + package `org.smarttube.stable`.
+- Starts on boot (`BOOT_COMPLETED`), verified.
 - Lamp needs shell rights. Not in the app yet.
 
 ## Performance
