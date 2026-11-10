@@ -15,6 +15,7 @@ class Actions(private val context: Context) {
     private val timer = SleepTimer(context)
     private val nowPlaying = NowPlaying(context)
     private val systemStatus = SystemStatus(context)
+    private val power = Power(context)
 
     fun run(name: String, params: Map<String, String>): String = when (name) {
         "play" -> media(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
@@ -50,6 +51,11 @@ class Actions(private val context: Context) {
         "preset-apply" -> corners.applyPreset(params["name"])
         "preset-delete" -> corners.deletePreset(params["name"])
         "system" -> systemStatus.status()
+        "key" -> Keys.press(params["name"])
+        "power" -> power.run(params["action"])
+        "focus" -> Focus.nudge(params["dir"])
+        "led" -> Leds.set(params["name"], params["on"] == "1")
+        "auto" -> Auto.set(params["name"], params["on"] == "1")
         "keystone-set" -> keystone.apply(
             params["tilt"]?.toIntOrNull() ?: throw IllegalArgumentException("tilt missing"),
             params["scale"]?.toIntOrNull() ?: throw IllegalArgumentException("scale missing"),

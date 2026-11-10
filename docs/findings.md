@@ -5,6 +5,8 @@ All verified on the device, 2026-11-10.
 ## Security
 
 - SELinux is permissive. Shell can `setprop` many `persist.*` values.
+- The platform signature also grants `INJECT_EVENTS`, `REBOOT`, `DEVICE_POWER` and
+  `READ_FRAME_BUFFER`, so the Panel can inject keys, reboot and take screenshots.
 - The platform key is the public AOSP one (SHA-256 `c8:a2:e9:bc:...:2a:b8`), for
   `framework-res.apk`, HotackSettings and the other system apps. Any APK signed with
   `build/target/product/security/platform.pk8` gets signature permissions, e.g.
@@ -98,12 +100,14 @@ Use `scripts/lamp.sh`. Device stays online while the lamp is off.
 - Read: first char `1` = up end reached, second char `1` = down end reached (e.g. `00.400.01`).
 - Middle field is the position (400 at start). One step is about 1-2 units.
   The value updates ~100 ms after a step.
-- Tested from the Panel app, then removed (not useful; auto focus is on, `persist.sys.vafocus=1`).
+- One-step manual nudge is back in the Panel (`Focus.kt`); auto focus is on (`persist.sys.vafocus=1`).
 
 ## Power
 
 - Sleep (`KEYCODE_SLEEP`) drops Wi-Fi. No wake over network.
 - Power key opens a 15 s shutdown countdown. Menu key opens OEM settings.
+- Panel has reboot/shutdown (`PowerManager`, signature permissions) and a panel-service restart.
+  Shutdown needs the physical power button to come back.
 
 ## Panel app
 
@@ -119,6 +123,16 @@ App in `panel/`, runs as a normal (non-system) app.
   (mode 666) and run `setprop sys.*`; SELinux logs denials but allows them (permissive).
   Checks the fan guard props before cutting the lamp.
 - Keystone screen opens with `setClassName("com.htc.htcsettings", "com.htc.activity.ProjectionActivity3")`.
+- D-pad/back/home/menu: `Instrumentation().sendKeyDownUpSync(code)` works from the app uid with
+  `INJECT_EVENTS`. The panel exposes only those eight keys.
+- Power: `PowerManager.reboot`, hidden `shutdown`, and stopping/starting `PanelService` for a
+  quick panel restart.
+- Auto switches: `persist.sys.tpryxcrt` (auto keystone) and `persist.sys.vafocus` (auto focus).
+  `tpryxcrt=0` does not stop `persist.sys.keystoneAngle` from showing the sensor angle; a real
+  tilt test is still needed to confirm the correction stops.
+- Focus nudge: one press writes 257 (up) or 513 (down), then 386/642 after 70 ms. One step moves
+  the position by ~1-3 units.
+- LEDs: `/sys/class/leds/{pwr-r,status-g,led3-b}/brightness` are world-writable; 0/1 works.
 
 ## Now playing
 

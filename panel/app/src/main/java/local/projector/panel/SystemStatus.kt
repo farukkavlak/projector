@@ -31,7 +31,13 @@ class SystemStatus(private val context: Context) {
             append(""","lamp":${json(Lamp.status())}""")
             append(""","fanGuard":${Props.get("sys.start_fan_fun") == "1"}""")
             append(""","app":${json(foreground())}""")
-            append(""","version":${json(version)}}""")
+            append(""","version":${json(version)}""")
+            append(""","autoKeystone":${Props.get("persist.sys.tpryxcrt") == "1"}""")
+            append(""","autoFocus":${Props.get("persist.sys.vafocus") == "1"}""")
+            append(""","focus":${Focus.position()}""")
+            append(""","ledPower":${Leds.isOn("power")}""")
+            append(""","ledStatus":${Leds.isOn("status")}""")
+            append(""","ledBlue":${Leds.isOn("blue")}}""")
         }
     }
 

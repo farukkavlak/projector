@@ -118,6 +118,30 @@
   .volume svg { width: 20px; height: 20px; fill: currentColor; }
   .vol-text { font-size: 12px; color: var(--muted); min-width: 52px; text-align: right; font-variant-numeric: tabular-nums; }
 
+  /* Navigate */
+  .navigate { display: grid; grid-template-columns: 136px 1fr; gap: 12px; align-items: center; }
+  .dpad { display: grid; grid-template-columns: repeat(3, 42px); grid-template-rows: repeat(3, 42px); gap: 4px; }
+  .dpad button { padding: 0; border-radius: 10px; font-size: 15px; }
+  .dpad .up { grid-column: 2; grid-row: 1; }
+  .dpad .left { grid-column: 1; grid-row: 2; }
+  .dpad .ok { grid-column: 2; grid-row: 2; font-weight: 600; }
+  .dpad .right { grid-column: 3; grid-row: 2; }
+  .dpad .down { grid-column: 2; grid-row: 3; }
+  .navkeys { display: grid; gap: 6px; }
+  .navkeys button { padding: 9px 10px; font-size: 13px; }
+
+  /* Switches and hardware rows */
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .row:last-child { border-bottom: 0; }
+  .switch { padding: 6px 12px; font-size: 13px; border-radius: 999px; }
+  .switch.on { background: var(--beam); color: var(--night); border-color: var(--beam); }
+  .step { display: inline-flex; align-items: center; gap: 8px; }
+  .step button { width: 34px; height: 34px; padding: 0; border-radius: 8px; }
+  .step b { min-width: 34px; text-align: center; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .leds { display: inline-flex; gap: 6px; }
+  .leds button { padding: 6px 9px; font-size: 12px; border-radius: 8px; }
+  .leds button.on { background: var(--beam); color: var(--night); border-color: var(--beam); }
+
   /* Sleep timer */
   .sleep .sleep-on, .sleep.active .sleep-off { display: none; }
   .sleep.active .sleep-on { display: block; }
@@ -277,6 +301,24 @@
     </div>
 
     <section class="block">
+      <h2>Navigate</h2>
+      <div class="navigate">
+        <div class="dpad" aria-label="Direction pad">
+          <button class="up" data-key="up" type="button" aria-label="Up">↑</button>
+          <button class="left" data-key="left" type="button" aria-label="Left">←</button>
+          <button class="ok" data-key="ok" type="button" aria-label="OK">OK</button>
+          <button class="right" data-key="right" type="button" aria-label="Right">→</button>
+          <button class="down" data-key="down" type="button" aria-label="Down">↓</button>
+        </div>
+        <div class="navkeys">
+          <button data-key="back" type="button">Back</button>
+          <button data-key="home" type="button">Home</button>
+          <button data-key="menu" type="button">Menu</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="block">
       <h2>Sleep timer</h2>
       <div class="sleep" id="sleep">
         <div class="sleep-off">
@@ -381,11 +423,42 @@
     </div>
 
     <section class="block">
+      <h2>Projector</h2>
+      <div class="row"><span>Auto keystone</span><button class="switch" id="auto-keystone" type="button">–</button></div>
+      <div class="row"><span>Auto focus</span><button class="switch" id="auto-focus" type="button">–</button></div>
+      <div class="row"><span>Focus</span>
+        <span class="step">
+          <button id="focus-up" type="button" aria-label="Focus up">−</button>
+          <b id="focus-pos">–</b>
+          <button id="focus-down" type="button" aria-label="Focus down">+</button>
+        </span>
+      </div>
+      <div class="row"><span>LEDs</span>
+        <span class="leds">
+          <button id="led-power" type="button">Pwr</button>
+          <button id="led-status" type="button">Stat</button>
+          <button id="led-blue" type="button">Blue</button>
+        </span>
+      </div>
+      <p class="note">Auto keystone off may let manual corners stick; test it on the wall.</p>
+    </section>
+
+    <section class="block">
       <h2>Device</h2>
       <div class="more">
         <button data-a="settings" type="button">Android settings</button>
         <button data-a="keystone" type="button">Projector menu</button>
       </div>
+    </section>
+
+    <section class="block">
+      <h2>Power</h2>
+      <div class="more">
+        <button id="restart-panel" type="button">Restart Panel</button>
+        <button id="reboot" type="button">Reboot</button>
+        <button id="shutdown" type="button">Shut down</button>
+      </div>
+      <p class="note">Shut down needs the physical power button to come back.</p>
     </section>
 
     <section class="block">
@@ -453,6 +526,15 @@
       if (a === 'play' || a === 'next' || a === 'prev') setTimeout(loadNow, 600);
     } catch (e) { fail(e); }
   }
+  document.querySelectorAll('[data-key]').forEach(b => b.addEventListener('click', async () => {
+    try {
+      await api('key?name=' + b.dataset.key);
+      if (['back', 'home', 'menu'].includes(b.dataset.key)) {
+        setTimeout(loadNow, 800);
+        setTimeout(loadSystem, 1200);
+      }
+    } catch (e) { fail(e); }
+  }));
   document.querySelectorAll('[data-a]').forEach(b => b.addEventListener('click', () => act(b.dataset.a)));
   $('vol').addEventListener('input', () => {
     volDragging = true;
@@ -866,6 +948,12 @@
       $('st-fan').textContent = s.lamp === 'on' ? (s.fanGuard ? 'On' : 'Bypassed') : 'Off';
       $('st-app').textContent = appLabel(s.app);
       $('st-version').textContent = s.version || '–';
+      setSwitch('auto-keystone', s.autoKeystone);
+      setSwitch('auto-focus', s.autoFocus);
+      $('focus-pos').textContent = s.focus ?? '–';
+      setLed('led-power', s.ledPower);
+      setLed('led-status', s.ledStatus);
+      setLed('led-blue', s.ledBlue);
     } catch { /* keep the last values */ }
   }
 
@@ -889,6 +977,44 @@
   } else {
     $('pwa-state').textContent = 'Install and sharing need HTTPS. Trust the certificate first.';
   }
+
+  function setSwitch(id, on) {
+    const b = $(id);
+    b.classList.toggle('on', !!on);
+    b.textContent = on ? 'On' : 'Off';
+  }
+  function setLed(id, on) { $(id).classList.toggle('on', !!on); }
+  async function toggleSwitch(name, id) {
+    const on = !$(id).classList.contains('on');
+    try { await api('auto?name=' + name + '&on=' + (on ? 1 : 0)); loadSystem(); } catch (e) { fail(e); }
+  }
+  $('auto-keystone').addEventListener('click', () => toggleSwitch('keystone', 'auto-keystone'));
+  $('auto-focus').addEventListener('click', () => toggleSwitch('focus', 'auto-focus'));
+  const focusStep = async dir => {
+    try { const r = await api('focus?dir=' + dir); $('focus-pos').textContent = r.position; }
+    catch (e) { fail(e); }
+  };
+  $('focus-up').addEventListener('click', () => focusStep('up'));
+  $('focus-down').addEventListener('click', () => focusStep('down'));
+  async function toggleLed(name, id) {
+    const on = !$(id).classList.contains('on');
+    try { await api('led?name=' + name + '&on=' + (on ? 1 : 0)); loadSystem(); } catch (e) { fail(e); }
+  }
+  $('led-power').addEventListener('click', () => toggleLed('power', 'led-power'));
+  $('led-status').addEventListener('click', () => toggleLed('status', 'led-status'));
+  $('led-blue').addEventListener('click', () => toggleLed('blue', 'led-blue'));
+
+  async function power(action, question) {
+    if (!confirm(question)) return;
+    try {
+      await api('power?action=' + action);
+      toast(action === 'restart' ? 'Restarting Panel…' : 'Shutting down…');
+    } catch (e) { fail(e); }
+  }
+  $('restart-panel').addEventListener('click', () => power('restart', 'Restart the Panel service?'));
+  $('reboot').addEventListener('click', () => power('reboot', 'Reboot the projector?'));
+  $('shutdown').addEventListener('click', () =>
+    power('shutdown', 'Shut down? You must press the power button to turn it back on.'));
 
   // ---- Start
   loadNow();
