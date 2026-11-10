@@ -17,6 +17,20 @@
   .wide { grid-column: span 3; }
   input { width: 100%; padding: 14px; border-radius: 10px; border: 1px solid #333;
           background: #1b1b1b; color: var(--fg); font-size: 16px; margin-bottom: 8px; }
+  .ks { margin-bottom: 16px; }
+  .ks label { display: flex; justify-content: space-between; color: #aaa; font-size: 14px; margin: 8px 0 4px; }
+  .ks input[type=range] { width: 100%; padding: 0; margin: 0 0 8px; border: 0; background: none; accent-color: var(--accent); }
+  .ks .ends { display: flex; justify-content: space-between; color: #666; font-size: 12px; margin: -4px 0 8px; }
+  .ks .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  h2 { font-size: 16px; margin: 0 0 4px; color: #ccc; }
+  .hint { color: #777; font-size: 12px; margin: 0 0 8px; }
+  .corners { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+  .corner { background: #1b1b1b; border-radius: 10px; padding: 8px; }
+  .corner b { display: block; font-size: 13px; color: #aaa; margin-bottom: 6px; font-weight: normal; }
+  .axis { display: grid; grid-template-columns: 22px 36px 1fr 36px; gap: 4px; align-items: center; margin-bottom: 4px; }
+  .axis span { color: #888; font-size: 13px; }
+  .axis button { padding: 8px 0; font-size: 16px; }
+  .axis input { margin: 0; padding: 8px 2px; text-align: center; font-size: 15px; }
   #status { color: #888; font-size: 14px; min-height: 1.2em; }
 </style>
 </head>
@@ -32,12 +46,42 @@
   <button data-a="vol-up">🔊</button>
 </div>
 
+<div class="ks">
+  <h2>Keystone</h2>
+  <label>Trapezoid <span id="tilt-v"></span></label>
+  <input id="tilt" type="range" min="-44" max="44" step="1">
+  <div class="ends"><span>◀ bottom narrower</span><span>top narrower ▶</span></div>
+  <label>Size <span id="scale-v"></span></label>
+  <input id="scale" type="range" min="50" max="100" step="1">
+  <div class="row">
+    <button data-nudge="tilt" data-by="-1">◀ Trapezoid</button>
+    <button data-nudge="tilt" data-by="1">Trapezoid ▶</button>
+    <button data-nudge="scale" data-by="-1">Smaller</button>
+    <button data-nudge="scale" data-by="1">Bigger</button>
+  </div>
+</div>
+
+<div class="ks">
+  <h2>Corners</h2>
+  <p class="hint">0 = edge, bigger = further in. Apply restarts the screen (~25 s).</p>
+  <div class="corners">
+    <div class="corner" data-c="lt"><b>Top left</b></div>
+    <div class="corner" data-c="rt"><b>Top right</b></div>
+    <div class="corner" data-c="lb"><b>Bottom left</b></div>
+    <div class="corner" data-c="rb"><b>Bottom right</b></div>
+  </div>
+  <div class="row">
+    <button id="corners-apply">Apply</button>
+    <button id="corners-undo">Undo</button>
+  </div>
+</div>
+
 <input id="url" type="url" placeholder="YouTube link">
 <div class="grid">
   <button class="wide" id="open">Open in SmartTube</button>
   <button data-a="lamp-off">Lamp off</button>
   <button data-a="lamp-on">Lamp on</button>
-  <button data-a="keystone">Keystone</button>
+  <button data-a="keystone">OEM keystone</button>
   <button class="wide" data-a="settings">Settings</button>
 </div>
 
@@ -65,6 +109,88 @@
   document.getElementById('open').addEventListener('click', () =>
     call('open', { url: document.getElementById('url').value.trim() }));
   call('status');
+
+  // Keystone: live while dragging (throttled), exact value on release.
+  const tilt = document.getElementById('tilt'), scale = document.getElementById('scale');
+  const label = () => {
+    document.getElementById('tilt-v').textContent = tilt.value;
+    document.getElementById('scale-v').textContent = scale.value + '%';
+  };
+  let sending = false, pending = false;
+  async function sendKeystone() {
+    if (sending) { pending = true; return; }
+    sending = true;
+    try {
+      const r = await fetch('/api/keystone-set?tilt=' + tilt.value + '&scale=' + scale.value);
+      if (!r.ok) throw new Error(await r.text());
+      status.textContent = 'Keystone ' + tilt.value + ', size ' + scale.value + '%';
+    } catch (e) { status.textContent = 'Error: ' + e.message; }
+    sending = false;
+    if (pending) { pending = false; sendKeystone(); }
+  }
+  let timer = null;
+  [tilt, scale].forEach(el => {
+    el.addEventListener('input', () => {
+      label();
+      if (!timer) timer = setTimeout(() => { timer = null; sendKeystone(); }, 300);
+    });
+    el.addEventListener('change', () => { clearTimeout(timer); timer = null; sendKeystone(); });
+  });
+  document.querySelectorAll('[data-nudge]').forEach(b => b.addEventListener('click', () => {
+    const el = document.getElementById(b.dataset.nudge);
+    el.value = +el.value + +b.dataset.by; label(); sendKeystone();
+  }));
+  fetch('/api/keystone-get').then(r => r.json()).then(s => {
+    tilt.value = s.tilt; scale.value = s.scale; label();
+  }).catch(() => {});
+
+  // Corners: free 4-corner keystone, applied by a screen restart.
+  const STEP = 5;
+  document.querySelectorAll('.corner').forEach(box => {
+    ['x', 'y'].forEach(ax => {
+      const id = box.dataset.c + ax;
+      const row = document.createElement('div');
+      row.className = 'axis';
+      row.innerHTML = '<span>' + (ax === 'x' ? '↔' : '↕') + '</span><button>−</button>' +
+        '<input id="c-' + id + '" type="number" min="0" max="450" inputmode="numeric"><button>+</button>';
+      const [minus, input, plus] = [row.children[1], row.children[2], row.children[3]];
+      minus.onclick = () => { input.value = Math.max(0, +input.value - STEP); };
+      plus.onclick = () => { input.value = Math.min(450, +input.value + STEP); };
+      box.appendChild(row);
+    });
+  });
+  const KEYS = ['ltx', 'lty', 'rtx', 'rty', 'lbx', 'lby', 'rbx', 'rby'];
+  function loadCorners() {
+    return fetch('/api/corners').then(r => r.json()).then(c =>
+      KEYS.forEach(k => { document.getElementById('c-' + k).value = c[k]; }));
+  }
+  async function waitBack(seconds) {
+    const start = Date.now();
+    await new Promise(r => setTimeout(r, 5000));
+    while (true) {
+      const left = Math.max(0, seconds - Math.round((Date.now() - start) / 1000));
+      status.textContent = 'Screen restarting… ' + left + ' s';
+      try { const r = await fetch('/api/status'); if (r.ok) break; } catch {}
+      await new Promise(r => setTimeout(r, 1500));
+    }
+    await loadCorners();
+    status.textContent = 'Corners applied';
+  }
+  async function cornersCall(url) {
+    try {
+      const r = await fetch(url);
+      const t = await r.text();
+      if (!r.ok) throw new Error(t);
+      await waitBack(JSON.parse(t).seconds);
+    } catch (e) { status.textContent = 'Error: ' + e.message; }
+  }
+  document.getElementById('corners-apply').onclick = () => {
+    const q = new URLSearchParams();
+    KEYS.forEach(k => q.set(k, document.getElementById('c-' + k).value));
+    cornersCall('/api/corners-set?' + q);
+  };
+  document.getElementById('corners-undo').onclick = () => cornersCall('/api/corners-undo');
+  loadCorners().catch(() => {});
 </script>
 </body>
 </html>

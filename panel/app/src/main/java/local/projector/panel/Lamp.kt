@@ -26,10 +26,10 @@ object Lamp {
     @Synchronized
     fun off(): String {
         check(!busy) { "lamp is busy" }
-        setprop("sys.shutdown_backlight", "1")
-        setprop("sys.start_fan_fun", "0")
+        Props.set("sys.shutdown_backlight", "1")
+        Props.set("sys.start_fan_fun", "0")
         // Never cut the lamp unless the fan guard is surely off.
-        check(getprop("sys.shutdown_backlight") == "1" && getprop("sys.start_fan_fun") == "0") {
+        check(Props.get("sys.shutdown_backlight") == "1" && Props.get("sys.start_fan_fun") == "0") {
             "fan guard still on, lamp not touched"
         }
         BL_POWER.writeText(OFF)
@@ -44,19 +44,12 @@ object Lamp {
         thread(isDaemon = true) {
             try {
                 Thread.sleep(FAN_SPINUP_MS)
-                setprop("sys.start_fan_fun", "1")
-                setprop("sys.shutdown_backlight", "0")
+                Props.set("sys.start_fan_fun", "1")
+                Props.set("sys.shutdown_backlight", "0")
             } finally {
                 busy = false
             }
         }
         return "on"
     }
-
-    private fun setprop(key: String, value: String) {
-        Runtime.getRuntime().exec(arrayOf("setprop", key, value)).waitFor()
-    }
-
-    private fun getprop(key: String): String =
-        Runtime.getRuntime().exec(arrayOf("getprop", key)).inputStream.bufferedReader().readText().trim()
 }

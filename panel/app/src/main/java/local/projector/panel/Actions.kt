@@ -10,6 +10,8 @@ import android.view.KeyEvent
 
 class Actions(private val context: Context) {
     private val audio = context.getSystemService(AudioManager::class.java)
+    private val keystone = Keystone(context)
+    private val corners = Corners(context)
 
     fun run(name: String, params: Map<String, String>): String = when (name) {
         "play" -> media(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
@@ -24,6 +26,14 @@ class Actions(private val context: Context) {
         "lamp" -> """{"lamp":"${Lamp.status()}"}"""
         "lamp-off" -> """{"lamp":"${Lamp.off()}"}"""
         "lamp-on" -> """{"lamp":"${Lamp.on()}"}"""
+        "keystone-get" -> keystone.status()
+        "corners" -> corners.status()
+        "corners-set" -> corners.apply(params)
+        "corners-undo" -> corners.undo()
+        "keystone-set" -> keystone.apply(
+            params["tilt"]?.toIntOrNull() ?: throw IllegalArgumentException("tilt missing"),
+            params["scale"]?.toIntOrNull() ?: throw IllegalArgumentException("scale missing"),
+        )
         "status" -> status()
         else -> throw IllegalArgumentException("unknown action: $name")
     }

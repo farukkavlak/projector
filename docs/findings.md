@@ -22,6 +22,28 @@ All verified on the device, 2026-11-10.
   - Broadcast `android.intent.hotack_keystone`: protected
 - Original values: [snapshots/2026-11-10/before/keystone.txt](../snapshots/2026-11-10/before/keystone.txt)
 - Settings screen: `am start -n com.htc.htcsettings/com.htc.activity.ProjectionActivity3`
+- Live apply is done by system code only: `PhoneWindowManager.recognizesKeystone` and
+  `com.htc.util.h` in HotackSettings read the props and call SurfaceFlinger `1050`.
+  Triggers `com.htc.auto_keystone` and `android.intent.hotack_keystone` are protected broadcasts.
+- SurfaceFlinger `1050` = token `android.ui.ISurfaceComposer` + 8 floats (lb, lt, rt, rb; x,y; value/1000).
+  Needs `HARDWARE_TEST` (signature). Shell has `ACCESS_SURFACE_FLINGER` but that is not enough.
+- `android.intent.projective_mode` is NOT protected. It runs `recognizesKeystone(angle)`:
+  manual corners from `persist.sys.zoom.value` + auto tilt correction, then applies live.
+  Only if `persist.sys.tpryauto=1` and |angle| < 45.
+- Tilt sensor: `.../i2c-1/1-0018/input/input4/stk83xx/cur_angle`. Reads `-47` here (ceiling).
+- The angle used is a cached value, not the sensor. With `tpryauto=0` the same broadcast loads it
+  from `persist.sys.keystoneAngle`. So live keystone works (Panel app, `Keystone.kt`):
+  1. `tpryauto=0`, `keystoneAngle=<tilt>`, send `projective_mode` (caches the angle)
+  2. `zoom.value=<size x8>`, `tpryauto=1`, send `projective_mode` (applies)
+- Result with zoom 0: tilt 0 = full screen. Tilt < 0 narrows the bottom edge, > 0 the top.
+  Zoom adds an inset. Corners are not free: the system fits a symmetric trapezoid.
+- SurfaceFlinger writes the applied corners back to `persist.display.keystone_*`.
+- SurfaceFlinger reads `persist.display.keystone_*` only at boot (and gets corners via `1050`).
+  No reload on `wm size`, `wm density`, `dumpsys`, or `persist.sys.keystone_vaf`.
+- `setprop ctl.restart surfaceflinger` works from shell (SELinux permissive). It restarts SF and
+  zygote (soft reboot, kernel keeps running). Panel back in ~23 s. Network ADB must reconnect.
+- Free 4 corners: Panel app (`Corners.kt`) writes `persist.display.keystone_*` and sets
+  `ctl.restart surfaceflinger` from the app uid. Works; SF logs the new `mKeystoneTran` values.
 
 ![Projection settings](img/projection-settings.png)
 
@@ -32,6 +54,16 @@ Use `scripts/lamp.sh`. Device stays online while the lamp is off.
 - Lamp: `/sys/devices/platform/soc@2900000/5240000.ge2d/backlight/tv/bl_power`, mode `rw-rw-rw-`.
   - `5` = off, `6` = on. `0` does not turn it on.
 - Lamp off also stops the fan.
+- Fan is GPIO on/off (`fanctrl-gpio`), no speed control. Always full speed while the lamp is on.
+  `PrjScreen.set_fan_level` (`persist.sys.prj.fanlevel`, `2009800.fan/pwm_fan`) is for other models;
+  that path does not exist here.
+- `debug_fantrl` is a wrapping pulse counter, not a speed. Lamp on: steady ~118 per 0.5 s.
+- `fan_ctrl` uses one pin, PH17 (gpio-241), as an input: the tach. No output pin. Fan power comes
+  with the lamp, so software cannot slow it.
+- Device tree has a `pwm-fan` node (`2009800.fan`, 8 speed levels) but `status: disabled`.
+  Enabling it needs a new DT, i.e. an unlocked bootloader. Its `fan2-run-gpio` (PH14) is the focus
+  `limiter-gpio` here, so this board is likely not wired for it.
+- `fan_ctrl/usba_sw` (gpio-33) is not the fan. It routes the USB-A port (system vs HDMI dongle).
 - Fan guard (`PhoneWindowManager`, `services.jar`):
   - Every 1.8 s it reads `/sys/devices/platform/fan_ctrl/debug_fantrl`.
   - Slow fan + `sys.start_fan_fun=1` + `sys.shutdown_backlight!=1` → counter +1.
@@ -42,6 +74,16 @@ Use `scripts/lamp.sh`. Device stays online while the lamp is off.
   - On: `bl_power=6`, wait ~12 s, then `sys.start_fan_fun=1`, `sys.shutdown_backlight=0`.
 - Other hardware (from `android.os.PrjScreen` in `framework.jar`): focus motor `/sys/devices/platform/motor_ctr/`,
   angle sensor `.../4-001b/sensor_angle`, auto keystone `persist.sys.tpryxcrt`, auto focus `persist.sys.vafocus`.
+
+## Focus
+
+- Motor: `/sys/devices/platform/motor_ctr/motor_ctrl`, mode 666, so apps can write it.
+- Remote focus keys (`PhoneWindowManager`): up = write `257`, then `386` every 70 ms while held.
+  Down = `513`, then `642`.
+- Read: first char `1` = up end reached, second char `1` = down end reached (e.g. `00.400.01`).
+- Middle field is the position (400 at start). One step is about 1-2 units.
+  The value updates ~100 ms after a step.
+- Tested from the Panel app, then removed (not useful; auto focus is on, `persist.sys.vafocus=1`).
 
 ## Power
 
