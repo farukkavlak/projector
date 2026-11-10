@@ -2,195 +2,424 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#16142a">
+<meta name="color-scheme" content="dark">
 <title>Projector</title>
+<link rel="icon" href="data:,">
 <style>
-  :root { --bg: #111; --fg: #eee; --btn: #2a2a2a; --accent: #3a7bd5; }
+  :root {
+    --night: #16142a;      /* page */
+    --dusk: #211e3b;       /* raised controls */
+    --line: #36325a;       /* borders, frame */
+    --text: #ece9f8;
+    --muted: #a19cc0;
+    --beam: #8fd3ff;       /* projector light: shape, focus, main action */
+    --lamp: #ffc46b;       /* lamp state */
+    --bad: #ff8f8f;
+    --radius-s: 10px;
+    --radius-l: 22px;
+  }
   * { box-sizing: border-box; }
-  body { margin: 0; padding: 16px; background: var(--bg); color: var(--fg);
-         font: 16px system-ui, sans-serif; max-width: 480px; margin-inline: auto; }
-  h1 { font-size: 20px; margin: 0 0 16px; }
-  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
-  button { padding: 18px 0; border: 0; border-radius: 10px; background: var(--btn);
-           color: var(--fg); font-size: 18px; }
-  button:active { background: var(--accent); }
-  .wide { grid-column: span 3; }
-  input { width: 100%; padding: 14px; border-radius: 10px; border: 1px solid #333;
-          background: #1b1b1b; color: var(--fg); font-size: 16px; margin-bottom: 8px; }
-  .ks { margin-bottom: 16px; }
-  .ks label { display: flex; justify-content: space-between; color: #aaa; font-size: 14px; margin: 8px 0 4px; }
-  .ks input[type=range] { width: 100%; padding: 0; margin: 0 0 8px; border: 0; background: none; accent-color: var(--accent); }
-  .ks .ends { display: flex; justify-content: space-between; color: #666; font-size: 12px; margin: -4px 0 8px; }
-  .ks .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  h2 { font-size: 16px; margin: 0 0 4px; color: #ccc; }
-  .hint { color: #777; font-size: 12px; margin: 0 0 8px; }
-  .corners { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-  .corner { background: #1b1b1b; border-radius: 10px; padding: 8px; }
-  .corner b { display: block; font-size: 13px; color: #aaa; margin-bottom: 6px; font-weight: normal; }
-  .axis { display: grid; grid-template-columns: 22px 36px 1fr 36px; gap: 4px; align-items: center; margin-bottom: 4px; }
-  .axis span { color: #888; font-size: 13px; }
-  .axis button { padding: 8px 0; font-size: 16px; }
-  .axis input { margin: 0; padding: 8px 2px; text-align: center; font-size: 15px; }
-  #status { color: #888; font-size: 14px; min-height: 1.2em; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--night); color: var(--text);
+    font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: max(16px, env(safe-area-inset-top)) 16px calc(88px + env(safe-area-inset-bottom));
+  }
+  main { max-width: 1120px; margin: 0 auto; display: grid; gap: 28px; }
+  @media (min-width: 900px) {
+    body { padding: 32px 32px 96px; }
+    main { grid-template-columns: minmax(320px, 400px) 1fr; gap: 48px; align-items: start; }
+    .shape-col { position: sticky; top: 32px; }
+  }
+  .controls { display: grid; gap: 28px; }
+  h1 { font-size: 22px; font-weight: 650; margin: 0; letter-spacing: -0.01em; }
+  h2 { font-size: 15px; font-weight: 600; margin: 0 0 10px; color: var(--muted); }
+  section { min-width: 0; }
+
+  button {
+    font: inherit; color: var(--text); background: var(--dusk);
+    border: 1px solid var(--line); border-radius: var(--radius-s);
+    padding: 12px 14px; cursor: pointer; touch-action: manipulation;
+  }
+  button:hover { border-color: #4a4576; }
+  button:active { background: #2c2850; }
+  button:disabled { opacity: .45; cursor: default; }
+  :focus-visible { outline: 2px solid var(--beam); outline-offset: 2px; }
+  input, button { -webkit-tap-highlight-color: transparent; }
+
+  /* Playback: the round transport is the most used control */
+  .transport { display: flex; align-items: center; justify-content: center; gap: 18px; }
+  .transport button { width: 56px; height: 56px; border-radius: 50%; padding: 0; font-size: 20px; }
+  .transport .play { width: 76px; height: 76px; font-size: 28px; background: var(--beam); color: var(--night); border: 0; }
+  .volume { display: grid; grid-template-columns: 48px 1fr 48px 48px; gap: 10px; align-items: center; margin-top: 18px; }
+  .volume button { padding: 10px 0; font-size: 18px; }
+  .meter { height: 8px; border-radius: 4px; background: var(--dusk); overflow: hidden; }
+  .meter i { display: block; height: 100%; width: 0; background: var(--text); transition: width .15s; }
+  .meter.muted i { background: var(--muted); }
+  .vol-text { font-size: 13px; color: var(--muted); margin-top: 6px; text-align: center; }
+
+  /* Lamp: one toggle that shows the real state */
+  .lamp { width: 100%; display: flex; align-items: center; gap: 14px; text-align: left; padding: 14px 16px; border-radius: var(--radius-l); }
+  .lamp .dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--muted); flex: none; }
+  .lamp.on .dot { background: var(--lamp); border-color: var(--lamp); box-shadow: 0 0 14px var(--lamp); }
+  .lamp .what { font-weight: 600; }
+  .lamp .why { display: block; font-size: 13px; color: var(--muted); }
+
+  form.link { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+  input[type=url] {
+    font: inherit; color: var(--text); background: var(--dusk); border: 1px solid var(--line);
+    border-radius: var(--radius-s); padding: 12px 14px; min-width: 0;
+  }
+  input[type=url]::placeholder { color: #77729a; }
+
+  .more { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* Picture shape: the one bold element */
+  .editor { position: relative; border-radius: var(--radius-l); background: #0f0d20; border: 1px solid var(--line); padding: 10px; }
+  .editor svg { display: block; width: 100%; height: auto; touch-action: none; user-select: none; -webkit-user-select: none; }
+  .frame { fill: none; stroke: var(--line); stroke-width: 3; stroke-dasharray: 10 8; }
+  .shape { fill: rgba(143, 211, 255, .14); stroke: var(--beam); stroke-width: 4; stroke-linejoin: round; }
+  .shape.dirty { fill: rgba(143, 211, 255, .22); stroke-dasharray: 16 8; }
+  .handle { fill: var(--night); stroke: var(--beam); stroke-width: 7; pointer-events: none; }
+  .handle.sel { fill: var(--beam); }
+  .hit { fill: transparent; cursor: grab; }
+  .busy-cover {
+    position: absolute; inset: 0; border-radius: var(--radius-l); display: none;
+    place-items: center; background: rgba(15, 13, 32, .85); text-align: center; padding: 20px;
+  }
+  .editor.busy .busy-cover { display: grid; }
+  .busy-cover b { font-size: 34px; display: block; font-variant-numeric: tabular-nums; }
+
+  .corner-bar { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; margin-top: 12px; }
+  .corner-info { font-size: 14px; color: var(--muted); }
+  .corner-info strong { color: var(--text); font-weight: 600; }
+  .pad { display: grid; grid-template-columns: repeat(3, 44px); grid-template-rows: repeat(2, 40px); gap: 4px; }
+  .pad button { padding: 0; font-size: 16px; }
+  .pad .up { grid-column: 2; }
+  .pad .left { grid-column: 1; grid-row: 2; }
+  .pad .down { grid-column: 2; grid-row: 2; }
+  .pad .right { grid-column: 3; grid-row: 2; }
+  .apply-row { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; margin-top: 12px; }
+  .apply { background: var(--beam); color: var(--night); border: 0; font-weight: 600; }
+  .apply:disabled { background: var(--dusk); color: var(--muted); border: 1px solid var(--line); opacity: 1; }
+  .note { font-size: 13px; color: var(--muted); margin: 8px 0 0; }
+
+  .slider { margin-top: 20px; }
+  .slider label { display: flex; justify-content: space-between; font-size: 15px; }
+  .slider label output { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .slider input { width: 100%; margin: 10px 0 2px; accent-color: var(--beam); height: 28px; }
+  .ends { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+
+  .keys { display: none; font-size: 13px; color: var(--muted); margin: 0; }
+  @media (min-width: 900px) and (hover: hover) { .keys { display: block; } }
+  kbd { font: inherit; border: 1px solid var(--line); border-radius: 5px; padding: 0 5px; color: var(--text); }
+
+  #toast {
+    position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+    max-width: calc(100% - 32px); background: var(--dusk); border: 1px solid var(--line);
+    border-radius: 999px; padding: 10px 18px; font-size: 14px; opacity: 0; pointer-events: none;
+    transition: opacity .2s;
+  }
+  #toast.show { opacity: 1; }
+  #toast.err { border-color: var(--bad); color: var(--bad); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body>
-<h1>Projector</h1>
+<main>
+  <div class="controls">
+    <h1>Projector</h1>
 
-<div class="grid">
-  <button data-a="prev">⏮</button>
-  <button data-a="play">⏯</button>
-  <button data-a="next">⏭</button>
-  <button data-a="vol-down">🔉</button>
-  <button data-a="mute">🔇</button>
-  <button data-a="vol-up">🔊</button>
-</div>
+    <section aria-label="Playback">
+      <div class="transport">
+        <button data-a="prev" aria-label="Previous">⏮</button>
+        <button data-a="play" class="play" aria-label="Play or pause">⏯</button>
+        <button data-a="next" aria-label="Next">⏭</button>
+      </div>
+      <div class="volume">
+        <button data-a="vol-down" aria-label="Volume down">−</button>
+        <div class="meter" id="meter"><i></i></div>
+        <button data-a="vol-up" aria-label="Volume up">+</button>
+        <button data-a="mute" aria-label="Mute">🔇</button>
+      </div>
+      <div class="vol-text" id="vol-text">Volume</div>
+    </section>
 
-<div class="ks">
-  <h2>Keystone</h2>
-  <label>Trapezoid <span id="tilt-v"></span></label>
-  <input id="tilt" type="range" min="-44" max="44" step="1">
-  <div class="ends"><span>◀ bottom narrower</span><span>top narrower ▶</span></div>
-  <label>Size <span id="scale-v"></span></label>
-  <input id="scale" type="range" min="50" max="100" step="1">
-  <div class="row">
-    <button data-nudge="tilt" data-by="-1">◀ Trapezoid</button>
-    <button data-nudge="tilt" data-by="1">Trapezoid ▶</button>
-    <button data-nudge="scale" data-by="-1">Smaller</button>
-    <button data-nudge="scale" data-by="1">Bigger</button>
+    <section>
+      <button class="lamp" id="lamp">
+        <span class="dot"></span>
+        <span><span class="what">Lamp</span><span class="why">Checking…</span></span>
+      </button>
+    </section>
+
+    <section>
+      <h2>Open a video</h2>
+      <form class="link" id="link">
+        <input id="url" type="url" placeholder="Paste a YouTube link" autocomplete="off" required>
+        <button type="submit">Play</button>
+      </form>
+    </section>
+
+    <section>
+      <h2>More</h2>
+      <div class="more">
+        <button data-a="settings">Android settings</button>
+        <button data-a="keystone">Projector picture menu</button>
+      </div>
+    </section>
+
+    <p class="keys"><kbd>Space</kbd> play/pause, <kbd>+</kbd> <kbd>−</kbd> volume, <kbd>M</kbd> mute. Arrows move the selected corner, <kbd>Shift</kbd> for bigger steps.</p>
   </div>
-</div>
 
-<div class="ks">
-  <h2>Corners</h2>
-  <p class="hint">0 = edge, bigger = further in. Apply restarts the screen (~25 s).</p>
-  <div class="corners">
-    <div class="corner" data-c="lt"><b>Top left</b></div>
-    <div class="corner" data-c="rt"><b>Top right</b></div>
-    <div class="corner" data-c="lb"><b>Bottom left</b></div>
-    <div class="corner" data-c="rb"><b>Bottom right</b></div>
-  </div>
-  <div class="row">
-    <button id="corners-apply">Apply</button>
-    <button id="corners-undo">Undo</button>
-  </div>
-</div>
+  <section class="shape-col" aria-label="Picture shape">
+    <h2>Picture shape</h2>
+    <div class="editor" id="editor">
+      <svg id="svg" viewBox="-50 -50 1380 820" role="img" aria-label="Projected picture shape">
+        <rect class="frame" x="0" y="0" width="1280" height="720" rx="6"/>
+        <polygon class="shape" id="shape" points=""/>
+        <g id="handles"></g>
+      </svg>
+      <div class="busy-cover"><div><b id="busy-sec">25</b>Screen restarting to apply the corners</div></div>
+    </div>
 
-<input id="url" type="url" placeholder="YouTube link">
-<div class="grid">
-  <button class="wide" id="open">Open in SmartTube</button>
-  <button data-a="lamp-off">Lamp off</button>
-  <button data-a="lamp-on">Lamp on</button>
-  <button data-a="keystone">OEM keystone</button>
-  <button class="wide" data-a="settings">Settings</button>
-</div>
+    <div class="corner-bar">
+      <div class="corner-info" id="corner-info">Drag a corner, or tap one and use the arrows.</div>
+      <div class="pad" aria-label="Move selected corner">
+        <button class="up" data-move="0,-1" aria-label="Move up">↑</button>
+        <button class="left" data-move="-1,0" aria-label="Move left">←</button>
+        <button class="down" data-move="0,1" aria-label="Move down">↓</button>
+        <button class="right" data-move="1,0" aria-label="Move right">→</button>
+      </div>
+    </div>
+    <div class="apply-row">
+      <button class="apply" id="apply" disabled>Apply corners</button>
+      <button id="discard" disabled>Discard</button>
+      <button id="undo">Undo last</button>
+    </div>
+    <p class="note">Applying restarts the screen for about 25 seconds and closes open apps.</p>
 
-<div id="status"></div>
+    <div class="slider">
+      <label for="tilt">Trapezoid <output id="tilt-v"></output></label>
+      <input id="tilt" type="range" min="-44" max="44" step="1">
+      <div class="ends"><span>Bottom narrower</span><span>Top narrower</span></div>
+    </div>
+    <div class="slider">
+      <label for="scale">Size <output id="scale-v"></output></label>
+      <input id="scale" type="range" min="50" max="100" step="1">
+      <div class="ends"><span>Smaller</span><span>Full</span></div>
+    </div>
+    <p class="note">Trapezoid and size change the picture right away. They replace any corner edits.</p>
+  </section>
+</main>
+<div id="toast" role="status" aria-live="polite"></div>
 
 <script>
-  const status = document.getElementById('status');
-  async function call(action, params = {}) {
-    const q = new URLSearchParams(params).toString();
-    try {
-      const r = await fetch('/api/' + action + (q ? '?' + q : ''));
-      const t = await r.text();
-      if (!r.ok) throw new Error(t);
-      show(t);
-    } catch (e) { status.textContent = 'Error: ' + e.message; }
-  }
-  function show(t) {
-    try { const s = JSON.parse(t);
-      status.textContent = s.lamp ? 'Lamp ' + s.lamp
-        : 'Volume ' + s.volume + '/' + s.max + (s.muted ? ' (muted)' : '');
-    } catch { status.textContent = t; }
-  }
-  document.querySelectorAll('[data-a]').forEach(b =>
-    b.addEventListener('click', () => call(b.dataset.a)));
-  document.getElementById('open').addEventListener('click', () =>
-    call('open', { url: document.getElementById('url').value.trim() }));
-  call('status');
+  const $ = id => document.getElementById(id);
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-  // Keystone: live while dragging (throttled), exact value on release.
-  const tilt = document.getElementById('tilt'), scale = document.getElementById('scale');
-  const label = () => {
-    document.getElementById('tilt-v').textContent = tilt.value;
-    document.getElementById('scale-v').textContent = scale.value + '%';
-  };
-  let sending = false, pending = false;
-  async function sendKeystone() {
-    if (sending) { pending = true; return; }
+  async function api(path) {
+    const r = await fetch('/api/' + path);
+    const t = await r.text();
+    if (!r.ok) throw new Error(t || 'Request failed');
+    try { return JSON.parse(t); } catch { return t; }
+  }
+  let toastTimer;
+  function toast(msg, err) {
+    const el = $('toast');
+    el.textContent = msg; el.className = 'show' + (err ? ' err' : '');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => el.className = '', 2600);
+  }
+  const fail = e => toast(e.message === 'Failed to fetch' ? 'Projector not reachable' : e.message, true);
+
+  // ---- Playback and volume
+  function showVolume(s) {
+    if (!s || s.volume === undefined) return;
+    $('meter').querySelector('i').style.width = (100 * s.volume / s.max) + '%';
+    $('meter').classList.toggle('muted', s.muted);
+    $('vol-text').textContent = s.muted ? 'Muted' : 'Volume ' + s.volume + ' of ' + s.max;
+  }
+  async function act(a) {
+    try { showVolume(await api(a)); } catch (e) { fail(e); }
+  }
+  document.querySelectorAll('[data-a]').forEach(b => b.addEventListener('click', () => act(b.dataset.a)));
+  $('link').addEventListener('submit', async e => {
+    e.preventDefault();
+    try {
+      await api('open?url=' + encodeURIComponent($('url').value.trim()));
+      toast('Opening in SmartTube'); $('url').value = '';
+    } catch (err) { fail(err); }
+  });
+
+  // ---- Lamp
+  let lampState = null;
+  function showLamp(state, why) {
+    lampState = state;
+    const b = $('lamp');
+    b.classList.toggle('on', state === 'on');
+    b.querySelector('.what').textContent = state === 'on' ? 'Lamp is on' : state === 'off' ? 'Lamp is off' : 'Lamp';
+    b.querySelector('.why').textContent = why ||
+      (state === 'on' ? 'Tap to turn it off. The fan stops too.' : 'Tap to turn it on.');
+  }
+  $('lamp').addEventListener('click', async () => {
+    const b = $('lamp');
+    b.disabled = true;
+    try {
+      if (lampState === 'on') {
+        showLamp((await api('lamp-off')).lamp);
+      } else {
+        showLamp((await api('lamp-on')).lamp, 'Warming up. Ready in 12 s.');
+        await sleep(12000);
+        showLamp('on');
+      }
+    } catch (e) { fail(e); }
+    b.disabled = false;
+  });
+
+  // ---- Picture shape. Corner values are insets in 1/1000 of the screen (0 = edge).
+  const W = 1280, H = 720, MAX = 450, KEYS = ['ltx', 'lty', 'rtx', 'rty', 'lbx', 'lby', 'rbx', 'rby'];
+  const NAMES = { lt: 'Top left', rt: 'Top right', rb: 'Bottom right', lb: 'Bottom left' };
+  const ORDER = ['lt', 'rt', 'rb', 'lb'];
+  let saved = null, edit = null, selected = null;
+
+  const clamp = v => Math.max(0, Math.min(MAX, Math.round(v)));
+  function toPoint(c, v) {
+    const x = c[0] === 'l' ? v[c + 'x'] * W / 1000 : W - v[c + 'x'] * W / 1000;
+    const y = c[1] === 't' ? v[c + 'y'] * H / 1000 : H - v[c + 'y'] * H / 1000;
+    return [x, y];
+  }
+  function fromPoint(c, x, y) {
+    edit[c + 'x'] = clamp(c[0] === 'l' ? x * 1000 / W : (W - x) * 1000 / W);
+    edit[c + 'y'] = clamp(c[1] === 't' ? y * 1000 / H : (H - y) * 1000 / H);
+  }
+  const dirty = () => !!(saved && edit && KEYS.some(k => saved[k] !== edit[k]));
+
+  function draw() {
+    if (!edit) return;
+    $('shape').setAttribute('points', ORDER.map(c => toPoint(c, edit).join(',')).join(' '));
+    $('shape').classList.toggle('dirty', dirty());
+    const g = $('handles'), ns = 'http://www.w3.org/2000/svg';
+    g.replaceChildren();
+    ORDER.forEach(c => {
+      const [x, y] = toPoint(c, edit);
+      const hit = document.createElementNS(ns, 'circle');
+      hit.setAttribute('class', 'hit');
+      hit.setAttribute('cx', x); hit.setAttribute('cy', y); hit.setAttribute('r', 110);
+      hit.dataset.c = c;
+      const h = document.createElementNS(ns, 'circle');
+      h.setAttribute('class', 'handle' + (c === selected ? ' sel' : ''));
+      h.setAttribute('cx', x); h.setAttribute('cy', y); h.setAttribute('r', 34);
+      g.append(hit, h);
+    });
+    $('corner-info').innerHTML = selected
+      ? '<strong>' + NAMES[selected] + '</strong><br>' + edit[selected + 'x'] + ' in from the side, ' +
+        edit[selected + 'y'] + ' from the ' + (selected[1] === 't' ? 'top' : 'bottom')
+      : 'Drag a corner, or tap one and use the arrows.';
+    $('apply').disabled = !dirty();
+    $('discard').disabled = !dirty();
+    document.querySelectorAll('[data-move]').forEach(b => b.disabled = !selected);
+  }
+
+  const svg = $('svg');
+  function svgPoint(e) {
+    const p = svg.createSVGPoint(); p.x = e.clientX; p.y = e.clientY;
+    return p.matrixTransform(svg.getScreenCTM().inverse());
+  }
+  let dragging = null;
+  svg.addEventListener('pointerdown', e => {
+    const c = e.target.dataset && e.target.dataset.c;
+    if (!c || !edit || $('editor').classList.contains('busy')) return;
+    selected = c; dragging = c; svg.setPointerCapture(e.pointerId); draw();
+  });
+  svg.addEventListener('pointermove', e => {
+    if (!dragging) return;
+    const p = svgPoint(e); fromPoint(dragging, p.x, p.y); draw();
+  });
+  ['pointerup', 'pointercancel'].forEach(t => svg.addEventListener(t, () => { dragging = null; }));
+
+  function nudge(dx, dy, big) {
+    if (!selected || !edit) return;
+    const step = big ? 10 : 2;
+    const [x, y] = toPoint(selected, edit);
+    fromPoint(selected, x + dx * step * W / 1000, y + dy * step * H / 1000);
+    draw();
+  }
+  document.querySelectorAll('[data-move]').forEach(b => b.addEventListener('click', () => {
+    const [dx, dy] = b.dataset.move.split(',').map(Number); nudge(dx, dy, false);
+  }));
+
+  async function loadCorners() {
+    saved = await api('corners'); edit = { ...saved }; draw();
+  }
+  $('discard').addEventListener('click', () => { edit = { ...saved }; draw(); });
+
+  async function restartAndWait(call) {
+    const editor = $('editor');
+    try {
+      const r = await api(call);
+      editor.classList.add('busy');
+      const start = Date.now();
+      await sleep(4000);
+      while (true) {
+        $('busy-sec').textContent = Math.max(0, r.seconds - Math.round((Date.now() - start) / 1000));
+        try { await api('status'); break; } catch { await sleep(1500); }
+      }
+      await loadCorners();
+      toast('Corners applied');
+    } catch (e) { fail(e); }
+    editor.classList.remove('busy');
+  }
+  $('apply').addEventListener('click', () => {
+    const q = new URLSearchParams(); KEYS.forEach(k => q.set(k, edit[k]));
+    restartAndWait('corners-set?' + q);
+  });
+  $('undo').addEventListener('click', () => restartAndWait('corners-undo'));
+
+  // ---- Trapezoid and size: live. One request at a time, the latest value wins.
+  const tilt = $('tilt'), scale = $('scale');
+  const labels = () => { $('tilt-v').textContent = tilt.value; $('scale-v').textContent = scale.value + '%'; };
+  let sending = false, again = false;
+  async function sendShape() {
+    if (sending) { again = true; return; }
     sending = true;
     try {
-      const r = await fetch('/api/keystone-set?tilt=' + tilt.value + '&scale=' + scale.value);
-      if (!r.ok) throw new Error(await r.text());
-      status.textContent = 'Keystone ' + tilt.value + ', size ' + scale.value + '%';
-    } catch (e) { status.textContent = 'Error: ' + e.message; }
+      await api('keystone-set?tilt=' + tilt.value + '&scale=' + scale.value);
+      await sleep(150); // SurfaceFlinger writes the new corners back
+      await loadCorners();
+    } catch (e) { fail(e); }
     sending = false;
-    if (pending) { pending = false; sendKeystone(); }
+    if (again) { again = false; sendShape(); }
   }
-  let timer = null;
+  let throttle = null;
   [tilt, scale].forEach(el => {
     el.addEventListener('input', () => {
-      label();
-      if (!timer) timer = setTimeout(() => { timer = null; sendKeystone(); }, 300);
+      labels();
+      if (!throttle) throttle = setTimeout(() => { throttle = null; sendShape(); }, 250);
     });
-    el.addEventListener('change', () => { clearTimeout(timer); timer = null; sendKeystone(); });
+    el.addEventListener('change', () => { clearTimeout(throttle); throttle = null; sendShape(); });
   });
-  document.querySelectorAll('[data-nudge]').forEach(b => b.addEventListener('click', () => {
-    const el = document.getElementById(b.dataset.nudge);
-    el.value = +el.value + +b.dataset.by; label(); sendKeystone();
-  }));
-  fetch('/api/keystone-get').then(r => r.json()).then(s => {
-    tilt.value = s.tilt; scale.value = s.scale; label();
-  }).catch(() => {});
 
-  // Corners: free 4-corner keystone, applied by a screen restart.
-  const STEP = 5;
-  document.querySelectorAll('.corner').forEach(box => {
-    ['x', 'y'].forEach(ax => {
-      const id = box.dataset.c + ax;
-      const row = document.createElement('div');
-      row.className = 'axis';
-      row.innerHTML = '<span>' + (ax === 'x' ? '↔' : '↕') + '</span><button>−</button>' +
-        '<input id="c-' + id + '" type="number" min="0" max="450" inputmode="numeric"><button>+</button>';
-      const [minus, input, plus] = [row.children[1], row.children[2], row.children[3]];
-      minus.onclick = () => { input.value = Math.max(0, +input.value - STEP); };
-      plus.onclick = () => { input.value = Math.min(450, +input.value + STEP); };
-      box.appendChild(row);
-    });
-  });
-  const KEYS = ['ltx', 'lty', 'rtx', 'rty', 'lbx', 'lby', 'rbx', 'rby'];
-  function loadCorners() {
-    return fetch('/api/corners').then(r => r.json()).then(c =>
-      KEYS.forEach(k => { document.getElementById('c-' + k).value = c[k]; }));
-  }
-  async function waitBack(seconds) {
-    const start = Date.now();
-    await new Promise(r => setTimeout(r, 5000));
-    while (true) {
-      const left = Math.max(0, seconds - Math.round((Date.now() - start) / 1000));
-      status.textContent = 'Screen restarting… ' + left + ' s';
-      try { const r = await fetch('/api/status'); if (r.ok) break; } catch {}
-      await new Promise(r => setTimeout(r, 1500));
+  // ---- Keyboard (desktop)
+  document.addEventListener('keydown', e => {
+    if (e.target.matches('input[type=url]')) return;
+    const arrows = { ArrowUp: [0, -1], ArrowDown: [0, 1], ArrowLeft: [-1, 0], ArrowRight: [1, 0] };
+    if (arrows[e.key] && selected && !e.target.matches('input[type=range]')) {
+      e.preventDefault(); nudge(...arrows[e.key], e.shiftKey); return;
     }
-    await loadCorners();
-    status.textContent = 'Corners applied';
-  }
-  async function cornersCall(url) {
-    try {
-      const r = await fetch(url);
-      const t = await r.text();
-      if (!r.ok) throw new Error(t);
-      await waitBack(JSON.parse(t).seconds);
-    } catch (e) { status.textContent = 'Error: ' + e.message; }
-  }
-  document.getElementById('corners-apply').onclick = () => {
-    const q = new URLSearchParams();
-    KEYS.forEach(k => q.set(k, document.getElementById('c-' + k).value));
-    cornersCall('/api/corners-set?' + q);
-  };
-  document.getElementById('corners-undo').onclick = () => cornersCall('/api/corners-undo');
-  loadCorners().catch(() => {});
+    if (e.target.matches('input')) return;
+    if (e.key === ' ') { e.preventDefault(); act('play'); }
+    else if (e.key === '+' || e.key === '=') act('vol-up');
+    else if (e.key === '-') act('vol-down');
+    else if (e.key === 'm' || e.key === 'M') act('mute');
+    else if (e.key === 'Escape') { selected = null; draw(); }
+  });
+
+  // ---- Start
+  api('status').then(showVolume).catch(fail);
+  api('lamp').then(s => showLamp(s.lamp)).catch(fail);
+  api('keystone-get').then(s => { tilt.value = s.tilt; scale.value = s.scale; labels(); }).catch(fail);
+  loadCorners().catch(fail);
 </script>
 </body>
 </html>
