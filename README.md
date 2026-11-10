@@ -47,7 +47,8 @@ adb install -r app-platform.apk
 adb shell appops set local.projector.panel SYSTEM_ALERT_WINDOW allow
 ```
 
-Open "Panel" once from the launcher. On a phone it has Remote, Picture and System tabs; on a
+Open "Panel" once from the launcher. The UI is in Turkish. On a phone it has Kumanda,
+Görüntü and Sistem tabs; on a
 wider screen it is a two-column layout. It works as a D-pad remote, shows the current video and
 position, can seek, keeps corner presets (export/import), and shows device status plus a live
 screenshot. System also has brightness/colour, auto keystone/focus switches, a focus nudge, LED

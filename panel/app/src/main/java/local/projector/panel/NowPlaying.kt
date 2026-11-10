@@ -55,8 +55,8 @@ class NowPlaying(private val context: Context) {
 
     /** Seeks to an absolute position (ms) or by a relative number of seconds. */
     fun seek(toMs: Long?, bySec: Int?): String {
-        require(toMs != null || bySec != null) { "to or by missing" }
-        val c = controller() ?: throw IllegalStateException("nothing playing")
+        require(toMs != null || bySec != null) { "hedef eksik" }
+        val c = controller() ?: throw IllegalStateException("şu an oynatılan bir şey yok")
         val duration = c.metadata?.getLong(MediaMetadata.METADATA_KEY_DURATION) ?: 0L
         var target = toMs ?: (position(c.playbackState) + (bySec ?: 0) * 1000L)
         target = target.coerceAtLeast(0)

@@ -25,12 +25,12 @@ object Lamp {
 
     @Synchronized
     fun off(): String {
-        check(!busy) { "lamp is busy" }
+        check(!busy) { "lamba meşgul" }
         Props.set("sys.shutdown_backlight", "1")
         Props.set("sys.start_fan_fun", "0")
         // Never cut the lamp unless the fan guard is surely off.
         check(Props.get("sys.shutdown_backlight") == "1" && Props.get("sys.start_fan_fun") == "0") {
-            "fan guard still on, lamp not touched"
+            "fan koruması hâlâ açık, lambaya dokunulmadı"
         }
         BL_POWER.writeText(OFF)
         return "off"
@@ -38,7 +38,7 @@ object Lamp {
 
     @Synchronized
     fun on(): String {
-        check(!busy) { "lamp is busy" }
+        check(!busy) { "lamba meşgul" }
         BL_POWER.writeText(ON)
         busy = true
         thread(isDaemon = true) {

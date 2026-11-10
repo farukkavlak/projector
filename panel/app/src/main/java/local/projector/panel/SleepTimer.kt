@@ -39,7 +39,7 @@ class SleepTimer(private val context: Context) {
     /** Starts (or restarts) the timer: lamp off in [minutes]. */
     @Synchronized
     fun start(minutes: Int): String {
-        require(minutes in 1..MAX_MINUTES) { "minutes must be 1..$MAX_MINUTES" }
+        require(minutes in 1..MAX_MINUTES) { "dakika 1..$MAX_MINUTES arasında olmalı" }
         prefs.edit()
             .putLong("endAt", now() + minutes * 60_000L)
             .putInt("minutes", minutes)
@@ -51,7 +51,7 @@ class SleepTimer(private val context: Context) {
     /** Adds time to a running timer, or starts one. */
     @Synchronized
     fun add(minutes: Int): String {
-        require(minutes in 1..MAX_MINUTES) { "minutes must be 1..$MAX_MINUTES" }
+        require(minutes in 1..MAX_MINUTES) { "dakika 1..$MAX_MINUTES arasında olmalı" }
         val end = endAt()
         if (end == 0L) return start(minutes)
         val newEnd = minOf(end + minutes * 60_000L, now() + MAX_MINUTES * 60_000L)

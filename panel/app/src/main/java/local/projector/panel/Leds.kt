@@ -7,7 +7,7 @@ object Leds {
     private val NAMES = mapOf("power" to "pwr-r", "status" to "status-g", "blue" to "led3-b")
 
     fun set(name: String?, on: Boolean): String {
-        val node = NAMES[name] ?: throw IllegalArgumentException("unknown led: $name")
+        val node = NAMES[name] ?: throw IllegalArgumentException("bilinmeyen LED: $name")
         File("/sys/class/leds/$node/brightness").writeText(if (on) "1" else "0")
         return status()
     }

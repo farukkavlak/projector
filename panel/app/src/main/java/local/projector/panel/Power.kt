@@ -11,7 +11,7 @@ class Power(private val context: Context) {
         "restart" -> restart()
         "reboot" -> { power().reboot("Panel"); "ok" }
         "shutdown" -> { shutdown(); "ok" }
-        else -> throw IllegalArgumentException("unknown power action: $action")
+        else -> throw IllegalArgumentException("bilinmeyen güç işlemi: $action")
     }
 
     private fun restart(): String {

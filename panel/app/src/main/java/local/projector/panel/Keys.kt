@@ -17,7 +17,7 @@ object Keys {
     )
 
     fun press(name: String?): String {
-        val code = CODES[name] ?: throw IllegalArgumentException("unknown key: $name")
+        val code = CODES[name] ?: throw IllegalArgumentException("bilinmeyen tuş: $name")
         Instrumentation().sendKeyDownUpSync(code)
         return "ok"
     }

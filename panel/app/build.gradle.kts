@@ -11,8 +11,8 @@ android {
         applicationId = "local.projector.panel"
         minSdk = 30
         targetSdk = 30
-        versionCode = 10
-        versionName = "0.10"
+        versionCode = 11
+        versionName = "0.11"
     }
 
     compileOptions {

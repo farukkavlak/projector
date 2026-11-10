@@ -41,7 +41,7 @@ class Corners(private val context: Context) {
 
     @Synchronized
     fun undo(): String {
-        val saved = prefs.getString("undo", null) ?: throw IllegalStateException("nothing to undo")
+        val saved = prefs.getString("undo", null) ?: throw IllegalStateException("geri alınacak bir şey yok")
         val values = saved.split(",").map { it.toInt() }
         return apply(KEYS.zip(values.map { it.toString() }).toMap())
     }
@@ -75,7 +75,7 @@ class Corners(private val context: Context) {
     fun applyPreset(rawName: String?): String {
         val name = nameOf(rawName)
         val store = presetStore()
-        require(store.has(name)) { "no preset named $name" }
+        require(store.has(name)) { "$name adında hazır ayar yok" }
         val values = store.getJSONObject(name)
         return apply(KEYS.associateWith { k -> values.optInt(k, 0).toString() })
     }
@@ -92,9 +92,9 @@ class Corners(private val context: Context) {
     /** Import the JSON from an export; names are validated and merged into the store. */
     @Synchronized
     fun importPresets(raw: String?): String {
-        val text = raw ?: throw IllegalArgumentException("data missing")
+        val text = raw ?: throw IllegalArgumentException("veri eksik")
         val arr = JSONObject(text).optJSONArray("presets")
-            ?: throw IllegalArgumentException("presets missing")
+            ?: throw IllegalArgumentException("hazır ayarlar eksik")
         val store = presetStore()
         for (i in 0 until arr.length()) {
             val o = arr.getJSONObject(i)
@@ -102,7 +102,7 @@ class Corners(private val context: Context) {
             val entry = JSONObject()
             KEYS.forEach { key ->
                 val v = o.optInt(key, -1)
-                require(v in 0..MAX) { "$key must be 0..$MAX" }
+                require(v in 0..MAX) { "$key 0..$MAX arasında olmalı" }
                 entry.put(key, v)
             }
             store.put(name, entry)
@@ -130,14 +130,14 @@ class Corners(private val context: Context) {
 
     private fun valuesOf(params: Map<String, String>): Map<String, Int> =
         KEYS.associateWith { key ->
-            val v = params[key]?.toIntOrNull() ?: throw IllegalArgumentException("$key missing")
-            require(v in 0..MAX) { "$key must be 0..$MAX" }
+            val v = params[key]?.toIntOrNull() ?: throw IllegalArgumentException("$key eksik")
+            require(v in 0..MAX) { "$key 0..$MAX arasında olmalı" }
             v
         }
 
     private fun nameOf(raw: String?): String {
         val name = raw?.trim().orEmpty()
-        require(name.length in 1..24) { "name must be 1..24 characters" }
+        require(name.length in 1..24) { "isim 1..24 karakter olmalı" }
         return name
     }
 

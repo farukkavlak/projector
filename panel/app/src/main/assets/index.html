@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="en">
+<html lang="tr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#16142a">
 <meta name="color-scheme" content="dark">
-<title>Projector</title>
+<title>Projektör</title>
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/icon-192.png">
 <link rel="apple-touch-icon" href="/icon-192.png">
@@ -264,21 +264,21 @@
 </head>
 <body>
 <header class="top">
-  <div class="brand"><img src="/icon-192.png" alt=""><span>Projector</span></div>
-  <button class="lamp-pill" id="lamp" type="button"><span class="dot"></span><span class="what">Lamp</span></button>
+  <div class="brand"><img src="/icon-192.png" alt=""><span>Projektör</span></div>
+  <button class="lamp-pill" id="lamp" type="button"><span class="dot"></span><span class="what">Lamba</span></button>
 </header>
 
 <main>
-  <section class="panel active" data-panel="remote" aria-label="Remote">
+  <section class="panel active" data-panel="remote" aria-label="Kumanda">
     <div class="player" id="now" hidden>
       <div class="art"><img id="now-art" alt="" hidden></div>
       <div class="track">
-        <div class="track-top"><span id="now-state">Playing</span><span id="now-app">YouTube</span></div>
+        <div class="track-top"><span id="now-state">Oynuyor</span><span id="now-app">YouTube</span></div>
         <div class="track-title" id="now-title"></div>
         <div class="track-artist" id="now-artist"></div>
       </div>
       <div class="seek">
-        <input type="range" class="bar" id="now-seek" min="0" max="1" value="0" step="1" aria-label="Seek">
+        <input type="range" class="bar" id="now-seek" min="0" max="1" value="0" step="1" aria-label="Sarma">
         <div class="times"><span id="now-pos">0:00</span><span id="now-dur"></span></div>
       </div>
       <div class="seek-nav">
@@ -290,232 +290,232 @@
     </div>
 
     <div class="transport">
-      <button data-a="prev" type="button" aria-label="Previous">
+      <button data-a="prev" type="button" aria-label="Önceki">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2v14H6zM20 5v14l-10-7z"/></svg>
       </button>
-      <button data-a="play" class="play" type="button" aria-label="Play or pause">
+      <button data-a="play" class="play" type="button" aria-label="Oynat veya duraklat">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l12-7z"/></svg>
       </button>
-      <button data-a="next" type="button" aria-label="Next">
+      <button data-a="next" type="button" aria-label="Sonraki">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 5h2v14h-2zM4 5v14l10-7z"/></svg>
       </button>
     </div>
 
     <div class="volume">
-      <button data-a="mute" type="button" aria-label="Mute">
+      <button data-a="mute" type="button" aria-label="Sessiz">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zm12.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/></svg>
       </button>
-      <input type="range" class="bar" id="vol" min="0" max="20" value="0" step="1" aria-label="Volume">
-      <span class="vol-text" id="vol-text">Volume</span>
+      <input type="range" class="bar" id="vol" min="0" max="20" value="0" step="1" aria-label="Ses">
+      <span class="vol-text" id="vol-text">Ses</span>
     </div>
 
     <section class="block">
-      <h2>Navigate</h2>
+      <h2>Gezinme</h2>
       <div class="navigate">
-        <div class="dpad" aria-label="Direction pad">
-          <button class="up" data-key="up" type="button" aria-label="Up">↑</button>
-          <button class="left" data-key="left" type="button" aria-label="Left">←</button>
+        <div class="dpad" aria-label="Yön tuşları">
+          <button class="up" data-key="up" type="button" aria-label="Yukarı">↑</button>
+          <button class="left" data-key="left" type="button" aria-label="Sol">←</button>
           <button class="ok" data-key="ok" type="button" aria-label="OK">OK</button>
-          <button class="right" data-key="right" type="button" aria-label="Right">→</button>
-          <button class="down" data-key="down" type="button" aria-label="Down">↓</button>
+          <button class="right" data-key="right" type="button" aria-label="Sağ">→</button>
+          <button class="down" data-key="down" type="button" aria-label="Aşağı">↓</button>
         </div>
         <div class="navkeys">
-          <button data-key="back" type="button">Back</button>
-          <button data-key="home" type="button">Home</button>
-          <button data-key="menu" type="button">Menu</button>
+          <button data-key="back" type="button">Geri</button>
+          <button data-key="home" type="button">Ana ekran</button>
+          <button data-key="menu" type="button">Menü</button>
         </div>
       </div>
     </section>
 
     <section class="block">
-      <h2>Sleep timer</h2>
+      <h2>Uyku zamanlayıcı</h2>
       <div class="sleep" id="sleep">
         <div class="sleep-off">
           <div class="chips">
-            <button data-start="15" type="button">15 min</button>
-            <button data-start="30" type="button">30 min</button>
-            <button data-start="60" type="button">1 h</button>
-            <button data-start="120" type="button">2 h</button>
+            <button data-start="15" type="button">15 dk</button>
+            <button data-start="30" type="button">30 dk</button>
+            <button data-start="60" type="button">1 sa</button>
+            <button data-start="120" type="button">2 sa</button>
           </div>
         </div>
         <div class="sleep-on">
           <div class="countdown">
             <b id="sleep-left">0:00</b>
-            <span id="sleep-end">Lamp off at --:--</span>
+            <span id="sleep-end">Kapanış --:--</span>
           </div>
           <div class="chips">
-            <button data-add="15" type="button">+15 min</button>
-            <button data-add="60" type="button">+1 h</button>
-            <button id="sleep-restart" type="button">Restart</button>
-            <button id="sleep-cancel" type="button">Cancel</button>
+            <button data-add="15" type="button">+15 dk</button>
+            <button data-add="60" type="button">+1 sa</button>
+            <button id="sleep-restart" type="button">Yeniden</button>
+            <button id="sleep-cancel" type="button">İptal</button>
           </div>
         </div>
       </div>
     </section>
 
     <section class="block">
-      <h2>Open a link</h2>
+      <h2>Bağlantı aç</h2>
       <form class="link" id="link">
-        <input id="url" type="url" placeholder="Paste a YouTube link" autocomplete="off" required>
-        <button type="submit">Play</button>
+        <input id="url" type="url" placeholder="YouTube linki yapıştır" autocomplete="off" required>
+        <button type="submit">Oynat</button>
       </form>
-      <p class="keys"><kbd>Space</kbd> play/pause, <kbd>+</kbd> <kbd>−</kbd> volume, <kbd>M</kbd> mute. Arrows move the selected corner, <kbd>Shift</kbd> for bigger steps.</p>
+      <p class="keys"><kbd>Boşluk</kbd> oynat/duraklat, <kbd>+</kbd> <kbd>−</kbd> ses, <kbd>M</kbd> sessiz. Oklar seçili köşeyi taşır, <kbd>Shift</kbd> daha büyük adım.</p>
     </section>
   </section>
 
-  <section class="panel" data-panel="picture" aria-label="Picture">
-    <h2>Picture shape</h2>
+  <section class="panel" data-panel="picture" aria-label="Görüntü">
+    <h2>Görüntü şekli</h2>
     <div class="editor" id="editor">
-      <svg id="svg" viewBox="-50 -50 1380 820" role="img" aria-label="Projected picture shape">
+      <svg id="svg" viewBox="-50 -50 1380 820" role="img" aria-label="Yansıtılan görüntü şekli">
         <rect class="frame" x="0" y="0" width="1280" height="720" rx="6"/>
         <polygon class="shape" id="shape" points=""/>
         <g id="handles"></g>
       </svg>
-      <div class="busy-cover"><div><b id="busy-sec">25</b>Screen restarting to apply the corners</div></div>
+      <div class="busy-cover"><div><b id="busy-sec">25</b>Köşeler uygulanırken ekran yeniden başlıyor</div></div>
     </div>
 
     <div class="corner-bar">
-      <div class="corner-info" id="corner-info">Drag a corner, or tap one and use the arrows.</div>
-      <div class="pad" aria-label="Move selected corner">
-        <button class="up" data-move="0,-1" type="button" aria-label="Move up">↑</button>
-        <button class="left" data-move="-1,0" type="button" aria-label="Move left">←</button>
-        <button class="down" data-move="0,1" type="button" aria-label="Move down">↓</button>
-        <button class="right" data-move="1,0" type="button" aria-label="Move right">→</button>
+      <div class="corner-info" id="corner-info">Bir köşeyi sürükle veya seçip okları kullan.</div>
+      <div class="pad" aria-label="Seçili köşeyi taşı">
+        <button class="up" data-move="0,-1" type="button" aria-label="Yukarı taşı">↑</button>
+        <button class="left" data-move="-1,0" type="button" aria-label="Sola taşı">←</button>
+        <button class="down" data-move="0,1" type="button" aria-label="Aşağı taşı">↓</button>
+        <button class="right" data-move="1,0" type="button" aria-label="Sağa taşı">→</button>
       </div>
     </div>
 
     <div class="apply-row">
-      <button class="apply" id="apply" type="button" disabled>Apply</button>
-      <button id="discard" type="button" disabled>Discard</button>
-      <button id="undo" type="button">Undo</button>
+      <button class="apply" id="apply" type="button" disabled>Uygula</button>
+      <button id="discard" type="button" disabled>Vazgeç</button>
+      <button id="undo" type="button">Geri al</button>
     </div>
-    <p class="note">Applies live. Falls back to a 25 s restart if needed.</p>
+    <p class="note">Canlı uygulanır. Gerekirse 25 sn'lik yeniden başlatmaya düşer.</p>
 
     <div class="presets">
-      <h2>Presets</h2>
+      <h2>Hazır ayarlar</h2>
       <div class="preset-save">
-        <input id="preset-name" maxlength="24" placeholder="Name this shape" autocomplete="off">
-        <button id="preset-save" type="button">Save</button>
+        <input id="preset-name" maxlength="24" placeholder="Bu şekle isim ver" autocomplete="off">
+        <button id="preset-save" type="button">Kaydet</button>
       </div>
       <div class="preset-list" id="preset-list"></div>
       <div class="preset-tools">
-        <button id="preset-export" type="button">Export</button>
-        <button id="preset-import" type="button">Import</button>
+        <button id="preset-export" type="button">Dışa aktar</button>
+        <button id="preset-import" type="button">İçe aktar</button>
         <input id="preset-file" type="file" accept="application/json,.json" hidden>
       </div>
-      <button class="factory" id="factory" type="button">Reset to factory corners</button>
+      <button class="factory" id="factory" type="button">Fabrika köşelerine dön</button>
     </div>
 
-    <p class="note warn" id="shape-note" hidden>The projector or a preset changed the shape. The sliders show the last manual setting.</p>
+    <p class="note warn" id="shape-note" hidden>Projektör veya bir hazır ayar şekli değiştirdi. Slider'lar son manuel ayarı gösterir.</p>
     <div class="slider">
-      <label for="tilt">Trapezoid <output id="tilt-v"></output></label>
+      <label for="tilt">Trapez <output id="tilt-v"></output></label>
       <input id="tilt" type="range" min="-44" max="44" step="1">
-      <div class="ends"><span>Bottom narrower</span><span>Top narrower</span></div>
+      <div class="ends"><span>Alt dar</span><span>Üst dar</span></div>
     </div>
     <div class="slider">
-      <label for="scale">Size <output id="scale-v"></output></label>
+      <label for="scale">Boyut <output id="scale-v"></output></label>
       <input id="scale" type="range" min="50" max="100" step="1">
-      <div class="ends"><span>Smaller</span><span>Full</span></div>
+      <div class="ends"><span>Küçük</span><span>Tam</span></div>
     </div>
-    <p class="note">Trapezoid and size change the picture right away. They replace any corner edits.</p>
+    <p class="note">Trapez ve boyut görüntüyü hemen değiştirir; köşe düzenlemelerinin yerine geçer.</p>
   </section>
 
-  <section class="panel" data-panel="system" aria-label="System">
-    <h2>Status</h2>
+  <section class="panel" data-panel="system" aria-label="Sistem">
+    <h2>Durum</h2>
     <div class="facts">
-      <div class="fact"><span>CPU</span><b id="st-cpu">–</b></div>
+      <div class="fact"><span>İşlemci</span><b id="st-cpu">–</b></div>
       <div class="fact"><span>GPU</span><b id="st-gpu">–</b></div>
-      <div class="fact"><span>Memory</span><b id="st-ram">–</b></div>
-      <div class="fact"><span>Storage</span><b id="st-storage">–</b></div>
-      <div class="fact"><span>Uptime</span><b id="st-uptime">–</b></div>
-      <div class="fact"><span>Tilt</span><b id="st-tilt">–</b></div>
+      <div class="fact"><span>Bellek</span><b id="st-ram">–</b></div>
+      <div class="fact"><span>Depolama</span><b id="st-storage">–</b></div>
+      <div class="fact"><span>Çalışma</span><b id="st-uptime">–</b></div>
+      <div class="fact"><span>Eğim</span><b id="st-tilt">–</b></div>
       <div class="fact wide"><span>Wi-Fi</span><b id="st-wifi">–</b></div>
-      <div class="fact"><span>Lamp</span><b id="st-lamp">–</b></div>
-      <div class="fact"><span>Fan guard</span><b id="st-fan">–</b></div>
-      <div class="fact wide"><span>In front</span><b id="st-app">–</b></div>
-      <div class="fact wide"><span>Version</span><b id="st-version">–</b></div>
+      <div class="fact"><span>Lamba</span><b id="st-lamp">–</b></div>
+      <div class="fact"><span>Fan koruması</span><b id="st-fan">–</b></div>
+      <div class="fact wide"><span>Öndeki</span><b id="st-app">–</b></div>
+      <div class="fact wide"><span>Sürüm</span><b id="st-version">–</b></div>
     </div>
 
     <section class="block">
-      <h2>Preview</h2>
-      <div class="preview"><img id="preview-img" alt=""><span id="preview-hint">Tap Refresh</span></div>
-      <div class="more"><button id="preview-refresh" type="button">Refresh</button></div>
-      <p class="note">Screenshot from the projector. The keystone warp is not included.</p>
+      <h2>Önizleme</h2>
+      <div class="preview"><img id="preview-img" alt=""><span id="preview-hint">Yenile'ye bas</span></div>
+      <div class="more"><button id="preview-refresh" type="button">Yenile</button></div>
+      <p class="note">Projektörden ekran görüntüsü. Keystone düzeltmesi dahil değil.</p>
     </section>
 
     <section class="block">
-      <h2>Projector</h2>
-      <div class="row"><span>Auto keystone</span><button class="switch" id="auto-keystone" type="button">–</button></div>
-      <div class="row"><span>Auto focus</span><button class="switch" id="auto-focus" type="button">–</button></div>
-      <div class="row"><span>Focus</span>
+      <h2>Projektör</h2>
+      <div class="row"><span>Oto keystone</span><button class="switch" id="auto-keystone" type="button">–</button></div>
+      <div class="row"><span>Oto odak</span><button class="switch" id="auto-focus" type="button">–</button></div>
+      <div class="row"><span>Odak</span>
         <span class="step">
-          <button id="focus-up" type="button" aria-label="Focus up">−</button>
+          <button id="focus-up" type="button" aria-label="Odak −">−</button>
           <b id="focus-pos">–</b>
-          <button id="focus-down" type="button" aria-label="Focus down">+</button>
+          <button id="focus-down" type="button" aria-label="Odak +">+</button>
         </span>
       </div>
-      <div class="row"><span>LEDs</span>
+      <div class="row"><span>LED'ler</span>
         <span class="leds">
-          <button id="led-power" type="button">Pwr</button>
-          <button id="led-status" type="button">Stat</button>
-          <button id="led-blue" type="button">Blue</button>
+          <button id="led-power" type="button">Güç</button>
+          <button id="led-status" type="button">Durum</button>
+          <button id="led-blue" type="button">Mavi</button>
         </span>
       </div>
-      <div class="row"><span>Brightness</span><output id="brightness-v">–</output></div>
-      <input type="range" class="bar" id="brightness" min="0" max="100" step="1" aria-label="Brightness">
-      <div class="row"><span>Colour</span>
+      <div class="row"><span>Parlaklık</span><output id="brightness-v">–</output></div>
+      <input type="range" class="bar" id="brightness" min="0" max="100" step="1" aria-label="Parlaklık">
+      <div class="row"><span>Renk</span>
         <span class="leds">
-          <button data-color="0" type="button">Warm</button>
-          <button data-color="1" type="button">Standard</button>
-          <button data-color="2" type="button">Cool</button>
+          <button data-color="0" type="button">Sıcak</button>
+          <button data-color="1" type="button">Standart</button>
+          <button data-color="2" type="button">Soğuk</button>
         </span>
       </div>
-      <p class="note">Auto keystone off may let manual corners stick; test it on the wall.</p>
+      <p class="note">Oto keystone kapalıyken manuel köşeler tutabilir; duvarda test et.</p>
     </section>
 
     <section class="block">
-      <h2>Device</h2>
+      <h2>Cihaz</h2>
       <div class="more">
-        <button data-a="settings" type="button">Android settings</button>
-        <button data-a="keystone" type="button">Projector menu</button>
+        <button data-a="settings" type="button">Android ayarları</button>
+        <button data-a="keystone" type="button">Projektör menüsü</button>
       </div>
     </section>
 
     <section class="block">
-      <h2>Power</h2>
+      <h2>Güç</h2>
       <div class="more">
-        <button id="restart-panel" type="button">Restart Panel</button>
-        <button id="reboot" type="button">Reboot</button>
-        <button id="shutdown" type="button">Shut down</button>
+        <button id="restart-panel" type="button">Panel'i yeniden başlat</button>
+        <button id="reboot" type="button">Yeniden başlat</button>
+        <button id="shutdown" type="button">Kapat</button>
       </div>
-      <p class="note">Shut down needs the physical power button to come back.</p>
+      <p class="note">Kapatınca geri açmak için cihazın güç düğmesi gerekir.</p>
     </section>
 
     <section class="block">
-      <h2>Phone app</h2>
-      <p class="note" id="pwa-state">Install and sharing need HTTPS.</p>
+      <h2>Telefon uygulaması</h2>
+      <p class="note" id="pwa-state">Kurulum ve paylaşım için HTTPS gerekir.</p>
       <div class="more">
-        <a class="btn" href="/ca.crt" download="projector-ca.crt">Certificate</a>
-        <a class="btn" id="https-link" href="#">Open HTTPS</a>
-        <button id="install" type="button" hidden>Install app</button>
+        <a class="btn" href="/ca.crt" download="projector-ca.crt">Sertifika</a>
+        <a class="btn" id="https-link" href="#">HTTPS aç</a>
+        <button id="install" type="button" hidden>Uygulamayı kur</button>
       </div>
-      <p class="note">Install the certificate as a CA, then open HTTPS and use Chrome's Install app. Sharing a YouTube link to the installed app opens it in SmartTube.</p>
+      <p class="note">Sertifikayı CA olarak kur, sonra HTTPS'i aç ve Chrome'dan uygulamayı kur. Kurulu uygulamaya YouTube linki paylaşınca SmartTube'da açılır.</p>
     </section>
   </section>
 </main>
 
-<nav class="tabs" aria-label="Sections">
+<nav class="tabs" aria-label="Bölümler">
   <button data-tab="remote" class="active" type="button">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm-2 6l6 4-6 4V8z"/></svg>
-    Remote
+    Kumanda
   </button>
   <button data-tab="picture" type="button">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H4V4zm2 2v8h12V6H6zM2 18h20v2H2v-2z"/></svg>
-    Picture
+    Görüntü
   </button>
   <button data-tab="system" type="button">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h4v7H4v-7zm6-9h4v16h-4V4zm6 5h4v11h-4V9z"/></svg>
-    System
+    Sistem
   </button>
 </nav>
 
@@ -538,7 +538,7 @@
     el.textContent = msg; el.className = 'show' + (err ? ' err' : '');
     clearTimeout(toastTimer); toastTimer = setTimeout(() => el.className = '', 2600);
   }
-  const fail = e => toast(e.message === 'Failed to fetch' ? 'Projector not reachable' : e.message, true);
+  const fail = e => toast(e.message === 'Failed to fetch' ? 'Projektöre ulaşılamıyor' : e.message, true);
 
   // ---- Playback and volume
   let volDragging = false;
@@ -549,7 +549,7 @@
     if (!volDragging) el.value = String(s.volume);
     el.style.setProperty('--p', (100 * s.volume / Math.max(1, s.max)) + '%');
     el.classList.toggle('muted', s.muted);
-    $('vol-text').textContent = s.muted ? 'Muted' : s.volume + ' / ' + s.max;
+    $('vol-text').textContent = s.muted ? 'Sessiz' : s.volume + ' / ' + s.max;
   }
   async function act(a) {
     try {
@@ -580,7 +580,7 @@
     e.preventDefault();
     try {
       await api('open?url=' + encodeURIComponent($('url').value.trim()));
-      toast('Opening in SmartTube'); $('url').value = '';
+      toast('SmartTube\'da açılıyor'); $('url').value = '';
     } catch (err) { fail(err); }
   });
 
@@ -602,9 +602,9 @@
     const box = $('now');
     if (!now || !now.available) { box.hidden = true; return; }
     box.hidden = false;
-    $('now-state').textContent = now.buffering ? 'Buffering…' : now.playing ? 'Playing' : 'Paused';
+    $('now-state').textContent = now.buffering ? 'Yükleniyor…' : now.playing ? 'Oynuyor' : 'Duraklatıldı';
     $('now-app').textContent = appName(now.package);
-    $('now-title').textContent = now.title || 'Unknown title';
+    $('now-title').textContent = now.title || 'Başlık yok';
     $('now-artist').textContent = now.artist || '';
     const art = $('now-art');
     if (now.art) { art.src = now.art; art.hidden = false; }
@@ -666,7 +666,7 @@
     b.classList.toggle('on', state === 'on');
     b.classList.toggle('warming', state === 'warming');
     b.querySelector('.what').textContent =
-      state === 'on' ? 'Lamp on' : state === 'off' ? 'Lamp off' : state === 'warming' ? 'Warming up…' : 'Lamp';
+      state === 'on' ? 'Lamba açık' : state === 'off' ? 'Lamba kapalı' : state === 'warming' ? 'Isınıyor…' : 'Lamba';
   }
   $('lamp').addEventListener('click', async () => {
     const b = $('lamp');
@@ -697,8 +697,8 @@
     $('sleep-left').textContent = (h ? h + ':' + pad2(m) : m) + ':' + pad2(s);
     const end = new Date(sleepEnd);
     $('sleep-end').textContent = left > 0
-      ? 'Lamp off at ' + pad2(end.getHours()) + ':' + pad2(end.getMinutes())
-      : 'Turning the lamp off…';
+      ? 'Kapanış ' + pad2(end.getHours()) + ':' + pad2(end.getMinutes())
+      : 'Lamba kapatılıyor…';
     if (left === 0 && !refreshing) {
       refreshing = true; // the projector checks every 5 s; look again after that
       setTimeout(() => {
@@ -717,18 +717,18 @@
     try { showTimer(await api(path)); if (msg) toast(msg); } catch (e) { fail(e); }
   }
   document.querySelectorAll('[data-start]').forEach(b => b.addEventListener('click', () =>
-    timerCall('timer-start?minutes=' + b.dataset.start, 'Lamp turns off in ' + b.textContent)));
+    timerCall('timer-start?minutes=' + b.dataset.start, 'Lamba ' + b.textContent + ' sonra kapanacak')));
   document.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', () =>
-    timerCall('timer-add?minutes=' + b.dataset.add, b.textContent + ' added')));
-  $('sleep-restart').addEventListener('click', () => timerCall('timer-restart', 'Timer restarted'));
-  $('sleep-cancel').addEventListener('click', () => timerCall('timer-cancel', 'Timer cancelled'));
+    timerCall('timer-add?minutes=' + b.dataset.add, b.textContent + ' eklendi')));
+  $('sleep-restart').addEventListener('click', () => timerCall('timer-restart', 'Zamanlayıcı yeniden başladı'));
+  $('sleep-cancel').addEventListener('click', () => timerCall('timer-cancel', 'Zamanlayıcı iptal edildi'));
   setInterval(() => { if (sleepEnd) renderTimer(); }, 1000);
   setInterval(() => { if (!document.hidden) loadTimer(); }, 30000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) loadTimer(); });
 
   // ---- Picture shape. Corner values are insets in 1/1000 of the screen (0 = edge).
   const W = 1280, H = 720, MAX = 450, KEYS = ['ltx', 'lty', 'rtx', 'rty', 'lbx', 'lby', 'rbx', 'rby'];
-  const NAMES = { lt: 'Top left', rt: 'Top right', rb: 'Bottom right', lb: 'Bottom left' };
+  const NAMES = { lt: 'Sol üst', rt: 'Sağ üst', rb: 'Sağ alt', lb: 'Sol alt' };
   const ORDER = ['lt', 'rt', 'rb', 'lb'];
   let saved = null, edit = null, selected = null;
 
@@ -762,9 +762,9 @@
       g.append(hit, h);
     });
     $('corner-info').innerHTML = selected
-      ? '<strong>' + NAMES[selected] + '</strong><br>' + edit[selected + 'x'] + ' in from the side, ' +
-        edit[selected + 'y'] + ' from the ' + (selected[1] === 't' ? 'top' : 'bottom')
-      : 'Drag a corner, or tap one and use the arrows.';
+      ? '<strong>' + NAMES[selected] + '</strong><br>' + edit[selected + 'x'] + ' yandan, ' +
+        edit[selected + 'y'] + ' ' + (selected[1] === 't' ? 'üstten' : 'alttan')
+      : 'Bir köşeyi sürükle veya seçip okları kullan.';
     $('apply').disabled = !dirty();
     $('discard').disabled = !dirty();
     document.querySelectorAll('[data-move]').forEach(b => b.disabled = !selected);
@@ -811,7 +811,7 @@
       if (r.live) {
         await sleep(400);
         await loadCorners();
-        toast('Corners applied');
+        toast('Köşeler uygulandı');
         return;
       }
       editor.classList.add('busy');
@@ -822,7 +822,7 @@
         try { await api('status'); break; } catch { await sleep(1500); }
       }
       await loadCorners();
-      toast('Corners applied');
+      toast('Köşeler uygulandı');
     } catch (e) { fail(e); }
     finally { editor.classList.remove('busy'); }
   }
@@ -840,7 +840,7 @@
     if (!presets.length) {
       const hint = document.createElement('span');
       hint.className = 'hint';
-      hint.textContent = 'No presets yet. Save the current shape.';
+      hint.textContent = 'Henüz hazır ayar yok. Mevcut şekli kaydet.';
       box.append(hint);
       return;
     }
@@ -849,17 +849,17 @@
       wrap.className = 'preset';
       const apply = document.createElement('button');
       apply.textContent = p.name;
-      apply.title = 'Apply ' + p.name;
+      apply.title = 'Uygula: ' + p.name;
       apply.addEventListener('click', () => applyPreset(p.name));
       const rename = document.createElement('button');
       rename.className = 'ren';
       rename.textContent = '✎';
-      rename.title = 'Rename ' + p.name;
+      rename.title = 'Yeniden adlandır: ' + p.name;
       rename.addEventListener('click', () => renamePreset(p.name));
       const del = document.createElement('button');
       del.className = 'del';
       del.textContent = '×';
-      del.title = 'Delete ' + p.name;
+      del.title = 'Sil: ' + p.name;
       del.addEventListener('click', () => deletePreset(p.name));
       wrap.append(apply, rename, del);
       box.append(wrap);
@@ -873,18 +873,18 @@
     try {
       await api('preset-apply?name=' + encodeURIComponent(name));
       await loadCorners();
-      toast('Applied ' + name);
+      toast(name + ' uygulandı');
     } catch (e) { fail(e); }
   }
   async function deletePreset(name) {
-    if (!confirm('Delete preset "' + name + '"?')) return;
+    if (!confirm('"' + name + '" hazır ayarı silinsin mi?')) return;
     try {
       presets = (await api('preset-delete?name=' + encodeURIComponent(name))).presets || [];
       renderPresets();
     } catch (e) { fail(e); }
   }
   async function renamePreset(name) {
-    const next = prompt('New name', name);
+    const next = prompt('Yeni isim', name);
     if (!next || !next.trim() || next.trim() === name) return;
     try {
       presets = (await api('preset-rename?from=' + encodeURIComponent(name) +
@@ -911,13 +911,13 @@
       const text = await file.text();
       presets = (await api('preset-import?data=' + encodeURIComponent(text))).presets || [];
       renderPresets();
-      toast('Presets imported');
+      toast('Hazır ayarlar içe aktarıldı');
     } catch (e) { fail(e); }
     $('preset-file').value = '';
   });
   $('preset-save').addEventListener('click', async () => {
     const name = $('preset-name').value.trim();
-    if (!name) { toast('Give the preset a name', true); return; }
+    if (!name) { toast('Hazır ayara bir isim ver', true); return; }
     if (!edit) return;
     const q = new URLSearchParams({ name });
     KEYS.forEach(k => q.set(k, edit[k]));
@@ -925,15 +925,15 @@
       presets = (await api('preset-save?' + q)).presets || [];
       $('preset-name').value = '';
       renderPresets();
-      toast('Saved ' + name);
+      toast(name + ' kaydedildi');
     } catch (e) { fail(e); }
   });
   $('factory').addEventListener('click', async () => {
-    if (!confirm('Reset the corners to the factory values?')) return;
+    if (!confirm('Köşeler fabrika değerlerine dönsün mü?')) return;
     try {
       await api('corners-factory');
       await loadCorners();
-      toast('Factory corners applied');
+      toast('Fabrika köşeleri uygulandı');
     } catch (e) { fail(e); }
   });
 
@@ -997,7 +997,7 @@
   };
   const fmtUptime = s => {
     const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
-    return d ? d + 'd ' + h + 'h' : h ? h + 'h ' + m + 'm' : m + 'm';
+    return d ? d + 'g ' + h + 'sa' : h ? h + 'sa ' + m + 'dk' : m + 'dk';
   };
   const appLabel = p => !p ? '–' : p.includes('smarttube') ? 'SmartTube' : p === 'local.projector.panel' ? 'Panel' : p.includes('flauncher') ? 'FLauncher' : p.split('.').pop();
   async function loadSystem() {
@@ -1008,12 +1008,12 @@
       $('st-cpu').classList.toggle('hot', s.cpu >= 75);
       $('st-gpu').classList.toggle('hot', s.gpu >= 75);
       $('st-ram').textContent = s.ramTotal ? Math.round(s.ramUsed / 1048576) + ' / ' + Math.round(s.ramTotal / 1048576) + ' MB' : '–';
-      $('st-storage').textContent = s.storageTotal ? fmtBytes(s.storageFree) + ' free' : '–';
+      $('st-storage').textContent = s.storageTotal ? fmtBytes(s.storageFree) + ' boş' : '–';
       $('st-uptime').textContent = s.uptime ? fmtUptime(s.uptime) : '–';
       $('st-tilt').textContent = s.angle == null ? '–' : s.angle + '°';
       $('st-wifi').textContent = s.wifiRssi ? s.wifiRssi + ' dBm' + (s.ip ? ' · ' + s.ip : '') : (s.ip || '–');
-      $('st-lamp').textContent = s.lamp === 'on' ? 'On' : s.lamp === 'off' ? 'Off' : '–';
-      $('st-fan').textContent = s.lamp === 'on' ? (s.fanGuard ? 'On' : 'Bypassed') : 'Off';
+      $('st-lamp').textContent = s.lamp === 'on' ? 'Açık' : s.lamp === 'off' ? 'Kapalı' : '–';
+      $('st-fan').textContent = s.lamp === 'on' ? (s.fanGuard ? 'Açık' : 'Atlandı') : 'Kapalı';
       $('st-app').textContent = appLabel(s.app);
       $('st-version').textContent = s.version || '–';
       setSwitch('auto-keystone', s.autoKeystone);
@@ -1042,16 +1042,16 @@
   // ---- PWA: HTTPS on 8443, certificate download for the phone.
   $('https-link').href = 'https://' + location.hostname + ':8443/';
   if (window.isSecureContext) {
-    $('pwa-state').textContent = 'HTTPS is ready. Use Chrome\'s Install app.';
+    $('pwa-state').textContent = 'HTTPS hazır. Chrome menüsünden Uygulamayı kur\'u seç.';
     $('https-link').hidden = true;
   } else {
-    $('pwa-state').textContent = 'Install and sharing need HTTPS. Trust the certificate first.';
+    $('pwa-state').textContent = 'Kurulum ve paylaşım için HTTPS gerekir. Önce sertifikaya güven.';
   }
 
   function setSwitch(id, on) {
     const b = $(id);
     b.classList.toggle('on', !!on);
-    b.textContent = on ? 'On' : 'Off';
+    b.textContent = on ? 'Açık' : 'Kapalı';
   }
   function setLed(id, on) { $(id).classList.toggle('on', !!on); }
   async function toggleSwitch(name, id) {
@@ -1109,13 +1109,13 @@
     if (!confirm(question)) return;
     try {
       await api('power?action=' + action);
-      toast(action === 'restart' ? 'Restarting Panel…' : 'Shutting down…');
+      toast(action === 'restart' ? 'Panel yeniden başlatılıyor…' : 'Kapatılıyor…');
     } catch (e) { fail(e); }
   }
-  $('restart-panel').addEventListener('click', () => power('restart', 'Restart the Panel service?'));
-  $('reboot').addEventListener('click', () => power('reboot', 'Reboot the projector?'));
+  $('restart-panel').addEventListener('click', () => power('restart', 'Panel servisi yeniden başlatılsın mı?'));
+  $('reboot').addEventListener('click', () => power('reboot', 'Projektör yeniden başlatılsın mı?'));
   $('shutdown').addEventListener('click', () =>
-    power('shutdown', 'Shut down? You must press the power button to turn it back on.'));
+    power('shutdown', 'Kapatılsın mı? Geri açmak için güç düğmesine basman gerekir.'));
 
   function refreshPreview() {
     const img = $('preview-img');
@@ -1166,7 +1166,7 @@
     history.replaceState({}, '', '/');
     if (link) {
       api('open?url=' + encodeURIComponent(link[0]))
-        .then(() => toast('Opening in SmartTube'))
+        .then(() => toast('SmartTube\'da açılıyor'))
         .catch(fail);
     }
   }

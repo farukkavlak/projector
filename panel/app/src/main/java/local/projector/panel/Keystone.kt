@@ -43,8 +43,8 @@ class Keystone(private val context: Context) {
 
     @Synchronized
     fun apply(tilt: Int, scale: Int): String {
-        require(tilt in -MAX_TILT..MAX_TILT) { "tilt must be -$MAX_TILT..$MAX_TILT" }
-        require(scale in MIN_SCALE..100) { "scale must be $MIN_SCALE..100" }
+        require(tilt in -MAX_TILT..MAX_TILT) { "tilt -$MAX_TILT..$MAX_TILT arasında olmalı" }
+        require(scale in MIN_SCALE..100) { "ölçek $MIN_SCALE..100 arasında olmalı" }
         val inset = (100 - scale) * 5 // 100% -> 0, 50% -> 250
 
         Props.set("persist.sys.tpryauto", "0")
