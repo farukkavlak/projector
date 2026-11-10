@@ -48,6 +48,17 @@ Use `scripts/lamp.sh`. Device stays online while the lamp is off.
 - Sleep (`KEYCODE_SLEEP`) drops Wi-Fi. No wake over network.
 - Power key opens a 15 s shutdown countdown. Menu key opens OEM settings.
 
+## Panel app
+
+App in `panel/`, runs as a normal (non-system) app.
+
+- Works without extra rights: media keys (`AudioManager.dispatchMediaKeyEvent`), volume.
+- Opening another app from a service is blocked on Android 11 ("Background activity start").
+  Fix: declare `SYSTEM_ALERT_WINDOW` in the manifest and run
+  `appops set local.projector.panel SYSTEM_ALERT_WINDOW allow`. Both are needed.
+- SmartTube opens YouTube links with `ACTION_VIEW` + package `org.smarttube.stable`.
+- Lamp needs shell rights. Not in the app yet.
+
 ## Performance
 
 | Change | Result |

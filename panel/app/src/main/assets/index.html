@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Projector</title>
+<style>
+  :root { --bg: #111; --fg: #eee; --btn: #2a2a2a; --accent: #3a7bd5; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 16px; background: var(--bg); color: var(--fg);
+         font: 16px system-ui, sans-serif; max-width: 480px; margin-inline: auto; }
+  h1 { font-size: 20px; margin: 0 0 16px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+  button { padding: 18px 0; border: 0; border-radius: 10px; background: var(--btn);
+           color: var(--fg); font-size: 18px; }
+  button:active { background: var(--accent); }
+  .wide { grid-column: span 3; }
+  input { width: 100%; padding: 14px; border-radius: 10px; border: 1px solid #333;
+          background: #1b1b1b; color: var(--fg); font-size: 16px; margin-bottom: 8px; }
+  #status { color: #888; font-size: 14px; min-height: 1.2em; }
+</style>
+</head>
+<body>
+<h1>Projector</h1>
+
+<div class="grid">
+  <button data-a="prev">⏮</button>
+  <button data-a="play">⏯</button>
+  <button data-a="next">⏭</button>
+  <button data-a="vol-down">🔉</button>
+  <button data-a="mute">🔇</button>
+  <button data-a="vol-up">🔊</button>
+</div>
+
+<input id="url" type="url" placeholder="YouTube link">
+<div class="grid">
+  <button class="wide" id="open">Open in SmartTube</button>
+  <button class="wide" data-a="settings">Settings</button>
+</div>
+
+<div id="status"></div>
+
+<script>
+  const status = document.getElementById('status');
+  async function call(action, params = {}) {
+    const q = new URLSearchParams(params).toString();
+    try {
+      const r = await fetch('/api/' + action + (q ? '?' + q : ''));
+      const t = await r.text();
+      if (!r.ok) throw new Error(t);
+      show(t);
+    } catch (e) { status.textContent = 'Error: ' + e.message; }
+  }
+  function show(t) {
+    try { const s = JSON.parse(t);
+      status.textContent = 'Volume ' + s.volume + '/' + s.max + (s.muted ? ' (muted)' : '');
+    } catch { status.textContent = t; }
+  }
+  document.querySelectorAll('[data-a]').forEach(b =>
+    b.addEventListener('click', () => call(b.dataset.a)));
+  document.getElementById('open').addEventListener('click', () =>
+    call('open', { url: document.getElementById('url').value.trim() }));
+  call('status');
+</script>
+</body>
+</html>

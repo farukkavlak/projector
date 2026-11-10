@@ -37,6 +37,16 @@ scripts/snapshot.sh             # save device state (serial/MAC masked)
 scripts/lamp.sh off|on|status   # lamp off, device stays online
 ```
 
+Panel app (phone remote at `http://<projector-ip>:8080`):
+
+```sh
+cd panel && ./gradlew assembleDebug
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+adb shell appops set local.projector.panel SYSTEM_ALERT_WINDOW allow
+```
+
+Open "Panel" once from the launcher. Needs the Android SDK (`sdk.dir` in `panel/local.properties`).
+
 - Install [FLauncher](https://gitlab.com/flauncher/flauncher) first. Without it, the stock launcher stays.
 - Wait ~30 s after changes before rebooting, or they are lost.
 
@@ -46,5 +56,6 @@ scripts/lamp.sh off|on|status   # lamp off, device stays online
 config/     packages and settings to change
 scripts/    apply, restore, snapshot, lamp
 snapshots/  device dumps
+panel/      Kotlin app: web remote on port 8080
 docs/       findings, images
 ```
