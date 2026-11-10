@@ -26,13 +26,15 @@ class Keystone(private val context: Context) {
     fun status(): String {
         val tilt = prefs.getInt("tilt", DEFAULT_TILT)
         val scale = prefs.getInt("scale", DEFAULT_SCALE)
-        return """{"tilt":$tilt,"scale":$scale,"changed":${changed(tilt)}}"""
+        return """{"tilt":$tilt,"scale":$scale,"changed":${changed()}}"""
     }
 
-    private fun changed(tilt: Int): Boolean {
-        val angle = Props.get("persist.sys.keystoneAngle").toIntOrNull()
-        if (angle != null && abs(angle - tilt) > 1) return true
-        val saved = prefs.getString("corners", null) ?: return false
+    /**
+     * The angle prop is not reliable here: it can show the sensor angle even when a manual
+     * apply worked. Only the corners written back after our last apply are a safe reference.
+     */
+    private fun changed(): Boolean {
+        val saved = prefs.getString("corners", null) ?: return true
         val last = saved.split(",").mapNotNull { it.toIntOrNull() }
         if (last.size != Corners.KEYS.size) return true
         val now = Corners.readProps()
