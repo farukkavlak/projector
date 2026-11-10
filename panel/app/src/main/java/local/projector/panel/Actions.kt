@@ -12,6 +12,7 @@ class Actions(private val context: Context) {
     private val audio = context.getSystemService(AudioManager::class.java)
     private val keystone = Keystone(context)
     private val corners = Corners(context)
+    private val timer = SleepTimer(context)
 
     fun run(name: String, params: Map<String, String>): String = when (name) {
         "play" -> media(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
@@ -24,8 +25,13 @@ class Actions(private val context: Context) {
         "settings" -> launch(Intent(Settings.ACTION_SETTINGS))
         "keystone" -> launch(Intent().setClassName(KEYSTONE_PKG, KEYSTONE_ACTIVITY))
         "lamp" -> """{"lamp":"${Lamp.status()}"}"""
-        "lamp-off" -> """{"lamp":"${Lamp.off()}"}"""
+        "lamp-off" -> { timer.cancel(); """{"lamp":"${Lamp.off()}"}""" }
         "lamp-on" -> """{"lamp":"${Lamp.on()}"}"""
+        "timer" -> timer.status()
+        "timer-start" -> timer.start(minutes(params))
+        "timer-add" -> timer.add(minutes(params))
+        "timer-restart" -> timer.restart()
+        "timer-cancel" -> timer.cancel()
         "keystone-get" -> keystone.status()
         "corners" -> corners.status()
         "corners-set" -> corners.apply(params)
@@ -37,6 +43,9 @@ class Actions(private val context: Context) {
         "status" -> status()
         else -> throw IllegalArgumentException("unknown action: $name")
     }
+
+    private fun minutes(params: Map<String, String>) =
+        params["minutes"]?.toIntOrNull() ?: throw IllegalArgumentException("minutes missing")
 
     private fun media(code: Int): String {
         val now = SystemClock.uptimeMillis()

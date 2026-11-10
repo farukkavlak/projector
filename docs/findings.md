@@ -105,6 +105,12 @@ App in `panel/`, runs as a normal (non-system) app.
   Checks the fan guard props before cutting the lamp.
 - Keystone screen opens with `setClassName("com.htc.htcsettings", "com.htc.activity.ProjectionActivity3")`.
 
+## Sleep timer
+
+- Panel app (`SleepTimer.kt`): at the end it sends media pause, then `Lamp.off()`.
+- End time is saved, so it survives an app restart. Missed by more than 10 min: dropped.
+- A toast shows on the projector 1 min before. Text toasts from a background app work here.
+
 ## Performance
 
 | Change | Result |

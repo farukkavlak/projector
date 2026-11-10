@@ -67,6 +67,16 @@
   .lamp .what { font-weight: 600; }
   .lamp .why { display: block; font-size: 13px; color: var(--muted); }
 
+  /* Sleep timer: chips when off, countdown when running */
+  .sleep { margin-top: 14px; }
+  .sleep .sleep-on, .sleep.active .sleep-off { display: none; }
+  .sleep.active .sleep-on { display: block; }
+  .chips { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .chips button { padding: 11px 4px; font-size: 15px; }
+  .countdown { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+  .countdown b { font-size: 38px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; color: var(--lamp); }
+  .countdown span { font-size: 14px; color: var(--muted); text-align: right; }
+
   form.link { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
   input[type=url] {
     font: inherit; color: var(--text); background: var(--dusk); border: 1px solid var(--line);
@@ -152,6 +162,30 @@
         <span class="dot"></span>
         <span><span class="what">Lamp</span><span class="why">Checking…</span></span>
       </button>
+
+      <div class="sleep" id="sleep">
+        <div class="sleep-off">
+          <h2>Sleep timer</h2>
+          <div class="chips">
+            <button data-start="15">15 min</button>
+            <button data-start="30">30 min</button>
+            <button data-start="60">1 h</button>
+            <button data-start="120">2 h</button>
+          </div>
+        </div>
+        <div class="sleep-on">
+          <div class="countdown">
+            <b id="sleep-left">0:00</b>
+            <span id="sleep-end">Lamp off at --:--</span>
+          </div>
+          <div class="chips">
+            <button data-add="15">+15 min</button>
+            <button data-add="60">+1 h</button>
+            <button id="sleep-restart">Restart</button>
+            <button id="sleep-cancel">Cancel</button>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section>
@@ -268,6 +302,7 @@
     try {
       if (lampState === 'on') {
         showLamp((await api('lamp-off')).lamp);
+        loadTimer(); // turning the lamp off cancels the timer
       } else {
         showLamp((await api('lamp-on')).lamp, 'Warming up. Ready in 12 s.');
         await sleep(12000);
@@ -276,6 +311,47 @@
     } catch (e) { fail(e); }
     b.disabled = false;
   });
+
+  // ---- Sleep timer. The projector keeps the time; the page only shows it.
+  let sleepEnd = 0;
+  const pad2 = n => String(n).padStart(2, '0');
+  function renderTimer() {
+    const box = $('sleep');
+    const left = Math.max(0, Math.round((sleepEnd - Date.now()) / 1000));
+    box.classList.toggle('active', sleepEnd > 0);
+    if (!sleepEnd) return;
+    const h = Math.floor(left / 3600), m = Math.floor(left % 3600 / 60), s = left % 60;
+    $('sleep-left').textContent = (h ? h + ':' + pad2(m) : m) + ':' + pad2(s);
+    const end = new Date(sleepEnd);
+    $('sleep-end').textContent = left > 0
+      ? 'Lamp off at ' + pad2(end.getHours()) + ':' + pad2(end.getMinutes())
+      : 'Turning the lamp off…';
+    if (left === 0 && !refreshing) {
+      refreshing = true; // the projector checks every 5 s; look again after that
+      setTimeout(() => {
+        refreshing = false; loadTimer(); api('lamp').then(s => showLamp(s.lamp)).catch(() => {});
+      }, 7000);
+    }
+  }
+  let refreshing = false;
+  function showTimer(t) {
+    // Use the time left, not endsAt, so a wrong phone clock does not matter.
+    sleepEnd = t.active ? Date.now() + t.left * 1000 : 0;
+    renderTimer();
+  }
+  const loadTimer = () => api('timer').then(showTimer).catch(fail);
+  async function timerCall(path, msg) {
+    try { showTimer(await api(path)); if (msg) toast(msg); } catch (e) { fail(e); }
+  }
+  document.querySelectorAll('[data-start]').forEach(b => b.addEventListener('click', () =>
+    timerCall('timer-start?minutes=' + b.dataset.start, 'Lamp turns off in ' + b.textContent)));
+  document.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', () =>
+    timerCall('timer-add?minutes=' + b.dataset.add, b.textContent + ' added')));
+  $('sleep-restart').addEventListener('click', () => timerCall('timer-restart', 'Timer restarted'));
+  $('sleep-cancel').addEventListener('click', () => timerCall('timer-cancel', 'Timer cancelled'));
+  setInterval(() => { if (sleepEnd) renderTimer(); }, 1000);
+  setInterval(() => { if (!document.hidden) loadTimer(); }, 30000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) loadTimer(); });
 
   // ---- Picture shape. Corner values are insets in 1/1000 of the screen (0 = edge).
   const W = 1280, H = 720, MAX = 450, KEYS = ['ltx', 'lty', 'rtx', 'rty', 'lbx', 'lby', 'rbx', 'rby'];
@@ -418,6 +494,7 @@
   // ---- Start
   api('status').then(showVolume).catch(fail);
   api('lamp').then(s => showLamp(s.lamp)).catch(fail);
+  loadTimer();
   api('keystone-get').then(s => { tilt.value = s.tilt; scale.value = s.scale; labels(); }).catch(fail);
   loadCorners().catch(fail);
 </script>
