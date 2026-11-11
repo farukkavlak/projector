@@ -211,6 +211,11 @@
   .preview img { width: 100%; height: 100%; object-fit: contain; display: block; }
   .preview span { position: absolute; color: var(--muted); font-size: 13px; }
 
+  /* Screen view */
+  .mirror { position: relative; aspect-ratio: 16 / 9; border-radius: var(--radius); overflow: hidden; background: var(--surface); border: 1px solid var(--line); display: grid; place-items: center; touch-action: none; cursor: crosshair; }
+  .mirror img { width: 100%; height: 100%; object-fit: contain; display: block; user-select: none; -webkit-user-select: none; }
+  .mirror span { position: absolute; color: var(--muted); font-size: 13px; pointer-events: none; }
+
   /* Status */
   .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; }
   .fact { display: flex; justify-content: space-between; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); min-width: 0; }
@@ -286,6 +291,20 @@
 
 <main>
   <section class="panel active" data-panel="remote" aria-label="Remote">
+    <section class="block">
+      <h2>Screen</h2>
+      <div class="mirror" id="mirror">
+        <img id="mirror-img" alt="" hidden>
+        <span id="mirror-hint">Loading screen…</span>
+      </div>
+      <div class="more">
+        <button class="switch on" id="mirror-live" type="button">Live</button>
+        <button id="mirror-refresh" type="button">Refresh</button>
+        <button id="mirror-mode" type="button">Touch</button>
+      </div>
+      <p class="note">Tap the picture to tap, drag to swipe. Switch to D-pad if the app ignores touch.</p>
+    </section>
+
     <div class="player" id="now" hidden>
       <div class="art"><img id="now-art" alt="" hidden></div>
       <div class="track">
@@ -595,6 +614,78 @@
     clearTimeout(toastTimer); toastTimer = setTimeout(() => el.className = '', 2600);
   }
   const fail = e => toast(e.message === 'Failed to fetch' ? 'Projector not reachable' : e.message, true);
+
+  // ---- Screen view. JPEG frames are polled; taps and swipes go to the projector.
+  let mirrorLive = true, mirrorLoading = false, mirrorMode = 'touch', mirrorDown = null;
+  const mirrorOpen = () => window.innerWidth >= 900 ||
+    document.querySelector('[data-panel="remote"]').classList.contains('active');
+  function refreshMirror() {
+    if (mirrorLoading || !mirrorOpen()) return;
+    mirrorLoading = true;
+    const next = new Image();
+    next.onload = () => {
+      const img = $('mirror-img');
+      img.src = next.src;
+      img.hidden = false;
+      $('mirror-hint').hidden = true;
+      mirrorLoading = false;
+    };
+    next.onerror = () => {
+      mirrorLoading = false;
+      $('mirror-hint').hidden = false;
+      $('mirror-hint').textContent = 'Screen unavailable';
+    };
+    next.src = '/preview.jpg?t=' + Date.now();
+  }
+  function mirrorPoint(e) {
+    const r = $('mirror').getBoundingClientRect();
+    const x = Math.round((e.clientX - r.left) * 1280 / Math.max(1, r.width));
+    const y = Math.round((e.clientY - r.top) * 720 / Math.max(1, r.height));
+    return [Math.max(0, Math.min(1279, x)), Math.max(0, Math.min(719, y))];
+  }
+  function mirrorKey(x, y) {
+    if (x < 427) return 'left';
+    if (x > 853) return 'right';
+    if (y < 240) return 'up';
+    if (y > 480) return 'down';
+    return 'ok';
+  }
+  const mirror = $('mirror');
+  mirror.addEventListener('pointerdown', e => {
+    if (e.button !== undefined && e.button !== 0) return;
+    e.preventDefault();
+    mirror.setPointerCapture(e.pointerId);
+    mirrorDown = mirrorPoint(e);
+  });
+  mirror.addEventListener('pointerup', e => {
+    if (!mirrorDown) return;
+    e.preventDefault();
+    const up = mirrorPoint(e);
+    const [x1, y1] = mirrorDown;
+    mirrorDown = null;
+    if (mirrorMode === 'dpad') {
+      api('key?name=' + mirrorKey(up[0], up[1])).catch(fail);
+    } else if (Math.abs(up[0] - x1) < 16 && Math.abs(up[1] - y1) < 16) {
+      api('tap?x=' + x1 + '&y=' + y1).catch(fail);
+    } else {
+      api('swipe?x1=' + x1 + '&y1=' + y1 + '&x2=' + up[0] + '&y2=' + up[1]).catch(fail);
+    }
+    setTimeout(refreshMirror, 350);
+  });
+  mirror.addEventListener('pointercancel', () => { mirrorDown = null; });
+  $('mirror-live').addEventListener('click', () => {
+    mirrorLive = !mirrorLive;
+    const b = $('mirror-live');
+    b.classList.toggle('on', mirrorLive);
+    b.textContent = mirrorLive ? 'Live' : 'Paused';
+    if (mirrorLive) refreshMirror();
+  });
+  $('mirror-refresh').addEventListener('click', refreshMirror);
+  $('mirror-mode').addEventListener('click', () => {
+    mirrorMode = mirrorMode === 'touch' ? 'dpad' : 'touch';
+    $('mirror-mode').textContent = mirrorMode === 'touch' ? 'Touch' : 'D-pad';
+  });
+  setInterval(() => { if (mirrorLive && !document.hidden) refreshMirror(); }, 1000);
 
   // ---- Playback and volume
   let volDragging = false;
@@ -1222,6 +1313,7 @@
     tabButtons.forEach(b => b.classList.toggle('active', b.dataset.tab === name));
     try { localStorage.setItem('panel.tab', name); } catch {}
     window.scrollTo(0, 0);
+    if (name === 'remote') refreshMirror();
   }
   tabButtons.forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
   let startTab = 'remote';
@@ -1343,6 +1435,7 @@
   loadPresets();
   loadApps();
   loadMedia();
+  refreshMirror();
   api('status').then(showVolume).catch(fail);
   api('lamp').then(s => showLamp(s.lamp)).catch(fail);
   loadTimer();

@@ -166,6 +166,15 @@ App in `panel/`, runs as a normal (non-system) app.
   `FLAG_GRANT_READ_URI_PERMISSION`. Without VLC it falls back to any player that accepts the URI.
   Tested with VLC 3.7.1 (armeabi-v7a): upload, list, play and delete worked.
 
+### Screen view (expected, device test pending)
+
+- Capture uses `SurfaceControl.screenshot` through reflection; the live view polls `/preview.jpg`
+  at about 1 fps and serializes captures.
+- Input uses `Instrumentation.sendPointerSync` with `SOURCE_TOUCHSCREEN`; `INJECT_EVENTS` comes
+  from the platform signature. Taps and swipes map the picture rectangle to 1280x720.
+- Many TV apps ignore touch. The D-pad mode maps screen zones to arrow keys and the center to OK.
+- The screenshot is unwarped and DRM video may be a black surface.
+
 ### Streaming apps
 
 - Kick: the Android TV 1.10.0 arm-v7a build needs API 32; this device is API 30, so the install

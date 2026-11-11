@@ -64,6 +64,11 @@ class HttpServer(
                             if (png == null) reply(out, 503, "text/plain", "screenshot failed".toByteArray())
                             else reply(out, 200, "image/png", png)
                         }
+                        route == "/preview.jpg" -> {
+                            val jpg = actions.previewJpeg()
+                            if (jpg == null) reply(out, 503, "text/plain", "screenshot failed".toByteArray())
+                            else reply(out, 200, "image/jpeg", jpg)
+                        }
                         else -> serveAsset(out, route)
                     }
                 } catch (e: Exception) {

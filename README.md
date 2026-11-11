@@ -21,6 +21,8 @@ Findings: [docs/findings.md](docs/findings.md)
 
 Device check: [docs/checklist.md](docs/checklist.md)
 
+Screen control: [docs/screen-control.md](docs/screen-control.md)
+
 ## Security
 
 The Panel has no login. Keep the projector on a trusted LAN and turn off network debugging
@@ -45,6 +47,7 @@ scripts/restore.sh              # undo everything
 scripts/restore.sh <package>    # undo one package
 scripts/snapshot.sh             # save device state (serial/MAC masked)
 scripts/lamp.sh off|on|status   # lamp off, device stays online
+scripts/install-apkm.sh <file.apkm>  # install an APKMirror bundle
 ```
 
 Panel app (phone remote at `http://<projector-ip>:8080`):
@@ -64,13 +67,14 @@ scripts/check.sh
 ```
 
 Open "Panel" once from the launcher. On a phone it has Remote, Picture and System tabs; on a
-wider screen it is a two-column layout. It works as a D-pad remote and can type into the focused
-field from the phone. Remote also lists installed apps with a filter, opens a video link in the
-matching app (YouTube, Kick, Prime, TV+, Twitch), and uploads local videos to play in VLC
-(500 MB per file, 2 GB total). Picture keeps corner presets (export/import). System shows device
-status and a live screenshot, plus brightness/colour, auto keystone/focus switches, a focus
-nudge, LED switches and a power menu. Needs the Android SDK (`sdk.dir` in
-`panel/local.properties`).
+wider screen it is a two-column layout. Remote has a live screen view: tap or drag the picture to
+control the projector, or switch to D-pad mode if the app ignores touch. It also works as a D-pad
+remote and can type into the focused field from the phone. Remote lists installed apps with a
+filter, opens a video link in the matching app (YouTube, Kick, Prime, TV+, Twitch), and uploads
+local videos to play in VLC (500 MB per file, 2 GB total). Picture keeps corner presets
+(export/import). System shows device status and a live screenshot, plus brightness/colour, auto
+keystone/focus switches, a focus nudge, LED switches and a power menu. Needs the Android SDK
+(`sdk.dir` in `panel/local.properties`).
 The sign script downloads the public AOSP platform key once, to `~/.local/android/platform-key`.
 An unsigned build still works, but a 4-corner apply restarts the screen for ~25 seconds.
 
@@ -88,7 +92,7 @@ stays the same, so the phone does not need to trust a new one.
 
 ```
 config/     packages and settings to change
-scripts/    apply, restore, snapshot, lamp, sign-panel, make-cert
+scripts/    apply, restore, snapshot, lamp, sign-panel, make-cert, install-apkm
 snapshots/  device dumps
 panel/      Kotlin app: web remote on port 8080
 docs/       findings, checklist, images

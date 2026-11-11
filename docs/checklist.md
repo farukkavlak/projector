@@ -19,6 +19,13 @@ Open "Panel" once from the launcher and note the IP.
 - D-pad, back/home/menu, volume, play/pause and mute work.
 - The screenshot on System refreshes.
 
+## Screen view
+
+- The picture on Remote updates about once a second.
+- Tap a button in an app; if nothing happens, switch to D-pad and tap the matching edge.
+- Drag a list and check that it scrolls.
+- Tap a text field, then type from the phone.
+
 ## Search from the phone
 
 - Open Kick or YouTube and focus a search box.

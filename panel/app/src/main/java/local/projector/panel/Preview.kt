@@ -6,21 +6,25 @@ import android.util.Log
 import java.io.ByteArrayOutputStream
 
 /**
- * Screenshot for the panel. READ_FRAME_BUFFER is signature, granted by the platform key.
+ * Screenshots for the panel. READ_FRAME_BUFFER is signature, granted by the platform key.
  *
  * `screencap` refuses to run from the app process (exit 1, no message), so use the hidden
- * SurfaceControl.screenshot call in-process and fall back to the binary.
+ * SurfaceControl.screenshot call in-process and fall back to the binary for PNG.
  */
 object Preview {
-    fun png(): ByteArray? = surface() ?: shell()
+    @Synchronized
+    fun png(): ByteArray? = capture(Bitmap.CompressFormat.PNG, 100) ?: shell()
 
-    private fun surface(): ByteArray? = try {
+    /** Smaller frames for the live view. */
+    @Synchronized
+    fun jpeg(quality: Int = 65): ByteArray? = capture(Bitmap.CompressFormat.JPEG, quality)
+
+    private fun capture(format: Bitmap.CompressFormat, quality: Int): ByteArray? = try {
         val sc = Class.forName("android.view.SurfaceControl")
-        val crop = Rect(0, 0, 1280, 720)
-        val bitmap = callScreenshot(sc, crop) ?: return null
+        val bitmap = callScreenshot(sc, Rect(0, 0, 1280, 720)) ?: return null
         val soft = bitmap.copy(Bitmap.Config.ARGB_8888, false) ?: bitmap
         ByteArrayOutputStream().use { out ->
-            soft.compress(Bitmap.CompressFormat.PNG, 100, out)
+            soft.compress(format, quality, out)
             out.toByteArray().takeIf { it.isNotEmpty() }
         }
     } catch (e: Throwable) {

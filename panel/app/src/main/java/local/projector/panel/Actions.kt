@@ -21,6 +21,7 @@ class Actions(private val context: Context) {
     private val media = Media(context)
 
     fun preview(): ByteArray? = Preview.png()
+    fun previewJpeg(): ByteArray? = Preview.jpeg()
 
     fun upload(name: String?, mime: String?, input: InputStream, length: Long): String =
         media.upload(name, mime, input, length)
@@ -62,6 +63,14 @@ class Actions(private val context: Context) {
         "preset-import" -> corners.importPresets(params["data"])
         "system" -> systemStatus.status()
         "key" -> Keys.press(params["name"])
+        "tap" -> Touch.tap(int(params, "x"), int(params, "y"))
+        "swipe" -> Touch.swipe(
+            int(params, "x1"),
+            int(params, "y1"),
+            int(params, "x2"),
+            int(params, "y2"),
+            params["ms"]?.toIntOrNull() ?: 300,
+        )
         "text" -> Keys.type(params["value"].orEmpty())
         "text-clear" -> Keys.clear()
         "apps" -> apps.list()
@@ -99,6 +108,9 @@ class Actions(private val context: Context) {
 
     private fun id(params: Map<String, String>) =
         params["id"]?.toLongOrNull() ?: throw IllegalArgumentException("id missing")
+
+    private fun int(params: Map<String, String>, key: String) =
+        params[key]?.toIntOrNull() ?: throw IllegalArgumentException("$key missing")
 
     private fun media(code: Int): String {
         val now = SystemClock.uptimeMillis()
