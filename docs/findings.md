@@ -166,6 +166,15 @@ App in `panel/`, runs as a normal (non-system) app.
   `FLAG_GRANT_READ_URI_PERMISSION`. Without VLC it falls back to any player that accepts the URI.
   Tested with VLC 3.7.1 (armeabi-v7a): upload, list, play and delete worked.
 
+### Streaming apps
+
+- Kick: the Android TV 1.10.0 arm-v7a build needs API 32; this device is API 30, so the install
+  fails with `INSTALL_FAILED_OLDER_SDK`. Use the 1.9.0 `arm64-v8a + armeabi-v7a` bundle
+  (Android 8.0+); package `com.kick.mobile`.
+- TV+: `com.turkcell.ott` 4.8.0 (Android TV, Android 8.0+) installs and opens the login screen.
+  Link routing opens it; login and playback are untested. Its UI is Turkish even with an en-US
+  system locale.
+
 ## Now playing
 
 - `dumpsys media_session` lists the sessions. SmartTube publishes playback state
