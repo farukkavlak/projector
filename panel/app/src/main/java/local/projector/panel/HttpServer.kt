@@ -85,6 +85,10 @@ class HttpServer(
         query: String,
     ) {
         val length = headers["content-length"]?.toLongOrNull()
+        if (headers["expect"]?.contains("100-continue", ignoreCase = true) == true) {
+            out.write("HTTP/1.1 100 Continue\r\n\r\n".toByteArray())
+            out.flush()
+        }
         if (length == null || length <= 0) {
             reply(out, 411, "text/plain", "Content-Length required".toByteArray())
             return

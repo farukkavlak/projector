@@ -143,22 +143,28 @@ App in `panel/`, runs as a normal (non-system) app.
   type 12 = colour temperature (0..2). This is the path the OEM brightness screen uses.
 - Preset export/import/rename and the PWA install button are app-side only.
 
-### Type, apps, links and local video (expected, device test pending)
+### Type, apps, links and local video
 
 - Typing uses `Instrumentation.sendStringSync` for text and `sendKeyDownUpSync` for
   enter/backspace/clear. Limited to 200 characters; needs `INJECT_EVENTS`.
+  Tested on 2026-11-11 in SmartTube search: `test` and `çocuk` both appeared, and
+  enter/backspace/clear worked.
 - Apps: `getInstalledApplications` plus launch intents, with `QUERY_ALL_PACKAGES` for Android 11
-  package visibility.
+  package visibility. Tested: the list showed FLauncher, Setting and SmartTube; `app-open`
+  launched Settings.
 - Links: host map for YouTube, Kick, Prime, TV+, Twitch, Netflix and Disney+. Exact package names
   are tried first, then a package-name keyword. A known app that rejects a web URL falls back to
-  its main screen.
+  its main screen. Tested: a YouTube link opened SmartTube. Kick/Prime/TV+ are not installed, so
+  those routes still need a device check; an unknown link returns 400.
 - Upload is a raw `POST /api/upload?name=...` with `Content-Length`; the body is streamed to
-  MediaStore, not buffered in memory.
+  MediaStore, not buffered in memory. The copy reads exactly `Content-Length` bytes, so it does
+  not wait for the client to close the connection.
 - Files go to `Movies/Panel` as app-owned media. No storage permission is needed for files the
   app created itself. Limits: 500 MB per file, 2 GB total, 50 MB free-space margin.
 - A failed or short upload deletes the pending row.
 - Playback sends the content URI to VLC (`org.videolan.vlc`) with
   `FLAG_GRANT_READ_URI_PERMISSION`. Without VLC it falls back to any player that accepts the URI.
+  Tested with VLC 3.7.1 (armeabi-v7a): upload, list, play and delete worked.
 
 ## Now playing
 

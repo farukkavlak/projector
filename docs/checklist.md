@@ -24,7 +24,7 @@ Open "Panel" once from the launcher and note the IP.
 - Open Kick or YouTube and focus a search box.
 - Panel -> Type on projector -> type a query -> Send: the text appears on the projector.
 - Search sends the text and Enter in one tap.
-- Backspace and Clear work. Non-ASCII characters may not inject.
+- Backspace and Clear work. Turkish characters worked in SmartTube search.
 
 ## Apps and links
 

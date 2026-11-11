@@ -52,8 +52,9 @@ class Media(private val context: Context) {
                 ?: throw IllegalStateException("could not open the media file")
             output.use {
                 val buffer = ByteArray(BUFFER)
-                while (true) {
-                    val read = input.read(buffer)
+                while (written < length) {
+                    val want = minOf(buffer.size.toLong(), length - written).toInt()
+                    val read = input.read(buffer, 0, want)
                     if (read < 0) break
                     written += read
                     check(written <= Limits.MAX_FILE) { "file is larger than ${Limits.MAX_FILE} bytes" }
