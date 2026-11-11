@@ -25,6 +25,12 @@ class LimitsTest {
     fun nameStripsPaths() = assertEquals("evil.mp4", Limits.safeName("../../evil.mp4"))
 
     @Test
+    fun nameStripsWindowsPaths() = assertEquals("evil.mp4", Limits.safeName("..\\..\\evil.mp4"))
+
+    @Test
+    fun nameCannotBeOnlyDots() = assertEquals("video.mp4", Limits.safeName("...."))
+
+    @Test
     fun nameGetsAnExtension() = assertEquals("clip.mp4", Limits.safeName("clip"))
 
     @Test

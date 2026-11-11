@@ -62,12 +62,13 @@ class Media(private val context: Context) {
                 it.flush()
             }
             check(written == length) { "upload incomplete" }
-            resolver.update(
+            val finalized = resolver.update(
                 uri,
                 ContentValues().apply { put(MediaStore.MediaColumns.IS_PENDING, 0) },
                 null,
                 null,
             )
+            check(finalized > 0) { "could not finalize the media entry" }
             return """{"id":${ContentUris.parseId(uri)},"name":${json(fileName)},"size":$written}"""
         } catch (e: Exception) {
             resolver.delete(uri, null, null)
