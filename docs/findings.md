@@ -143,8 +143,15 @@ App in `panel/`, runs as a normal (non-system) app.
   type 12 = colour temperature (0..2). This is the path the OEM brightness screen uses.
 - Preset export/import/rename and the PWA install button are app-side only.
 
-### Local video (expected, device test pending)
+### Type, apps, links and local video (expected, device test pending)
 
+- Typing uses `Instrumentation.sendStringSync` for text and `sendKeyDownUpSync` for
+  enter/backspace/clear. Limited to 200 characters; needs `INJECT_EVENTS`.
+- Apps: `getInstalledApplications` plus launch intents, with `QUERY_ALL_PACKAGES` for Android 11
+  package visibility.
+- Links: host map for YouTube, Kick, Prime, TV+, Twitch, Netflix and Disney+. Exact package names
+  are tried first, then a package-name keyword. A known app that rejects a web URL falls back to
+  its main screen.
 - Upload is a raw `POST /api/upload?name=...` with `Content-Length`; the body is streamed to
   MediaStore, not buffered in memory.
 - Files go to `Movies/Panel` as app-owned media. No storage permission is needed for files the

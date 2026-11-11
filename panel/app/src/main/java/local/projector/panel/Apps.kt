@@ -8,15 +8,12 @@ import org.json.JSONObject
 
 /** Launchable apps, so a service can be opened from the phone. */
 class Apps(private val context: Context) {
+    data class Info(val packageName: String, val label: String)
+
     fun list(): String {
-        val pm = context.packageManager
-        val items = pm.getInstalledApplications(0).mapNotNull { info ->
-            if (info.packageName == context.packageName) return@mapNotNull null
-            pm.getLaunchIntentForPackage(info.packageName) ?: return@mapNotNull null
-            JSONObject()
-                .put("package", info.packageName)
-                .put("label", pm.getApplicationLabel(info).toString())
-        }.sortedBy { it.getString("label").lowercase(Locale.ROOT) }
+        val items = launchable().map {
+            JSONObject().put("package", it.packageName).put("label", it.label)
+        }
         return """{"apps":${JSONArray(items)}}"""
     }
 
@@ -27,5 +24,21 @@ class Apps(private val context: Context) {
             ?: throw IllegalArgumentException("no launch intent for $name")
         context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         return "ok"
+    }
+
+    /** First installed package from [target], then a package name that contains its keyword. */
+    fun resolve(target: Links.Target): String? {
+        val apps = launchable()
+        return target.packages.firstOrNull { pkg -> apps.any { it.packageName == pkg } }
+            ?: apps.firstOrNull { it.packageName.contains(target.keyword, ignoreCase = true) }?.packageName
+    }
+
+    private fun launchable(): List<Info> {
+        val pm = context.packageManager
+        return pm.getInstalledApplications(0).mapNotNull { info ->
+            if (info.packageName == context.packageName) return@mapNotNull null
+            pm.getLaunchIntentForPackage(info.packageName) ?: return@mapNotNull null
+            Info(info.packageName, pm.getApplicationLabel(info).toString())
+        }.sortedBy { it.label.lowercase(Locale.ROOT) }
     }
 }

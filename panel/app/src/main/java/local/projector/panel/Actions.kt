@@ -127,7 +127,20 @@ class Actions(private val context: Context) {
 
     private fun open(url: String): String {
         require(url.startsWith("http://") || url.startsWith("https://")) { "bad url" }
-        return launch(Intent(Intent.ACTION_VIEW, Uri.parse(url)).setPackage(SMARTTUBE))
+        val target = Links.target(url)
+        val pkg = target?.let { apps.resolve(it) }
+        try {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            if (pkg != null) intent.setPackage(pkg)
+            context.startActivity(intent)
+        } catch (e: Exception) {
+            // The app may not accept web URLs; open its main screen instead.
+            val home = pkg?.let { context.packageManager.getLaunchIntentForPackage(it) }
+                ?: throw IllegalStateException("no app can open this link", e)
+            context.startActivity(home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        }
+        return "ok"
     }
 
     private fun launch(intent: Intent): String {
@@ -136,7 +149,6 @@ class Actions(private val context: Context) {
     }
 
     companion object {
-        const val SMARTTUBE = "org.smarttube.stable"
         const val KEYSTONE_PKG = "com.htc.htcsettings"
         const val KEYSTONE_ACTIVITY = "com.htc.activity.ProjectionActivity3"
     }

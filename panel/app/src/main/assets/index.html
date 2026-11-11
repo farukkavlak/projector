@@ -227,6 +227,7 @@
   .app-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
   .app-grid button { padding: 10px 8px; font-size: 13px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .app-grid .hint { font-size: 13px; color: var(--muted); }
+  #app-filter { width: 100%; margin-bottom: 8px; }
 
   /* Local videos */
   .upload { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
@@ -386,7 +387,7 @@
     <section class="block">
       <h2>Open a link</h2>
       <form class="link" id="link">
-        <input id="url" type="url" placeholder="Paste a YouTube link" autocomplete="off" required>
+        <input id="url" type="url" placeholder="Paste a video link" autocomplete="off" required>
         <button type="submit">Play</button>
       </form>
       <p class="keys"><kbd>Space</kbd> play/pause, <kbd>+</kbd> <kbd>−</kbd> volume, <kbd>M</kbd> mute. Arrows move the selected corner, <kbd>Shift</kbd> for bigger steps.</p>
@@ -394,6 +395,7 @@
 
     <section class="block">
       <h2>Apps</h2>
+      <input id="app-filter" type="search" placeholder="Filter apps" autocomplete="off">
       <div class="app-grid" id="app-grid"><span class="hint">Loading…</span></div>
     </section>
 
@@ -634,7 +636,7 @@
     e.preventDefault();
     try {
       await api('open?url=' + encodeURIComponent($('url').value.trim()));
-      toast('Opening in SmartTube'); $('url').value = '';
+      toast('Opening link'); $('url').value = '';
     } catch (err) { fail(err); }
   });
 
@@ -658,32 +660,39 @@
   $('type-clear').addEventListener('click', () => api('text-clear').catch(fail));
 
   // ---- Apps
-  async function loadApps() {
+  let appList = [];
+  function renderApps() {
     const box = $('app-grid');
+    const q = $('app-filter').value.trim().toLowerCase();
+    const apps = appList.filter(a => !q ||
+      a.label.toLowerCase().includes(q) || a.package.toLowerCase().includes(q));
+    box.textContent = '';
+    if (!apps.length) {
+      const hint = document.createElement('span');
+      hint.className = 'hint';
+      hint.textContent = appList.length ? 'No matching apps.' : 'No launchable apps.';
+      box.append(hint);
+      return;
+    }
+    apps.forEach(a => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = a.label;
+      b.title = a.package;
+      b.addEventListener('click', () =>
+        api('app-open?package=' + encodeURIComponent(a.package)).catch(fail));
+      box.append(b);
+    });
+  }
+  async function loadApps() {
     try {
-      const r = await api('apps');
-      box.textContent = '';
-      const apps = r.apps || [];
-      if (!apps.length) {
-        const hint = document.createElement('span');
-        hint.className = 'hint';
-        hint.textContent = 'No launchable apps.';
-        box.append(hint);
-        return;
-      }
-      apps.forEach(a => {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.textContent = a.label;
-        b.title = a.package;
-        b.addEventListener('click', () =>
-          api('app-open?package=' + encodeURIComponent(a.package)).catch(fail));
-        box.append(b);
-      });
+      appList = (await api('apps')).apps || [];
+      renderApps();
     } catch {
-      box.textContent = 'Could not load apps.';
+      $('app-grid').textContent = 'Could not load apps.';
     }
   }
+  $('app-filter').addEventListener('input', renderApps);
 
   // ---- Local videos
   const MAX_VIDEO = 500 * 1024 * 1024;
@@ -1347,7 +1356,7 @@
     history.replaceState({}, '', '/');
     if (link) {
       api('open?url=' + encodeURIComponent(link[0]))
-        .then(() => toast('Opening in SmartTube'))
+        .then(() => toast('Opening link'))
         .catch(fail);
     }
   }
