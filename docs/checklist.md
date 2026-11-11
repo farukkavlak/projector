@@ -10,6 +10,12 @@ adb install -r panel/app-platform.apk
 adb shell appops set local.projector.panel SYSTEM_ALERT_WINDOW allow
 ```
 
+For a sideloaded app bundle:
+
+```sh
+DEV=192.168.1.112:5555 scripts/install-apkm.sh ~/Downloads/com.kick.mobile_1.9.0-*.apkm
+```
+
 Open "Panel" once from the launcher and note the IP.
 
 ## Base
