@@ -6,7 +6,7 @@ object Auto {
         when (name) {
             "keystone" -> Props.set("persist.sys.tpryxcrt", if (on) "1" else "0")
             "focus" -> Props.set("persist.sys.vafocus", if (on) "1" else "0")
-            else -> throw IllegalArgumentException("bilinmeyen anahtar: $name")
+            else -> throw IllegalArgumentException("unknown toggle: $name")
         }
         return status()
     }

@@ -50,7 +50,7 @@ class HttpServer(
                         }
                         route == "/preview.png" -> {
                             val png = actions.preview()
-                            if (png == null) reply(out, 503, "text/plain", "ekran görüntüsü alınamadı".toByteArray())
+                            if (png == null) reply(out, 503, "text/plain", "screenshot failed".toByteArray())
                             else reply(out, 200, "image/png", png)
                         }
                         else -> serveAsset(out, route)
@@ -73,12 +73,12 @@ class HttpServer(
             else -> route.removePrefix("/")
         }
         if (path.isEmpty() || path.contains("..") || path == "server.key.der") {
-            reply(out, 404, "text/plain", "bulunamadı".toByteArray())
+            reply(out, 404, "text/plain", "not found".toByteArray())
             return
         }
         val bytes = runCatching { assets.open(path).use { it.readBytes() } }.getOrNull()
         if (bytes == null) {
-            reply(out, 404, "text/plain", "bulunamadı".toByteArray())
+            reply(out, 404, "text/plain", "not found".toByteArray())
             return
         }
         reply(out, 200, contentType(path), bytes)

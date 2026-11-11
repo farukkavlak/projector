@@ -25,7 +25,7 @@ class Actions(private val context: Context) {
         "prev" -> media(KeyEvent.KEYCODE_MEDIA_PREVIOUS)
         "vol-up" -> volume(AudioManager.ADJUST_RAISE)
         "vol-down" -> volume(AudioManager.ADJUST_LOWER)
-        "vol-set" -> volumeSet(params["level"]?.toIntOrNull() ?: throw IllegalArgumentException("seviye eksik"))
+        "vol-set" -> volumeSet(params["level"]?.toIntOrNull() ?: throw IllegalArgumentException("level missing"))
         "mute" -> volume(AudioManager.ADJUST_TOGGLE_MUTE)
         "open" -> open(params["url"].orEmpty())
         "settings" -> launch(Intent(Settings.ACTION_SETTINGS))
@@ -74,15 +74,15 @@ class Actions(private val context: Context) {
             """{"color":${Pq.colorTemperature()}}"""
         }
         "keystone-set" -> keystone.apply(
-            params["tilt"]?.toIntOrNull() ?: throw IllegalArgumentException("tilt eksik"),
-            params["scale"]?.toIntOrNull() ?: throw IllegalArgumentException("ölçek eksik"),
+            params["tilt"]?.toIntOrNull() ?: throw IllegalArgumentException("tilt missing"),
+            params["scale"]?.toIntOrNull() ?: throw IllegalArgumentException("scale missing"),
         )
         "status" -> status()
-        else -> throw IllegalArgumentException("bilinmeyen işlem: $name")
+        else -> throw IllegalArgumentException("unknown action: $name")
     }
 
     private fun minutes(params: Map<String, String>) =
-        params["minutes"]?.toIntOrNull() ?: throw IllegalArgumentException("dakika eksik")
+        params["minutes"]?.toIntOrNull() ?: throw IllegalArgumentException("minutes missing")
 
     private fun media(code: Int): String {
         val now = SystemClock.uptimeMillis()
@@ -110,7 +110,7 @@ class Actions(private val context: Context) {
     }
 
     private fun open(url: String): String {
-        require(url.startsWith("http://") || url.startsWith("https://")) { "geçersiz URL" }
+        require(url.startsWith("http://") || url.startsWith("https://")) { "bad url" }
         return launch(Intent(Intent.ACTION_VIEW, Uri.parse(url)).setPackage(SMARTTUBE))
     }
 

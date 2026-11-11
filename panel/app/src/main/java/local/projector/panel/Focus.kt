@@ -11,7 +11,7 @@ object Focus {
         val (first, then) = when (dir) {
             "up" -> 257 to 386
             "down" -> 513 to 642
-            else -> throw IllegalArgumentException("yön up veya down olmalı")
+            else -> throw IllegalArgumentException("dir must be up or down")
         }
         PATH.writeText(first.toString())
         Thread.sleep(70)
