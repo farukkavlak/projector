@@ -224,6 +224,9 @@
     background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px;
   }
   .more .btn:hover { border-color: #4a4576; }
+  .app-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
+  .app-grid button { padding: 10px 8px; font-size: 13px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .app-grid .hint { font-size: 13px; color: var(--muted); }
 
   /* Tabs (mobile) */
   .tabs {
@@ -328,6 +331,21 @@
     </section>
 
     <section class="block">
+      <h2>Type on projector</h2>
+      <form class="link" id="type-form">
+        <input id="type-text" type="text" maxlength="200" placeholder="Search text" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <button type="submit">Send</button>
+      </form>
+      <div class="more">
+        <button id="type-search" type="button">Search</button>
+        <button id="type-enter" type="button">Enter</button>
+        <button id="type-back" type="button">Backspace</button>
+        <button id="type-clear" type="button">Clear</button>
+      </div>
+      <p class="note">Focus the search field on the projector, then type here.</p>
+    </section>
+
+    <section class="block">
       <h2>Sleep timer</h2>
       <div class="sleep" id="sleep">
         <div class="sleep-off">
@@ -360,6 +378,11 @@
         <button type="submit">Play</button>
       </form>
       <p class="keys"><kbd>Space</kbd> play/pause, <kbd>+</kbd> <kbd>−</kbd> volume, <kbd>M</kbd> mute. Arrows move the selected corner, <kbd>Shift</kbd> for bigger steps.</p>
+    </section>
+
+    <section class="block">
+      <h2>Apps</h2>
+      <div class="app-grid" id="app-grid"><span class="hint">Loading…</span></div>
     </section>
   </section>
 
@@ -583,6 +606,53 @@
       toast('Opening in SmartTube'); $('url').value = '';
     } catch (err) { fail(err); }
   });
+
+  // ---- Type into the focused field on the projector (search boxes, logins).
+  async function sendText(enter) {
+    const field = $('type-text');
+    const text = field.value;
+    if (!text) return;
+    try {
+      await api('text?value=' + encodeURIComponent(text));
+      if (enter) await api('key?name=enter');
+      field.value = '';
+      field.focus();
+      toast(enter ? 'Search sent' : 'Text sent');
+    } catch (err) { fail(err); }
+  }
+  $('type-form').addEventListener('submit', e => { e.preventDefault(); sendText(false); });
+  $('type-search').addEventListener('click', () => sendText(true));
+  $('type-enter').addEventListener('click', () => api('key?name=enter').catch(fail));
+  $('type-back').addEventListener('click', () => api('key?name=del').catch(fail));
+  $('type-clear').addEventListener('click', () => api('text-clear').catch(fail));
+
+  // ---- Apps
+  async function loadApps() {
+    const box = $('app-grid');
+    try {
+      const r = await api('apps');
+      box.textContent = '';
+      const apps = r.apps || [];
+      if (!apps.length) {
+        const hint = document.createElement('span');
+        hint.className = 'hint';
+        hint.textContent = 'No launchable apps.';
+        box.append(hint);
+        return;
+      }
+      apps.forEach(a => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = a.label;
+        b.title = a.package;
+        b.addEventListener('click', () =>
+          api('app-open?package=' + encodeURIComponent(a.package)).catch(fail));
+        box.append(b);
+      });
+    } catch {
+      box.textContent = 'Could not load apps.';
+    }
+  }
 
   // ---- Now playing. The projector reports the session; the page ticks the clock.
   let now = null, nowAt = 0;
@@ -1152,6 +1222,7 @@
   loadSystem();
   setInterval(() => { if (!document.hidden) loadSystem(); }, 10000);
   loadPresets();
+  loadApps();
   api('status').then(showVolume).catch(fail);
   api('lamp').then(s => showLamp(s.lamp)).catch(fail);
   loadTimer();

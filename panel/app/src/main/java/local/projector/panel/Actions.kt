@@ -16,6 +16,7 @@ class Actions(private val context: Context) {
     private val nowPlaying = NowPlaying(context)
     private val systemStatus = SystemStatus(context)
     private val power = Power(context)
+    private val apps = Apps(context)
 
     fun preview(): ByteArray? = Preview.png()
 
@@ -56,6 +57,10 @@ class Actions(private val context: Context) {
         "preset-import" -> corners.importPresets(params["data"])
         "system" -> systemStatus.status()
         "key" -> Keys.press(params["name"])
+        "text" -> Keys.type(params["value"].orEmpty())
+        "text-clear" -> Keys.clear()
+        "apps" -> apps.list()
+        "app-open" -> apps.open(params["package"])
         "power" -> power.run(params["action"])
         "focus" -> Focus.nudge(params["dir"])
         "led" -> Leds.set(params["name"], params["on"] == "1")
