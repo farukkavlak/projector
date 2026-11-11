@@ -1221,6 +1221,7 @@
     document.querySelectorAll('[data-panel]').forEach(p => p.classList.toggle('active', p.dataset.panel === name));
     tabButtons.forEach(b => b.classList.toggle('active', b.dataset.tab === name));
     try { localStorage.setItem('panel.tab', name); } catch {}
+    window.scrollTo(0, 0);
   }
   tabButtons.forEach(b => b.addEventListener('click', () => showTab(b.dataset.tab)));
   let startTab = 'remote';
