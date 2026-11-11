@@ -17,6 +17,8 @@ Debloat and control a MUTU HY320 Mini Android projector over Wi-Fi ADB. No root.
 
 Findings: [docs/findings.md](docs/findings.md)
 
+Device check: [docs/checklist.md](docs/checklist.md)
+
 ## Setup
 
 1. Install [adb](https://developer.android.com/tools/releases/platform-tools).
