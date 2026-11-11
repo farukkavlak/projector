@@ -1,6 +1,6 @@
 # Findings
 
-All verified on the device, 2026-11-10.
+Verified on the device on 2026-11-10, except where noted.
 
 ## Security
 

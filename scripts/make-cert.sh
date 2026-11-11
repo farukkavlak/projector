@@ -12,7 +12,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-IP="${1:-${DEV:-192.168.1.112}}"
+IP="${1:-${DEV:-192.168.1.50}}"
 IP="${IP%%:*}"                       # drop :5555 if DEV was used
 KEYDIR="${KEYDIR:-$HOME/.local/android/projector-cert}"
 OUT="$ROOT/panel/app/src/main/assets"

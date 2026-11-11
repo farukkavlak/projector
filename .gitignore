@@ -6,6 +6,8 @@ shots/
 *.idsig
 
 .DS_Store
+.idea/
+*.iml
 
 # Generated HTTPS certificate for the local projector (scripts/make-cert.sh)
 panel/app/src/main/assets/ca.crt

@@ -8,7 +8,7 @@ PACKAGES_FILE="$ROOT/config/packages.tsv"
 SETTINGS_FILE="$ROOT/config/settings.tsv"
 
 ADB="${ADB:-$(command -v adb || echo "$HOME/.local/android/platform-tools/adb")}"
-DEV="${DEV:-192.168.1.112:5555}"
+DEV="${DEV:-192.168.1.50:5555}"
 
 STOCK_LAUNCHER="com.htc.htclauncherhighenglishd08/com.htc.activity.HomeActivity"
 FLAUNCHER="me.efesser.flauncher/.MainActivity"

@@ -21,6 +21,12 @@ Findings: [docs/findings.md](docs/findings.md)
 
 Device check: [docs/checklist.md](docs/checklist.md)
 
+## Security
+
+The Panel has no login. Keep the projector on a trusted LAN and turn off network debugging
+when not in use. The device trusts the public AOSP platform key, so a build signed with it
+gets signature permissions; see [docs/findings.md](docs/findings.md).
+
 ## Setup
 
 1. Install [adb](https://developer.android.com/tools/releases/platform-tools).
@@ -30,7 +36,7 @@ Device check: [docs/checklist.md](docs/checklist.md)
 ## Usage
 
 ```sh
-export DEV=192.168.1.112:5555   # projector IP:port
+export DEV=192.168.1.50:5555   # projector IP:port
 export ADB=/path/to/adb         # if not in PATH
 
 scripts/apply.sh --dry-run      # preview
@@ -58,19 +64,20 @@ scripts/check.sh
 ```
 
 Open "Panel" once from the launcher. On a phone it has Remote, Picture and System tabs; on a
-wider screen it is a two-column layout. It works as a D-pad remote, can type into the focused
-field from the phone, lists installed apps with a filter, opens a video link in the matching app
-(YouTube, Kick, Prime, TV+, Twitch), uploads local videos and plays them in VLC (500 MB per file,
-2 GB total), shows the current video and position, can seek, keeps corner presets
-(export/import), and shows device status plus a live screenshot. System also has
-brightness/colour, auto keystone/focus switches, a focus nudge, LED switches and a power menu. Needs the Android SDK (`sdk.dir` in `panel/local.properties`).
+wider screen it is a two-column layout. It works as a D-pad remote and can type into the focused
+field from the phone. Remote also lists installed apps with a filter, opens a video link in the
+matching app (YouTube, Kick, Prime, TV+, Twitch), and uploads local videos to play in VLC
+(500 MB per file, 2 GB total). Picture keeps corner presets (export/import). System shows device
+status and a live screenshot, plus brightness/colour, auto keystone/focus switches, a focus
+nudge, LED switches and a power menu. Needs the Android SDK (`sdk.dir` in
+`panel/local.properties`).
 The sign script downloads the public AOSP platform key once, to `~/.local/android/platform-key`.
 An unsigned build still works, but a 4-corner apply restarts the screen for ~25 seconds.
 
 HTTPS runs on `https://<projector-ip>:8443` for the installable phone app. Download the CA from
 `http://<projector-ip>:8080/ca.crt`, install it as a CA certificate (Android asks for the screen
-lock), then open the HTTPS page and use Chrome's Install app. Sharing a YouTube link to the
-installed app opens it in SmartTube. Rerun `scripts/make-cert.sh <ip>` if the IP changes; the CA
+lock), then open the HTTPS page and use Chrome's Install app. Sharing a link to the installed
+app opens it in the matching app. Rerun `scripts/make-cert.sh <ip>` if the IP changes; the CA
 stays the same, so the phone does not need to trust a new one.
 
 - Install [FLauncher](https://gitlab.com/flauncher/flauncher) first. Without it, the stock launcher stays.

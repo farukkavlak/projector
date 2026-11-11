@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Save the projector's current state to snapshots/<date>/, with device
-# identifiers (serial numbers, MAC addresses) masked so it is safe to commit.
+# identifiers (serial numbers, MAC addresses, ADB GUID, DNS) masked so it is
+# safe to commit.
 #
 # Usage: scripts/snapshot.sh [output-dir]
 
@@ -17,6 +18,8 @@ redact() {
   sed -E \
     -e "${serial:+s/$serial/REDACTED/g}" \
     -e 's/^(\[ro\.pc\.MAC\]: \[).*\]$/\1REDACTED]/' \
+    -e 's/^(\[persist\.adb\.wifi\.guid\]: \[).*\]$/\1REDACTED]/' \
+    -e 's/^(\[net\.dns[0-9]*\]: \[).*\]$/\1REDACTED]/' \
     -e 's/([0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}/XX:XX:XX:XX:XX:XX/g'
 }
 
