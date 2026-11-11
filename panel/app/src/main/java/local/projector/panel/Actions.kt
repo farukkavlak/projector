@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.SystemClock
 import android.provider.Settings
 import android.view.KeyEvent
+import java.io.InputStream
 
 class Actions(private val context: Context) {
     private val audio = context.getSystemService(AudioManager::class.java)
@@ -17,8 +18,12 @@ class Actions(private val context: Context) {
     private val systemStatus = SystemStatus(context)
     private val power = Power(context)
     private val apps = Apps(context)
+    private val media = Media(context)
 
     fun preview(): ByteArray? = Preview.png()
+
+    fun upload(name: String?, mime: String?, input: InputStream, length: Long): String =
+        media.upload(name, mime, input, length)
 
     fun run(name: String, params: Map<String, String>): String = when (name) {
         "play" -> media(KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
@@ -61,6 +66,9 @@ class Actions(private val context: Context) {
         "text-clear" -> Keys.clear()
         "apps" -> apps.list()
         "app-open" -> apps.open(params["package"])
+        "media" -> media.status()
+        "media-play" -> media.play(id(params))
+        "media-delete" -> media.delete(id(params))
         "power" -> power.run(params["action"])
         "focus" -> Focus.nudge(params["dir"])
         "led" -> Leds.set(params["name"], params["on"] == "1")
@@ -88,6 +96,9 @@ class Actions(private val context: Context) {
 
     private fun minutes(params: Map<String, String>) =
         params["minutes"]?.toIntOrNull() ?: throw IllegalArgumentException("minutes missing")
+
+    private fun id(params: Map<String, String>) =
+        params["id"]?.toLongOrNull() ?: throw IllegalArgumentException("id missing")
 
     private fun media(code: Int): String {
         val now = SystemClock.uptimeMillis()

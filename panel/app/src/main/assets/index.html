@@ -228,6 +228,18 @@
   .app-grid button { padding: 10px 8px; font-size: 13px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .app-grid .hint { font-size: 13px; color: var(--muted); }
 
+  /* Local videos */
+  .upload { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
+  .upload input { font-size: 13px; }
+  .media-list { margin-top: 8px; }
+  .media-list .hint { font-size: 13px; color: var(--muted); }
+  .media-item { display: grid; grid-template-columns: 1fr auto auto auto; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
+  .media-item:last-child { border-bottom: 0; }
+  .media-item .name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+  .media-item .size { color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+  .media-item button { padding: 6px 9px; font-size: 12px; border-radius: 8px; }
+  progress { width: 100%; height: 6px; accent-color: var(--beam); margin-top: 8px; }
+
   /* Tabs (mobile) */
   .tabs {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: grid; grid-template-columns: repeat(3, 1fr);
@@ -383,6 +395,18 @@
     <section class="block">
       <h2>Apps</h2>
       <div class="app-grid" id="app-grid"><span class="hint">Loading…</span></div>
+    </section>
+
+    <section class="block">
+      <h2>Videos</h2>
+      <div class="upload">
+        <input id="media-file" type="file" accept="video/*">
+        <button id="media-upload" type="button">Upload</button>
+      </div>
+      <progress id="media-progress" max="100" value="0" hidden></progress>
+      <p class="note" id="media-usage">–</p>
+      <div class="media-list" id="media-list"></div>
+      <p class="note">Up to 500 MB per video and 2 GB total. Playback opens in VLC.</p>
     </section>
   </section>
 
@@ -548,6 +572,13 @@
 
   const $ = id => document.getElementById(id);
   const sleep = ms => new Promise(r => setTimeout(r, ms));
+  const sizeText = n => {
+    if (!n) return '0 B';
+    const units = ['B', 'KB', 'MB', 'GB'];
+    let v = n, i = 0;
+    while (v >= 1024 && i < units.length - 1) { v /= 1024; i++; }
+    return (v >= 10 || i === 0 ? Math.round(v) : v.toFixed(1)) + ' ' + units[i];
+  };
 
   async function api(path) {
     const r = await fetch('/api/' + path);
@@ -653,6 +684,90 @@
       box.textContent = 'Could not load apps.';
     }
   }
+
+  // ---- Local videos
+  const MAX_VIDEO = 500 * 1024 * 1024;
+  let uploading = false;
+  async function loadMedia() {
+    const list = $('media-list');
+    try {
+      const r = await api('media');
+      $('media-usage').textContent = sizeText(r.used) + ' / ' + sizeText(r.quota) +
+        ' · ' + sizeText(r.free) + ' free';
+      list.textContent = '';
+      const files = r.files || [];
+      if (!files.length) {
+        const hint = document.createElement('span');
+        hint.className = 'hint';
+        hint.textContent = 'No videos yet.';
+        list.append(hint);
+        return;
+      }
+      files.forEach(f => {
+        const row = document.createElement('div');
+        row.className = 'media-item';
+        const name = document.createElement('span');
+        name.className = 'name';
+        name.textContent = f.name;
+        name.title = f.name;
+        const size = document.createElement('span');
+        size.className = 'size';
+        size.textContent = sizeText(f.size);
+        const play = document.createElement('button');
+        play.type = 'button';
+        play.textContent = 'Play';
+        play.addEventListener('click', () =>
+          api('media-play?id=' + f.id).then(() => toast('Opening in VLC')).catch(fail));
+        const del = document.createElement('button');
+        del.type = 'button';
+        del.textContent = 'Delete';
+        del.addEventListener('click', () => deleteMedia(f));
+        row.append(name, size, play, del);
+        list.append(row);
+      });
+    } catch {
+      $('media-usage').textContent = 'Could not load videos.';
+    }
+  }
+  async function deleteMedia(f) {
+    if (!confirm('Delete "' + f.name + '"?')) return;
+    try {
+      await api('media-delete?id=' + f.id);
+      loadMedia();
+    } catch (e) { fail(e); }
+  }
+  $('media-upload').addEventListener('click', () => {
+    const file = $('media-file').files[0];
+    if (!file) { toast('Choose a video first', true); return; }
+    if (file.size > MAX_VIDEO) { toast('File is larger than 500 MB', true); return; }
+    if (uploading) return;
+    uploading = true;
+    $('media-upload').disabled = true;
+    const bar = $('media-progress');
+    bar.hidden = false;
+    bar.value = 0;
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/upload?name=' + encodeURIComponent(file.name));
+    xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+    xhr.upload.onprogress = e => {
+      if (e.lengthComputable) bar.value = 100 * e.loaded / e.total;
+    };
+    xhr.onload = () => {
+      bar.hidden = true;
+      uploading = false;
+      $('media-upload').disabled = false;
+      $('media-file').value = '';
+      if (xhr.status === 200) { toast('Uploaded'); loadMedia(); }
+      else { toast(xhr.responseText || 'Upload failed', true); }
+    };
+    xhr.onerror = () => {
+      bar.hidden = true;
+      uploading = false;
+      $('media-upload').disabled = false;
+      toast('Upload failed', true);
+    };
+    xhr.send(file);
+  });
 
   // ---- Now playing. The projector reports the session; the page ticks the clock.
   let now = null, nowAt = 0;
@@ -1058,13 +1173,7 @@
   });
 
   // ---- Status
-  const fmtBytes = n => {
-    if (!n) return '–';
-    const units = ['B', 'KB', 'MB', 'GB'];
-    let v = n, i = 0;
-    while (v >= 1024 && i < units.length - 1) { v /= 1024; i++; }
-    return (v >= 10 || i === 0 ? Math.round(v) : v.toFixed(1)) + ' ' + units[i];
-  };
+  const fmtBytes = n => n ? sizeText(n) : '–';
   const fmtUptime = s => {
     const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
     return d ? d + 'd ' + h + 'h' : h ? h + 'h ' + m + 'm' : m + 'm';
@@ -1223,6 +1332,7 @@
   setInterval(() => { if (!document.hidden) loadSystem(); }, 10000);
   loadPresets();
   loadApps();
+  loadMedia();
   api('status').then(showVolume).catch(fail);
   api('lamp').then(s => showLamp(s.lamp)).catch(fail);
   loadTimer();

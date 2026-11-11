@@ -11,8 +11,8 @@ android {
         applicationId = "local.projector.panel"
         minSdk = 30
         targetSdk = 30
-        versionCode = 13
-        versionName = "0.13"
+        versionCode = 14
+        versionName = "0.14"
     }
 
     compileOptions {
@@ -20,4 +20,8 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions { jvmTarget = "17" }
+}
+
+dependencies {
+    testImplementation("junit:junit:4.13.2")
 }

@@ -49,8 +49,9 @@ adb shell appops set local.projector.panel SYSTEM_ALERT_WINDOW allow
 
 Open "Panel" once from the launcher. On a phone it has Remote, Picture and System tabs; on a
 wider screen it is a two-column layout. It works as a D-pad remote, can type into the focused
-field from the phone, lists installed apps, shows the current video and position, can seek, keeps
-corner presets (export/import), and shows device status plus a live screenshot. System also has
+field from the phone, lists installed apps, uploads local videos and plays them in VLC (500 MB
+per file, 2 GB total), shows the current video and position, can seek, keeps corner presets
+(export/import), and shows device status plus a live screenshot. System also has
 brightness/colour, auto keystone/focus switches, a focus nudge, LED switches and a power menu. Needs the Android SDK (`sdk.dir` in `panel/local.properties`).
 The sign script downloads the public AOSP platform key once, to `~/.local/android/platform-key`.
 An unsigned build still works, but a 4-corner apply restarts the screen for ~25 seconds.

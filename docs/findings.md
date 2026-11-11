@@ -143,6 +143,16 @@ App in `panel/`, runs as a normal (non-system) app.
   type 12 = colour temperature (0..2). This is the path the OEM brightness screen uses.
 - Preset export/import/rename and the PWA install button are app-side only.
 
+### Local video (expected, device test pending)
+
+- Upload is a raw `POST /api/upload?name=...` with `Content-Length`; the body is streamed to
+  MediaStore, not buffered in memory.
+- Files go to `Movies/Panel` as app-owned media. No storage permission is needed for files the
+  app created itself. Limits: 500 MB per file, 2 GB total, 50 MB free-space margin.
+- A failed or short upload deletes the pending row.
+- Playback sends the content URI to VLC (`org.videolan.vlc`) with
+  `FLAG_GRANT_READ_URI_PERMISSION`. Without VLC it falls back to any player that accepts the URI.
+
 ## Now playing
 
 - `dumpsys media_session` lists the sessions. SmartTube publishes playback state
