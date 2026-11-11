@@ -10,7 +10,7 @@ object Links {
 
     private val YOUTUBE = Target(listOf("org.smarttube.stable"), "smarttube")
     private val KICK = Target(
-        listOf("com.kick.mobile", "com.kick.androidtv", "tv.kick", "com.kick.tv"),
+        listOf("com.kick.androidtv", "tv.kick", "com.kick.tv", "com.kick.mobile"),
         "kick",
     )
     private val PRIME = Target(
@@ -18,7 +18,7 @@ object Links {
         "amazonvideo",
     )
     private val TVPLUS = Target(
-        listOf("com.turkcell.ott", "com.turkcell.tvplus", "com.ttech.tvplus"),
+        listOf("com.turkcell.tvplus", "com.turkcell.ott.tv", "com.ttech.tvplus", "com.turkcell.ott"),
         "tvplus",
     )
     private val TWITCH = Target(listOf("tv.twitch.android.app"), "twitch")

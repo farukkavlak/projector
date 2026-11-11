@@ -1,5 +1,7 @@
 # projector
 
+[![build](https://github.com/farukkavlak/projector/actions/workflows/build.yml/badge.svg)](https://github.com/farukkavlak/projector/actions/workflows/build.yml)
+
 Debloat and control a MUTU HY320 Mini Android projector over Wi-Fi ADB. No root.
 
 | Before | After |
@@ -49,6 +51,12 @@ adb install -r app-platform.apk
 adb shell appops set local.projector.panel SYSTEM_ALERT_WINDOW allow
 ```
 
+Build and test without a device:
+
+```sh
+scripts/check.sh
+```
+
 Open "Panel" once from the launcher. On a phone it has Remote, Picture and System tabs; on a
 wider screen it is a two-column layout. It works as a D-pad remote, can type into the focused
 field from the phone, lists installed apps with a filter, opens a video link in the matching app
@@ -76,5 +84,5 @@ config/     packages and settings to change
 scripts/    apply, restore, snapshot, lamp, sign-panel, make-cert
 snapshots/  device dumps
 panel/      Kotlin app: web remote on port 8080
-docs/       findings, images
+docs/       findings, checklist, images
 ```
