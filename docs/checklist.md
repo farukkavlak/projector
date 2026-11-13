@@ -52,9 +52,16 @@ Open "Panel" once from the launcher and note the IP.
 
 - The Apps list loads; the filter narrows it; tapping an app opens it.
 - Paste a YouTube link: it opens in SmartTube.
-- Paste a Kick link: it opens in the Kick app, or at least its main screen.
+- Paste a Kick link: it opens Kick. Kick is leanback-only; tap through the Apps list.
 - Paste a TV+ link: it opens TV+.
 - Repeat for Prime if it is installed.
+
+## Kick
+
+- Open Kick; a live stream should start from the home carousel.
+- Search: navigate to Categories, then left twice and OK. The custom keyboard is D-pad only;
+  injected text does not reach it.
+- A `kick.com` link opens the app's main screen, not the channel.
 
 ## TV+
 

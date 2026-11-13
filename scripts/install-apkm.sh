@@ -33,14 +33,33 @@ else
 fi
 
 abi_us="${abi//-/_}"
-case "$dpi" in
-  160) dpi_name=mdpi ;;
-  240) dpi_name=hdpi ;;
-  320) dpi_name=xhdpi ;;
-  480) dpi_name=xxhdpi ;;
-  640) dpi_name=xxxhdpi ;;
-  *)   dpi_name="" ;;
-esac
+dpi_value() {
+  case "$1" in
+    mdpi) echo 160 ;;
+    hdpi) echo 240 ;;
+    xhdpi) echo 320 ;;
+    xxhdpi) echo 480 ;;
+    xxxhdpi) echo 640 ;;
+    *) echo 0 ;;
+  esac
+}
+density_split=""
+if [[ -n "$dpi" ]]; then
+  best=99999
+  for f in "$tmp"/split_config.mdpi.apk "$tmp"/split_config.hdpi.apk "$tmp"/split_config.xhdpi.apk \
+           "$tmp"/split_config.xxhdpi.apk "$tmp"/split_config.xxxhdpi.apk; do
+    [[ -e "$f" ]] || continue
+    name="${f##*/}"
+    key="${name#split_config.}"
+    key="${key%.apk}"
+    value="$(dpi_value "$key")"
+    diff=$(( value > dpi ? value - dpi : dpi - value ))
+    if (( diff < best )); then
+      best=$diff
+      density_split="$f"
+    fi
+  done
+fi
 
 files=("$tmp/base.apk")
 for f in "$tmp"/split_config.*.apk; do
@@ -51,7 +70,7 @@ for f in "$tmp"/split_config.*.apk; do
       [[ "$name" == "split_config.${abi_us}.apk" ]] && files+=("$f")
       ;;
     split_config.mdpi.apk|split_config.hdpi.apk|split_config.xhdpi.apk|split_config.xxhdpi.apk|split_config.xxxhdpi.apk)
-      [[ -n "$dpi_name" && "$name" == "split_config.${dpi_name}.apk" ]] && files+=("$f")
+      [[ -n "$density_split" && "$f" == "$density_split" ]] && files+=("$f")
       ;;
     *)
       files+=("$f")

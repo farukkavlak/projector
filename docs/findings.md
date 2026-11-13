@@ -180,9 +180,14 @@ App in `panel/`, runs as a normal (non-system) app.
 
 ### Streaming apps
 
-- Kick: the Android TV 1.10.0 arm-v7a build needs API 32; this device is API 30, so the install
-  fails with `INSTALL_FAILED_OLDER_SDK`. Use the 1.9.0 `arm64-v8a + armeabi-v7a` bundle
-  (Android 8.0+); package `com.kick.mobile`. Install is still pending.
+- Kick: 1.9.0 (`com.kick.mobile`) is installed with `scripts/install-apkm.sh`. The bundle has no
+  240dpi split, so the script picks the nearest density (xhdpi); without it the app crashed
+  inflating `exo_player_control_view` with `Resources$NotFoundException`.
+- Kick is leanback-only. Apps now falls back to `CATEGORY_LEANBACK_LAUNCHER`, and a link opens
+  its main screen when the app rejects the web URL.
+- Kick streams play. The app is D-pad only. The search screen opens from the nav (Categories ->
+  left -> left -> OK), but its custom keyboard ignores `sendStringSync` and `input text`; letters
+  must be selected with the D-pad.
 - TV+: `com.turkcell.ott` 4.8.0 (Android TV, Android 8.0+) is installed. Link routing opens it.
   A profile was already signed in; home, series detail and VOD playback work. The player uses
   Widevine and the hardware decoder, and `screencap` is blocked during playback (secure surface).

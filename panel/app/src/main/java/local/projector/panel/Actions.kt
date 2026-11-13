@@ -148,9 +148,8 @@ class Actions(private val context: Context) {
             context.startActivity(intent)
         } catch (e: Exception) {
             // The app may not accept web URLs; open its main screen instead.
-            val home = pkg?.let { context.packageManager.getLaunchIntentForPackage(it) }
-                ?: throw IllegalStateException("no app can open this link", e)
-            context.startActivity(home.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            val fallback = pkg ?: throw IllegalStateException("no app can open this link", e)
+            apps.open(fallback)
         }
         return "ok"
     }
