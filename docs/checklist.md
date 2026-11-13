@@ -25,9 +25,17 @@ Open "Panel" once from the launcher and note the IP.
 - D-pad, back/home/menu, volume, play/pause and mute work.
 - The screenshot on System refreshes.
 
+## UI
+
+- 390, 768 and 1280px wide: no horizontal scroll.
+- The fixed bottom bar does not cover the last block when scrolled to the end.
+- Tabs switch Control, Library, Display and System; the active state is clear.
+- On desktop the sidebar switches the same views.
+- Buttons and inputs are at least 44px tall where they are primary targets.
+
 ## Screen view
 
-- The picture on Remote updates about once a second.
+- The picture on Control updates about once a second.
 - Tap a button in an app; if nothing happens, switch to D-pad and tap the matching edge.
 - Drag a list and check that it scrolls.
 - Tap a text field, then type from the phone.

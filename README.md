@@ -23,6 +23,8 @@ Device check: [docs/checklist.md](docs/checklist.md)
 
 Screen control: [docs/screen-control.md](docs/screen-control.md)
 
+UI notes: [docs/ui.md](docs/ui.md)
+
 ## Security
 
 The Panel has no login. Keep the projector on a trusted LAN and turn off network debugging
@@ -66,15 +68,15 @@ Build and test without a device:
 scripts/check.sh
 ```
 
-Open "Panel" once from the launcher. On a phone it has Remote, Picture and System tabs; on a
-wider screen it is a two-column layout. Remote has a live screen view: tap or drag the picture to
-control the projector, or switch to D-pad mode if the app ignores touch. It also works as a D-pad
-remote and can type into the focused field from the phone. Remote lists installed apps with a
-filter, opens a video link in the matching app (YouTube, Kick, Prime, TV+, Twitch), and uploads
-local videos to play in VLC (500 MB per file, 2 GB total). Picture keeps corner presets
-(export/import). System shows device status and a live screenshot, plus brightness/colour, auto
-keystone/focus switches, a focus nudge, LED switches and a power menu. Needs the Android SDK
-(`sdk.dir` in `panel/local.properties`).
+Open "Panel" once from the launcher. On a phone it has Control, Library, Display and System tabs; on
+a wider screen it is a sidebar with the same sections. Control has a live screen view: tap or drag
+the picture to control the projector, or switch to D-pad mode if the app ignores touch. It also
+works as a D-pad remote, types into the focused field from the phone, and has playback, volume and
+sleep controls. Library lists installed apps with a filter, opens a video link in the matching app
+(YouTube, Kick, Prime, TV+, Twitch), and uploads local videos to play in VLC (500 MB per file, 2 GB
+total). Display keeps corner presets and the picture/projector settings. System shows device status,
+a live screenshot, power and PWA setup. Needs the Android SDK (`sdk.dir` in
+`panel/local.properties`).
 The sign script downloads the public AOSP platform key once, to `~/.local/android/platform-key`.
 An unsigned build still works, but a 4-corner apply restarts the screen for ~25 seconds.
 
