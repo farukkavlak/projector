@@ -36,7 +36,8 @@ Open "Panel" once from the launcher and note the IP.
 ## Screen view
 
 - The picture on Control updates about once a second.
-- Tap a button in an app; if nothing happens, switch to D-pad and tap the matching edge.
+- Tap a button in an app; if nothing happens (FLauncher ignored it), switch to D-pad and tap the
+  matching edge. D-pad mode is the reliable path on TV UIs.
 - Drag a list and check that it scrolls.
 - Tap a text field, then type from the phone.
 
@@ -52,7 +53,15 @@ Open "Panel" once from the launcher and note the IP.
 - The Apps list loads; the filter narrows it; tapping an app opens it.
 - Paste a YouTube link: it opens in SmartTube.
 - Paste a Kick link: it opens in the Kick app, or at least its main screen.
-- Repeat for Prime and TV+ if those apps are installed.
+- Paste a TV+ link: it opens TV+.
+- Repeat for Prime if it is installed.
+
+## TV+
+
+- Select a profile; the home screen loads.
+- Open a series or film and start playback. Video should start; a screenshot during playback may
+  be empty because the player is a secure surface.
+- Go back and stop playback.
 
 ## Local video
 

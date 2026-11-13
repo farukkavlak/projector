@@ -154,8 +154,8 @@ App in `panel/`, runs as a normal (non-system) app.
   launched Settings.
 - Links: host map for YouTube, Kick, Prime, TV+, Twitch, Netflix and Disney+. Exact package names
   are tried first, then a package-name keyword. A known app that rejects a web URL falls back to
-  its main screen. Tested: a YouTube link opened SmartTube. Kick/Prime/TV+ are not installed, so
-  those routes still need a device check; an unknown link returns 400.
+  its main screen. Tested: YouTube opened SmartTube and a TV+ link opened TV+. Kick and Prime are
+  not installed, so those routes still need a device check; an unknown link returns 400.
 - Upload is a raw `POST /api/upload?name=...` with `Content-Length`; the body is streamed to
   MediaStore, not buffered in memory. The copy reads exactly `Content-Length` bytes, so it does
   not wait for the client to close the connection.
@@ -166,23 +166,28 @@ App in `panel/`, runs as a normal (non-system) app.
   `FLAG_GRANT_READ_URI_PERMISSION`. Without VLC it falls back to any player that accepts the URI.
   Tested with VLC 3.7.1 (armeabi-v7a): upload, list, play and delete worked.
 
-### Screen view (expected, device test pending)
+### Screen view
 
 - Capture uses `SurfaceControl.screenshot` through reflection; the live view polls `/preview.jpg`
-  at about 1 fps and serializes captures.
+  at about 1 fps and serializes captures. Tested: the view shows FLauncher.
 - Input uses `Instrumentation.sendPointerSync` with `SOURCE_TOUCHSCREEN`; `INJECT_EVENTS` comes
   from the platform signature. Taps and swipes map the picture rectangle to 1280x720.
-- Many TV apps ignore touch. The D-pad mode maps screen zones to arrow keys and the center to OK.
-- The screenshot is unwarped and DRM video may be a black surface.
+- FLauncher ignored an injected tap on the SmartTube card. The D-pad fallback launched Settings,
+  so treat D-pad as the reliable path; touch may work in apps that handle pointer input.
+- The D-pad mode maps screen zones to arrow keys and the center to OK.
+- The screenshot is unwarped. During TV+ playback `screencap` returns 0 bytes (secure video
+  surface), so DRM video is not visible in the Panel.
 
 ### Streaming apps
 
 - Kick: the Android TV 1.10.0 arm-v7a build needs API 32; this device is API 30, so the install
   fails with `INSTALL_FAILED_OLDER_SDK`. Use the 1.9.0 `arm64-v8a + armeabi-v7a` bundle
-  (Android 8.0+); package `com.kick.mobile`.
-- TV+: `com.turkcell.ott` 4.8.0 (Android TV, Android 8.0+) installs and opens the login screen.
-  Link routing opens it; login and playback are untested. Its UI is Turkish even with an en-US
-  system locale.
+  (Android 8.0+); package `com.kick.mobile`. Install is still pending.
+- TV+: `com.turkcell.ott` 4.8.0 (Android TV, Android 8.0+) is installed. Link routing opens it.
+  A profile was already signed in; home, series detail and VOD playback work. The player uses
+  Widevine and the hardware decoder, and `screencap` is blocked during playback (secure surface).
+  The QR/phone login flow was not retested because the app was already signed in. UI is Turkish
+  even with an en-US system locale.
 
 ## Now playing
 
