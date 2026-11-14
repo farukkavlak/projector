@@ -75,7 +75,7 @@ works as a D-pad remote, types into the focused field from the phone, and has pl
 sleep controls. Library lists installed apps with a filter, opens a video link in the matching app
 (YouTube, Kick, Prime, TV+, Twitch), and uploads local videos to play in VLC (500 MB per file, 2 GB
 total). Display keeps corner presets and the picture/projector settings. System shows device status,
-a live screenshot, power and PWA setup. Needs the Android SDK (`sdk.dir` in
+power and PWA setup. Needs the Android SDK (`sdk.dir` in
 `panel/local.properties`).
 The sign script downloads the public AOSP platform key once, to `~/.local/android/platform-key`.
 An unsigned build still works, but a 4-corner apply restarts the screen for ~25 seconds.
@@ -97,5 +97,5 @@ config/     packages and settings to change
 scripts/    apply, restore, snapshot, lamp, sign-panel, make-cert, install-apkm
 snapshots/  device dumps
 panel/      Kotlin app: web remote on port 8080
-docs/       findings, checklist, images
+docs/       findings, checklist, UI notes, images
 ```
