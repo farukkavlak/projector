@@ -14,154 +14,163 @@
   :root {
     --night: #0e0f11;
     --surface: #17181b;
-    --surface-2: #1d1f23;
-    --line: #26282d;
+    --surface-2: #212327;
+    --line: #2a2c31;
     --text: #f4f1ea;
     --muted: #9a9da5;
     --beam: #e8a33d;
     --lamp: #f0b35b;
     --bad: #e06c5f;
-    --radius: 12px;
+    --gutter: 16px;
+    --tabbar: 56px;
   }
   * { box-sizing: border-box; }
   [hidden] { display: none !important; }
   html { -webkit-text-size-adjust: 100%; }
   body {
     margin: 0; background: var(--night); color: var(--text);
-    font: 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, Roboto, sans-serif;
-    padding: 0 18px calc(104px + env(safe-area-inset-bottom));
+    font: 14px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, Roboto, sans-serif;
+    padding: 0 var(--gutter) calc(var(--tabbar) + 24px + env(safe-area-inset-bottom));
   }
-  h1, h2, p { margin: 0; }
-  h2 {
-    font-size: 12px; font-weight: 600; letter-spacing: .01em;
-    color: var(--muted); margin-bottom: 10px;
-  }
-  button {
-    font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--line);
-    border-radius: 10px; padding: 10px 14px; cursor: pointer; touch-action: manipulation;
-  }
-  button:hover { border-color: #3a3d44; }
-  button:active { background: #23252a; }
-  button:disabled { opacity: .5; cursor: default; }
+  h2, p { margin: 0; }
+  h2 { font-size: 12px; font-weight: 600; color: var(--muted); margin: 0 0 8px; }
   :focus-visible { outline: 2px solid var(--beam); outline-offset: 2px; }
-  input:not([type=range]) {
-    font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--line);
-    border-radius: 10px; padding: 10px 12px; min-width: 0;
+
+  /* Controls */
+  button, .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    min-height: 40px; padding: 0 14px; border: 0; border-radius: 8px;
+    font: inherit; font-size: 13px; color: var(--text); background: var(--surface-2);
+    text-decoration: none; cursor: pointer; touch-action: manipulation; white-space: nowrap;
+  }
+  button:hover, .btn:hover { background: #2a2c31; }
+  button:active { background: #31343a; }
+  button:disabled { opacity: .45; cursor: default; background: var(--surface-2); }
+  .primary, .switch.on, .seg .on { background: var(--beam); color: var(--night); font-weight: 600; }
+  .primary:hover, .switch.on:hover, .seg .on:hover { background: #f0b04f; }
+  .danger { color: var(--bad); }
+  .small { min-height: 32px; padding: 0 10px; font-size: 12px; }
+  input:not([type=range]):not([type=file]) {
+    font: inherit; color: var(--text); background: var(--night); border: 1px solid var(--line);
+    border-radius: 8px; height: 40px; padding: 0 12px; min-width: 0; width: 100%;
   }
   input::placeholder { color: #6f737c; }
   input[type=range] { accent-color: var(--beam); }
+  input[type=file] { color: var(--muted); font-size: 12px; min-width: 0; }
+  input[type=file]::file-selector-button {
+    font: inherit; color: var(--text); background: var(--surface-2); border: 0;
+    border-radius: 8px; height: 32px; padding: 0 10px; margin-right: 10px; cursor: pointer;
+  }
   .bar { -webkit-appearance: none; appearance: none; width: 100%; height: 24px; margin: 0; background: transparent; display: block; }
   .bar::-webkit-slider-runnable-track {
     height: 4px; border-radius: 2px;
     background: linear-gradient(to right, var(--beam) var(--p, 0%), var(--line) var(--p, 0%));
   }
   .bar::-webkit-slider-thumb {
-    -webkit-appearance: none; width: 15px; height: 15px; margin-top: -5.5px;
+    -webkit-appearance: none; width: 16px; height: 16px; margin-top: -6px;
     border-radius: 50%; background: var(--beam); border: 0;
   }
   .bar::-moz-range-track { height: 4px; border-radius: 2px; background: var(--line); }
   .bar::-moz-range-progress { height: 4px; border-radius: 2px; background: var(--beam); }
-  .bar::-moz-range-thumb { width: 15px; height: 15px; border: 0; border-radius: 50%; background: var(--beam); }
+  .bar::-moz-range-thumb { width: 16px; height: 16px; border: 0; border-radius: 50%; background: var(--beam); }
   .bar:disabled { opacity: .35; }
+  progress { width: 100%; height: 4px; accent-color: var(--beam); }
+  kbd { font: inherit; border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; color: var(--text); }
 
   /* Header */
   .top {
     position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between;
-    gap: 12px; padding: max(12px, env(safe-area-inset-top)) 0 10px;
+    gap: 12px; min-height: 52px; padding-top: env(safe-area-inset-top);
     background: var(--night); border-bottom: 1px solid var(--line);
   }
-  .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: -.01em; }
-  .brand img { width: 24px; height: 24px; border-radius: 6px; display: block; }
-  .lamp-pill {
-    display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 8px;
-    background: var(--surface); border: 1px solid var(--line); font-size: 13px;
-  }
-  .lamp-pill .dot { width: 8px; height: 8px; border-radius: 50%; background: #4a4d55; }
-  .lamp-pill.on .dot { background: var(--lamp); box-shadow: 0 0 8px var(--lamp); }
+  .brand { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px; }
+  .brand img { width: 22px; height: 22px; border-radius: 5px; display: block; }
+  .lamp-pill { min-height: 32px; padding: 0 12px; gap: 8px; font-size: 12px; }
+  .lamp-pill .dot { width: 7px; height: 7px; border-radius: 50%; background: #4a4d55; }
+  .lamp-pill.on .dot { background: var(--lamp); }
   .lamp-pill.warming { color: var(--lamp); }
   .lamp-pill.warming .dot { background: var(--lamp); animation: pulse 1.2s infinite; }
   .lamp-pill .what { font-weight: 600; }
   @keyframes pulse { 50% { opacity: .35; } }
 
-  /* Panels */
-  main { max-width: 1120px; margin: 0 auto; }
-  .panel { display: none; }
+  /* Layout: a panel is a stack of blocks; each block is a label and a card. */
+  main { max-width: 1080px; }
+  .panel { display: none; padding-top: 16px; }
   .panel.active { display: block; }
-  .panel > :first-child { margin-top: 20px; }
-  .block { margin-top: 20px; }
+  .col { display: contents; }
+  .block + .block, .col + .col > .block:first-child { margin-top: 20px; }
+  .card { background: var(--surface); border-radius: 12px; padding: 12px; }
+  .card > * + * { margin-top: 12px; }
+  .card.flush { padding: 0; overflow: hidden; }
+  .card.field > *, .card.navigate > *, .sleep > * { margin-top: 0; }
+  .block > .note { margin-top: 8px; }
+  .row-tools { display: flex; flex-wrap: wrap; gap: 8px; }
+  .row-tools .grow { flex: 1; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .grid-4 button { padding: 0 4px; }
+  .field { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+  .note { font-size: 12px; color: var(--muted); }
+  .warn { color: var(--lamp); }
+  .hint { font-size: 12px; color: var(--muted); }
+  .keys { display: none; font-size: 12px; color: var(--muted); margin-top: 12px; }
 
-  /* Player */
-  .player {
-    display: grid; grid-template-columns: 60px 1fr; gap: 12px;
-    padding: 14px; margin-top: 20px; border-radius: var(--radius); background: var(--surface);
+  /* Screen view */
+  .mirror {
+    position: relative; aspect-ratio: 16 / 9; background: #000; display: grid; place-items: center;
   }
-  .player .art {
-    grid-column: 1; grid-row: 1; width: 60px; height: 60px; border-radius: 8px; overflow: hidden;
-    background: linear-gradient(135deg, #23252a, #3a2c1a);
-  }
+  .mirror { touch-action: none; cursor: crosshair; }
+  .mirror img { width: 100%; height: 100%; object-fit: contain; display: block; user-select: none; -webkit-user-select: none; }
+  .mirror span { position: absolute; color: var(--muted); font-size: 12px; pointer-events: none; }
+  .flush > .row-tools { margin: 0; padding: 8px; align-items: center; }
+
+  /* Now playing */
+  .player { display: grid; grid-template-columns: 56px 1fr; gap: 10px 12px; }
+  .player > * + * { margin-top: 0; }
+  .player .art { width: 56px; height: 56px; border-radius: 8px; overflow: hidden; background: var(--surface-2); }
   .player .art img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .track { grid-column: 2; grid-row: 1; min-width: 0; }
+  .player:has(#now-art[hidden]) { grid-template-columns: 1fr; }
+  .player .art:has(img[hidden]) { display: none; }
+  .track { min-width: 0; align-self: center; }
   .track-top { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--muted); }
   .track-title {
-    margin-top: 3px; font-size: 15px; font-weight: 600; line-height: 1.3;
+    margin-top: 2px; font-size: 14px; font-weight: 600; line-height: 1.3;
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   }
-  .track-artist { margin-top: 2px; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .seek { grid-column: 1 / -1; grid-row: 2; margin-top: 6px; }
+  .track-artist { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .seek, .seek-nav { grid-column: 1 / -1; }
   .times { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
-  .seek-nav { grid-column: 1 / -1; grid-row: 3; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; }
-  .seek-nav button { padding: 8px 0; font-size: 12px; border-radius: 8px; color: var(--muted); background: transparent; }
+  .seek-nav button { color: var(--muted); }
 
-  /* Transport and volume */
-  .transport { display: flex; align-items: center; justify-content: center; gap: 20px; margin: 18px 0 14px; }
-  .transport button { display: grid; place-items: center; width: 50px; height: 50px; border-radius: 50%; padding: 0; }
-  .transport .play { width: 64px; height: 64px; background: var(--beam); color: var(--night); border: 0; }
-  .transport svg { width: 21px; height: 21px; fill: currentColor; }
-  .transport .play svg { width: 25px; height: 25px; }
-  .volume { display: grid; grid-template-columns: 44px 1fr auto; gap: 12px; align-items: center; }
-  .volume button { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; padding: 0; }
-  .volume svg { width: 19px; height: 19px; fill: currentColor; }
-  .vol-text { font-size: 12px; color: var(--muted); min-width: 52px; text-align: right; font-variant-numeric: tabular-nums; }
+  /* Playback */
+  .transport { display: flex; align-items: center; justify-content: center; gap: 16px; }
+  .transport button, .volume button { width: 44px; height: 44px; padding: 0; border-radius: 50%; }
+  .transport .play { width: 56px; height: 56px; }
+  .transport svg, .volume svg { width: 20px; height: 20px; fill: currentColor; }
+  .transport .play svg { width: 24px; height: 24px; }
+  .volume { display: grid; grid-template-columns: 44px 1fr 48px; gap: 12px; align-items: center; }
+  .vol-text { font-size: 12px; color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
 
   /* Navigate */
-  .navigate { display: grid; grid-template-columns: 140px 1fr; gap: 12px; align-items: center; }
-  .dpad { display: grid; grid-template-columns: repeat(3, 44px); grid-template-rows: repeat(3, 44px); gap: 4px; }
-  .dpad button { padding: 0; border-radius: 9px; font-size: 15px; }
+  .navigate { display: grid; grid-template-columns: auto 1fr; gap: 12px; }
+  .dpad { display: grid; grid-template-columns: repeat(3, 48px); grid-template-rows: repeat(3, 48px); gap: 6px; }
+  .dpad button { padding: 0; min-height: 0; font-size: 16px; }
   .dpad .up { grid-column: 2; grid-row: 1; }
   .dpad .left { grid-column: 1; grid-row: 2; }
-  .dpad .ok { grid-column: 2; grid-row: 2; font-weight: 600; }
+  .dpad .ok { grid-column: 2; grid-row: 2; font-weight: 600; font-size: 13px; }
   .dpad .right { grid-column: 3; grid-row: 2; }
   .dpad .down { grid-column: 2; grid-row: 3; }
-  .navkeys { display: grid; gap: 6px; }
-  .navkeys button { padding: 9px 10px; font-size: 13px; }
-
-  /* Switches and hardware rows */
-  .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
-  .row:last-child { border-bottom: 0; }
-  .switch { padding: 6px 11px; font-size: 13px; border-radius: 8px; }
-  .switch.on { background: var(--beam); color: var(--night); border-color: var(--beam); }
-  .step { display: inline-flex; align-items: center; gap: 8px; }
-  .step button { width: 34px; height: 34px; padding: 0; border-radius: 8px; }
-  .step b { min-width: 34px; text-align: center; font-variant-numeric: tabular-nums; font-weight: 600; }
-  .leds { display: inline-flex; gap: 6px; }
-  .leds button { padding: 6px 9px; font-size: 12px; border-radius: 7px; }
-  .leds button.on { background: var(--beam); color: var(--night); border-color: var(--beam); }
+  .navkeys { display: grid; grid-template-rows: repeat(3, 1fr); gap: 6px; }
+  .navkeys button { min-height: 0; }
 
   /* Sleep timer */
   .sleep .sleep-on, .sleep.active .sleep-off { display: none; }
   .sleep.active .sleep-on { display: block; }
-  .chips { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-  .chips button { padding: 10px 4px; font-size: 13px; }
-  .countdown { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
-  .countdown b { font-size: 30px; font-weight: 600; color: var(--lamp); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
-  .countdown span { font-size: 12px; color: var(--muted); text-align: right; }
-  .link { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+  .countdown { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+  .countdown b { font-size: 28px; font-weight: 600; color: var(--lamp); font-variant-numeric: tabular-nums; }
+  .countdown span { font-size: 12px; color: var(--muted); }
 
-  /* Picture */
-  .editor {
-    position: relative; border-radius: var(--radius); background: var(--surface);
-    border: 1px solid var(--line); padding: 10px;
-  }
+  /* Picture shape */
+  .editor { position: relative; border-radius: 8px; background: var(--night); }
   .editor svg { display: block; width: 100%; height: auto; touch-action: none; user-select: none; -webkit-user-select: none; }
   .frame { fill: none; stroke: var(--line); stroke-width: 3; stroke-dasharray: 10 8; }
   .shape { fill: rgba(232, 163, 61, .12); stroke: var(--beam); stroke-width: 4; stroke-linejoin: round; }
@@ -170,139 +179,125 @@
   .handle.sel { fill: var(--beam); }
   .hit { fill: transparent; cursor: grab; }
   .busy-cover {
-    position: absolute; inset: 0; border-radius: var(--radius); display: none;
-    place-items: center; background: rgba(14, 15, 17, .92); text-align: center; padding: 20px;
+    position: absolute; inset: 0; border-radius: 8px; display: none; place-items: center;
+    background: rgba(14, 15, 17, .92); text-align: center; padding: 16px; font-size: 13px;
   }
   .editor.busy .busy-cover { display: grid; }
-  .busy-cover b { font-size: 30px; display: block; font-variant-numeric: tabular-nums; }
-  .corner-bar { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; margin-top: 12px; }
+  .busy-cover b { font-size: 28px; display: block; font-variant-numeric: tabular-nums; }
+  .corner-bar { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; }
   .corner-info { font-size: 12px; color: var(--muted); }
   .corner-info strong { color: var(--text); font-weight: 600; }
-  .pad { display: grid; grid-template-columns: repeat(3, 40px); grid-template-rows: repeat(2, 36px); gap: 4px; }
-  .pad button { padding: 0; font-size: 15px; }
+  .pad { display: grid; grid-template-columns: repeat(3, 36px); grid-template-rows: repeat(2, 36px); gap: 4px; }
+  .pad button { padding: 0; min-height: 0; }
   .pad .up { grid-column: 2; }
   .pad .left { grid-column: 1; grid-row: 2; }
   .pad .down { grid-column: 2; grid-row: 2; }
   .pad .right { grid-column: 3; grid-row: 2; }
-  .apply-row { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; margin-top: 12px; }
-  .apply { background: var(--beam); color: var(--night); border: 0; font-weight: 600; }
-  .apply:disabled { background: var(--surface); color: var(--muted); border: 1px solid var(--line); opacity: 1; }
-  .note { font-size: 12px; color: var(--muted); margin-top: 8px; }
-  .warn { color: var(--lamp); }
-
-  /* Presets */
-  .presets { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); }
-  .preset-save { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
-  .preset-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-  .preset-list .hint { font-size: 12px; color: var(--muted); }
-  .preset { display: inline-flex; align-items: stretch; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
-  .preset button { border: 0; border-radius: 0; background: var(--surface); padding: 8px 10px; }
-  .preset .del { color: var(--muted); border-left: 1px solid var(--line); padding: 8px 9px; }
-  .preset .ren { color: var(--muted); border-left: 1px solid var(--line); padding: 8px 8px; }
-  .preset-tools { display: flex; gap: 8px; margin-top: 8px; }
-  .preset-tools button { flex: 1; font-size: 12px; color: var(--muted); }
-  .factory { margin-top: 10px; width: 100%; color: var(--muted); background: transparent; }
+  .apply-row { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; }
+  .apply:disabled { background: var(--surface-2); color: var(--muted); font-weight: 400; }
 
   /* Sliders */
-  .slider { margin-top: 18px; }
   .slider label { display: flex; justify-content: space-between; font-size: 13px; }
   .slider output { color: var(--muted); font-variant-numeric: tabular-nums; }
-  .slider input { width: 100%; height: 28px; margin: 8px 0 2px; }
+  .slider .bar { margin: 4px 0 0; }
   .ends { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
 
-  /* Preview */
-  .preview { position: relative; aspect-ratio: 16 / 9; max-width: 720px; border-radius: var(--radius); overflow: hidden; background: #000; border: 1px solid var(--line); display: grid; place-items: center; }
-  .preview img { width: 100%; height: 100%; object-fit: contain; display: block; }
-  .preview span { position: absolute; color: var(--muted); font-size: 12px; }
+  /* Presets */
+  .preset-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .preset { display: inline-flex; border-radius: 8px; overflow: hidden; background: var(--surface-2); }
+  .preset button { border-radius: 0; min-height: 32px; padding: 0 10px; font-size: 12px; }
+  .preset .ren, .preset .del { color: var(--muted); padding: 0 8px; border-left: 1px solid var(--surface); }
 
-  /* Screen view */
-  .mirror { position: relative; aspect-ratio: 16 / 9; border-radius: var(--radius); overflow: hidden; background: #000; border: 1px solid var(--line); display: grid; place-items: center; touch-action: none; cursor: crosshair; }
-  .mirror img { width: 100%; height: 100%; object-fit: contain; display: block; user-select: none; -webkit-user-select: none; }
-  .mirror span { position: absolute; color: var(--muted); font-size: 12px; pointer-events: none; }
+  /* Settings list */
+  .list { padding: 0 12px; }
+  .list > * + * { margin-top: 0; }
+  .row {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    min-height: 48px; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 13px;
+  }
+  .row:last-child { border-bottom: 0; }
+  .row.stack { display: block; padding: 10px 0 6px; }
+  .row.stack .head { display: flex; justify-content: space-between; }
+  .row output { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .switch { min-width: 52px; }
+  .step { display: inline-flex; align-items: center; gap: 4px; }
+  .step button { width: 32px; padding: 0; }
+  .step b { min-width: 40px; text-align: center; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .seg { display: inline-flex; gap: 4px; }
 
   /* Status */
-  .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
-  .fact { display: flex; justify-content: space-between; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); min-width: 0; }
-  .fact span { color: var(--muted); font-size: 12px; }
-  .fact b { font-weight: 600; font-size: 12px; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .facts { display: grid; grid-template-columns: 1fr 1fr; column-gap: 20px; }
+  .facts > * + * { margin-top: 0; }
+  .fact { display: flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); min-width: 0; font-size: 12px; }
+  .fact span { color: var(--muted); }
+  .fact b { font-weight: 600; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .fact.wide { grid-column: 1 / -1; }
+  .fact:nth-last-child(1) { border-bottom: 0; }
   .fact b.hot { color: var(--bad); }
-  .more { display: flex; gap: 8px; flex-wrap: wrap; }
-  .more .btn {
-    display: inline-flex; align-items: center; text-decoration: none; color: var(--text);
-    background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px;
-  }
-  .more .btn:hover { border-color: #3a3d44; }
-  .app-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; }
-  .app-grid button { padding: 10px 8px; font-size: 12px; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .app-grid .hint { font-size: 12px; color: var(--muted); }
-  #app-filter { width: 100%; margin-bottom: 8px; }
 
-  /* Local videos */
+  /* Apps and videos */
+  .app-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 6px; }
+  .app-grid button { justify-content: flex-start; font-size: 12px; overflow: hidden; text-overflow: ellipsis; display: block; text-align: left; line-height: 40px; }
   .upload { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
-  .upload input { font-size: 12px; }
-  .media-list { margin-top: 8px; }
-  .media-list .hint { font-size: 12px; color: var(--muted); }
-  .media-item { display: grid; grid-template-columns: 1fr auto auto auto; gap: 8px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--line); }
-  .media-item:last-child { border-bottom: 0; }
-  .media-item .name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+  .media-list > * + * { margin-top: 0; }
+  .media-item { display: grid; grid-template-columns: 1fr auto auto auto; gap: 8px; align-items: center; padding: 6px 0; border-top: 1px solid var(--line); }
+  .media-item .name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
   .media-item .size { color: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
-  .media-item button { padding: 6px 9px; font-size: 11px; border-radius: 7px; }
-  progress { width: 100%; height: 6px; accent-color: var(--beam); margin-top: 8px; }
+  .media-item button { min-height: 32px; padding: 0 10px; font-size: 12px; }
+  .media-item button:last-child { color: var(--bad); }
+  .media-item:first-child { border-top: 0; }
 
   /* Tabs (mobile) */
   .tabs {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; display: grid; grid-template-columns: repeat(4, 1fr);
-    padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
-    background: var(--night); border-top: 1px solid var(--line);
+    padding: 0 8px env(safe-area-inset-bottom); background: var(--night); border-top: 1px solid var(--line);
   }
-  .tabs button { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 0; min-height: 44px; border: 0; background: none; color: var(--muted); font-size: 11px; }
+  .tabs button {
+    flex-direction: column; gap: 2px; height: var(--tabbar); padding: 0;
+    background: none; color: var(--muted); font-size: 11px; border-radius: 0;
+  }
+  .tabs button:hover, .tabs button:active { background: none; }
   .tabs button.active { color: var(--beam); }
-  .tabs svg { width: 21px; height: 21px; fill: currentColor; }
-
+  .tabs svg { width: 20px; height: 20px; fill: currentColor; }
   .side { display: none; }
-  .control-left, .control-right { display: contents; }
-  .keys { display: none; font-size: 11px; color: var(--muted); margin-top: 14px; line-height: 1.7; }
-  input[type=file] { color: var(--muted); font-size: 12px; }
-  input[type=file]::file-selector-button {
-    font: inherit; color: var(--text); background: var(--surface-2); border: 1px solid var(--line);
-    border-radius: 7px; padding: 7px 10px; margin-right: 8px; cursor: pointer;
-  }
-  kbd { font: inherit; border: 1px solid var(--line); border-radius: 4px; padding: 0 5px; color: var(--text); }
 
   #toast {
-    position: fixed; left: 50%; bottom: calc(104px + env(safe-area-inset-bottom)); transform: translateX(-50%);
-    max-width: calc(100% - 32px); background: var(--surface); border: 1px solid var(--line);
-    border-radius: 8px; padding: 10px 16px; font-size: 13px; opacity: 0; pointer-events: none;
-    transition: opacity .2s; z-index: 40;
+    position: fixed; left: 50%; bottom: calc(var(--tabbar) + 12px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+    max-width: calc(100% - 32px); background: var(--surface-2); border-radius: 8px; padding: 10px 14px;
+    font-size: 13px; opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 40;
   }
   #toast.show { opacity: 1; }
-  #toast.err { border-color: var(--bad); color: var(--bad); }
+  #toast.err { color: var(--bad); }
 
+  @media (min-width: 600px) and (max-width: 899px) {
+    main { max-width: 640px; margin: 0 auto; }
+  }
   @media (min-width: 900px) {
-    body { display: grid; grid-template-columns: 200px minmax(0, 1fr); grid-template-rows: auto 1fr; column-gap: 32px; padding: 0 28px 40px; }
-    .top { grid-column: 1 / -1; max-width: none; margin: 0; }
-    .side { display: block; grid-column: 1; grid-row: 2; position: sticky; top: 72px; align-self: start; }
+    :root { --gutter: 24px; }
+    body {
+      display: grid; grid-template-columns: 180px minmax(0, 1fr); grid-template-rows: auto 1fr;
+      column-gap: 24px; padding-bottom: 32px;
+    }
+    .top { grid-column: 1 / -1; }
+    .side { display: block; grid-column: 1; grid-row: 2; position: sticky; top: 52px; align-self: start; padding-top: 16px; }
     .side-nav { display: flex; flex-direction: column; gap: 2px; }
-    .side-nav button { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 0; background: transparent; color: var(--muted); border-radius: 8px; text-align: left; font-size: 13px; }
+    .side-nav button {
+      justify-content: flex-start; gap: 10px; min-height: 36px; padding: 0 10px;
+      background: transparent; color: var(--muted);
+    }
     .side-nav button:hover { background: var(--surface); color: var(--text); }
-    .side-nav button.active { background: var(--surface-2); color: var(--text); }
+    .side-nav button.active { background: var(--surface); color: var(--text); }
     .side-nav button.active svg { color: var(--beam); }
     .side-nav svg { width: 18px; height: 18px; fill: currentColor; }
-    main { grid-column: 2; grid-row: 2; max-width: 980px; margin: 0; }
-    .panel { display: none; }
-    .panel.active { display: block; }
+    main { grid-column: 2; grid-row: 2; }
     .tabs { display: none; }
     .keys { display: block; }
     #toast { bottom: 24px; }
   }
   @media (min-width: 1000px) {
-    .panel.active[data-panel="control"] { display: flex; gap: 24px; align-items: flex-start; }
-    .control-left { flex: 1.2; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
-    .control-right { flex: .8; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
-    .control-left > *, .control-right > * { margin-top: 0; }
-    .control-left .player { margin-top: 0; }
-    .control-right > .transport { margin: 0; }
+    .panel.active.cols { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+    .col { display: block; }
+    .col + .col > .block:first-child { margin-top: 0; }
   }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
@@ -313,319 +308,342 @@
   <button class="lamp-pill" id="lamp" type="button"><span class="dot"></span><span class="what">Lamp</span></button>
 </header>
 
-  <aside class="side">
-    <nav class="side-nav" aria-label="Sections">
-      <button data-tab="control" class="active" type="button">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3zm4 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-2 7v2h4v-2h-4z"/></svg>
-        Control
-      </button>
-      <button data-tab="library" type="button">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z"/></svg>
-        Library
-      </button>
-      <button data-tab="display" type="button">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H4V4zm2 2v8h12V6H6zM2 18h20v2H2v-2z"/></svg>
-        Display
-      </button>
-      <button data-tab="system" type="button">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h4v7H4v-7zm6-9h4v16h-4V4zm6 5h4v11h-4V9z"/></svg>
-        System
-      </button>
-    </nav>
-  </aside>
+<aside class="side">
+  <nav class="side-nav" aria-label="Sections">
+    <button data-tab="control" class="active" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8a3 3 0 0 1 3 3v12a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V6a3 3 0 0 1 3-3zm4 3a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-2 7v2h4v-2h-4z"/></svg>
+      Control
+    </button>
+    <button data-tab="library" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4V4zm9 0h7v7h-7V4zM4 13h7v7H4v-7zm9 0h7v7h-7v-7z"/></svg>
+      Library
+    </button>
+    <button data-tab="display" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H4V4zm2 2v8h12V6H6zM2 18h20v2H2v-2z"/></svg>
+      Display
+    </button>
+    <button data-tab="system" type="button">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h4v7H4v-7zm6-9h4v16h-4V4zm6 5h4v11h-4V9z"/></svg>
+      System
+    </button>
+  </nav>
+</aside>
 
 <main>
-  <section class="panel active" data-panel="control" aria-label="Control">
-    <div class="control-left">
-    <section class="block screen-block">
-      <h2>Screen</h2>
-      <div class="mirror" id="mirror">
-        <img id="mirror-img" alt="" hidden>
-        <span id="mirror-hint">Loading screen…</span>
-      </div>
-      <div class="more">
-        <button class="switch on" id="mirror-live" type="button">Live</button>
-        <button id="mirror-refresh" type="button">Refresh</button>
-        <button id="mirror-mode" type="button">Touch</button>
-      </div>
-      <p class="note">Tap the picture to tap, drag to swipe. Switch to D-pad if the app ignores touch.</p>
-    </section>
-
-    <div class="player" id="now" hidden>
-      <div class="art"><img id="now-art" alt="" hidden></div>
-      <div class="track">
-        <div class="track-top"><span id="now-state">Playing</span><span id="now-app">YouTube</span></div>
-        <div class="track-title" id="now-title"></div>
-        <div class="track-artist" id="now-artist"></div>
-      </div>
-      <div class="seek">
-        <input type="range" class="bar" id="now-seek" min="0" max="1" value="0" step="1" aria-label="Seek">
-        <div class="times"><span id="now-pos">0:00</span><span id="now-dur"></span></div>
-      </div>
-      <div class="seek-nav">
-        <button data-seek="-30" type="button">−30 s</button>
-        <button data-seek="-10" type="button">−10 s</button>
-        <button data-seek="10" type="button">+10 s</button>
-        <button data-seek="30" type="button">+30 s</button>
-      </div>
-    </div>
-
-    </div>
-
-    <div class="control-right">
-    <div class="transport">
-      <button data-a="prev" type="button" aria-label="Previous">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2v14H6zM20 5v14l-10-7z"/></svg>
-      </button>
-      <button data-a="play" class="play" type="button" aria-label="Play or pause">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l12-7z"/></svg>
-      </button>
-      <button data-a="next" type="button" aria-label="Next">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 5h2v14h-2zM4 5v14l10-7z"/></svg>
-      </button>
-    </div>
-
-    <div class="volume">
-      <button data-a="mute" type="button" aria-label="Mute">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zm12.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/></svg>
-      </button>
-      <input type="range" class="bar" id="vol" min="0" max="20" value="0" step="1" aria-label="Volume">
-      <span class="vol-text" id="vol-text">Volume</span>
-    </div>
-
-    <section class="block navigate-block">
-      <h2>Navigate</h2>
-      <div class="navigate">
-        <div class="dpad" aria-label="Direction pad">
-          <button class="up" data-key="up" type="button" aria-label="Up">↑</button>
-          <button class="left" data-key="left" type="button" aria-label="Left">←</button>
-          <button class="ok" data-key="ok" type="button" aria-label="OK">OK</button>
-          <button class="right" data-key="right" type="button" aria-label="Right">→</button>
-          <button class="down" data-key="down" type="button" aria-label="Down">↓</button>
+  <section class="panel cols active" data-panel="control" aria-label="Control">
+    <div class="col">
+      <section class="block">
+        <h2>Screen</h2>
+        <div class="card flush">
+          <div class="mirror" id="mirror">
+            <img id="mirror-img" alt="" hidden>
+            <span id="mirror-hint">Loading screen…</span>
+          </div>
+          <div class="row-tools">
+            <button class="small switch on" id="mirror-live" type="button">Live</button>
+            <button class="small" id="mirror-refresh" type="button">Refresh</button>
+            <button class="small" id="mirror-mode" type="button" title="Touch sends taps and swipes. D-pad turns taps into arrow keys.">Touch</button>
+            <span class="hint">Tap or drag the picture</span>
+          </div>
         </div>
-        <div class="navkeys">
-          <button data-key="back" type="button">Back</button>
-          <button data-key="home" type="button">Home</button>
-          <button data-key="menu" type="button">Menu</button>
+      </section>
+
+      <div class="block card player" id="now" hidden>
+        <div class="art"><img id="now-art" alt="" hidden></div>
+        <div class="track">
+          <div class="track-top"><span id="now-state">Playing</span><span id="now-app">YouTube</span></div>
+          <div class="track-title" id="now-title"></div>
+          <div class="track-artist" id="now-artist"></div>
+        </div>
+        <div class="seek">
+          <input type="range" class="bar" id="now-seek" min="0" max="1" value="0" step="1" aria-label="Seek">
+          <div class="times"><span id="now-pos">0:00</span><span id="now-dur"></span></div>
+        </div>
+        <div class="seek-nav grid-4">
+          <button class="small" data-seek="-30" type="button">−30 s</button>
+          <button class="small" data-seek="-10" type="button">−10 s</button>
+          <button class="small" data-seek="10" type="button">+10 s</button>
+          <button class="small" data-seek="30" type="button">+30 s</button>
         </div>
       </div>
-    </section>
+    </div>
 
-    <section class="block type-block">
-      <h2>Type on projector</h2>
-      <form class="link" id="type-form">
-        <input id="type-text" type="text" maxlength="200" placeholder="Search text" autocomplete="off" autocapitalize="off" spellcheck="false">
-        <button type="submit">Send</button>
-      </form>
-      <div class="more">
-        <button id="type-search" type="button">Search</button>
-        <button id="type-enter" type="button">Enter</button>
-        <button id="type-back" type="button">Backspace</button>
-        <button id="type-clear" type="button">Clear</button>
-      </div>
-      <p class="note">Focus the search field on the projector, then type here.</p>
-      <p class="keys"><kbd>Space</kbd> play/pause, <kbd>+</kbd> <kbd>−</kbd> volume, <kbd>M</kbd> mute.</p>
-    </section>
+    <div class="col">
+      <section class="block">
+        <h2>Playback</h2>
+        <div class="card">
+          <div class="transport">
+            <button data-a="prev" type="button" aria-label="Previous">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5h2v14H6zM20 5v14l-10-7z"/></svg>
+            </button>
+            <button data-a="play" class="play primary" type="button" aria-label="Play or pause">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l12-7z"/></svg>
+            </button>
+            <button data-a="next" type="button" aria-label="Next">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 5h2v14h-2zM4 5v14l10-7z"/></svg>
+            </button>
+          </div>
+          <div class="volume">
+            <button data-a="mute" type="button" aria-label="Mute">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zm12.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z"/></svg>
+            </button>
+            <input type="range" class="bar" id="vol" min="0" max="20" value="0" step="1" aria-label="Volume">
+            <span class="vol-text" id="vol-text">–</span>
+          </div>
+        </div>
+      </section>
 
-    <section class="block sleep-block">
-      <h2>Sleep timer</h2>
-      <div class="sleep" id="sleep">
-        <div class="sleep-off">
-          <div class="chips">
+      <section class="block">
+        <h2>Navigate</h2>
+        <div class="card navigate">
+          <div class="dpad" aria-label="Direction pad">
+            <button class="up" data-key="up" type="button" aria-label="Up">↑</button>
+            <button class="left" data-key="left" type="button" aria-label="Left">←</button>
+            <button class="ok" data-key="ok" type="button" aria-label="OK">OK</button>
+            <button class="right" data-key="right" type="button" aria-label="Right">→</button>
+            <button class="down" data-key="down" type="button" aria-label="Down">↓</button>
+          </div>
+          <div class="navkeys">
+            <button data-key="back" type="button">Back</button>
+            <button data-key="home" type="button">Home</button>
+            <button data-key="menu" type="button">Menu</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="block">
+        <h2>Type on projector</h2>
+        <div class="card">
+          <form class="field" id="type-form">
+            <input id="type-text" type="text" maxlength="200" placeholder="Text for the focused field" autocomplete="off" autocapitalize="off" spellcheck="false">
+            <button type="submit">Send</button>
+          </form>
+          <div class="grid-4">
+            <button class="small" id="type-search" type="button">Search</button>
+            <button class="small" id="type-enter" type="button">Enter</button>
+            <button class="small" id="type-back" type="button">Backspace</button>
+            <button class="small" id="type-clear" type="button">Clear</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="block">
+        <h2>Sleep timer</h2>
+        <div class="card sleep" id="sleep">
+          <div class="sleep-off grid-4">
             <button data-start="15" type="button">15 min</button>
             <button data-start="30" type="button">30 min</button>
             <button data-start="60" type="button">1 h</button>
             <button data-start="120" type="button">2 h</button>
           </div>
-        </div>
-        <div class="sleep-on">
-          <div class="countdown">
-            <b id="sleep-left">0:00</b>
-            <span id="sleep-end">Lamp off at --:--</span>
+          <div class="sleep-on">
+            <div class="countdown">
+              <b id="sleep-left">0:00</b>
+              <span id="sleep-end">Lamp off at --:--</span>
+            </div>
+            <div class="grid-4">
+              <button data-add="15" type="button">+15 min</button>
+              <button data-add="60" type="button">+1 h</button>
+              <button id="sleep-restart" type="button">Restart</button>
+              <button class="danger" id="sleep-cancel" type="button">Cancel</button>
+            </div>
           </div>
-          <div class="chips">
-            <button data-add="15" type="button">+15 min</button>
-            <button data-add="60" type="button">+1 h</button>
-            <button id="sleep-restart" type="button">Restart</button>
-            <button id="sleep-cancel" type="button">Cancel</button>
+        </div>
+        <p class="keys"><kbd>Space</kbd> play/pause · <kbd>+</kbd> <kbd>−</kbd> volume · <kbd>M</kbd> mute</p>
+      </section>
+    </div>
+  </section>
+
+  <section class="panel cols" data-panel="library" aria-label="Library">
+    <div class="col">
+      <section class="block">
+        <h2>Open a link</h2>
+        <form class="card field" id="link">
+          <input id="url" type="url" placeholder="Paste a video link" autocomplete="off" required>
+          <button class="primary" type="submit">Play</button>
+        </form>
+      </section>
+
+      <section class="block">
+        <h2>Apps</h2>
+        <div class="card">
+          <input id="app-filter" type="search" placeholder="Filter apps" autocomplete="off">
+          <div class="app-grid" id="app-grid"><span class="hint">Loading…</span></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="col">
+      <section class="block">
+        <h2>Videos</h2>
+        <div class="card">
+          <div class="upload">
+            <input id="media-file" type="file" accept="video/*">
+            <button id="media-upload" type="button">Upload</button>
+          </div>
+          <progress id="media-progress" max="100" value="0" hidden></progress>
+          <div class="media-list" id="media-list"></div>
+          <p class="note"><span id="media-usage">–</span> · 500 MB per file · plays in VLC</p>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <section class="panel cols" data-panel="display" aria-label="Display">
+    <div class="col">
+      <section class="block">
+        <h2>Picture shape</h2>
+        <div class="card">
+          <div class="editor" id="editor">
+            <svg id="svg" viewBox="-50 -50 1380 820" role="img" aria-label="Projected picture shape">
+              <rect class="frame" x="0" y="0" width="1280" height="720" rx="6"/>
+              <polygon class="shape" id="shape" points=""/>
+              <g id="handles"></g>
+            </svg>
+            <div class="busy-cover"><div><b id="busy-sec">25</b>Screen restarting to apply the corners</div></div>
+          </div>
+          <div class="corner-bar">
+            <div class="corner-info" id="corner-info">Drag a corner, or tap one and use the arrows.</div>
+            <div class="pad" aria-label="Move selected corner">
+              <button class="up" data-move="0,-1" type="button" aria-label="Move up">↑</button>
+              <button class="left" data-move="-1,0" type="button" aria-label="Move left">←</button>
+              <button class="down" data-move="0,1" type="button" aria-label="Move down">↓</button>
+              <button class="right" data-move="1,0" type="button" aria-label="Move right">→</button>
+            </div>
+          </div>
+          <div class="apply-row">
+            <button class="apply primary" id="apply" type="button" disabled>Apply</button>
+            <button id="discard" type="button" disabled>Discard</button>
+            <button id="undo" type="button">Undo</button>
           </div>
         </div>
-      </div>
-    </section>
+        <p class="keys">Arrows move the selected corner, <kbd>Shift</kbd> for bigger steps.</p>
+      </section>
 
+      <section class="block">
+        <h2>Trapezoid and size</h2>
+        <div class="card">
+          <p class="note warn" id="shape-note" hidden>The projector or a preset changed the shape. The sliders show the last manual setting.</p>
+          <div class="slider">
+            <label for="tilt">Trapezoid <output id="tilt-v"></output></label>
+            <input class="bar" id="tilt" type="range" min="-44" max="44" step="1">
+            <div class="ends"><span>Bottom narrower</span><span>Top narrower</span></div>
+          </div>
+          <div class="slider">
+            <label for="scale">Size <output id="scale-v"></output></label>
+            <input class="bar" id="scale" type="range" min="50" max="100" step="1">
+            <div class="ends"><span>Smaller</span><span>Full</span></div>
+          </div>
+          <p class="note">These replace any corner edits.</p>
+        </div>
+      </section>
+    </div>
+
+    <div class="col">
+      <section class="block">
+        <h2>Presets</h2>
+        <div class="card">
+          <div class="field">
+            <input id="preset-name" maxlength="24" placeholder="Name this shape" autocomplete="off">
+            <button id="preset-save" type="button">Save</button>
+          </div>
+          <div class="preset-list" id="preset-list"></div>
+          <div class="row-tools">
+            <button class="small" id="preset-export" type="button">Export</button>
+            <button class="small" id="preset-import" type="button">Import</button>
+            <input id="preset-file" type="file" accept="application/json,.json" hidden>
+            <span class="grow"></span>
+            <button class="small danger" id="factory" type="button">Factory corners</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="block">
+        <h2>Projector</h2>
+        <div class="card list">
+          <div class="row"><span>Auto keystone</span><button class="small switch" id="auto-keystone" type="button">–</button></div>
+          <div class="row"><span>Auto focus</span><button class="small switch" id="auto-focus" type="button">–</button></div>
+          <div class="row"><span>Focus</span>
+            <span class="step">
+              <button class="small" id="focus-up" type="button" aria-label="Focus up">−</button>
+              <b id="focus-pos">–</b>
+              <button class="small" id="focus-down" type="button" aria-label="Focus down">+</button>
+            </span>
+          </div>
+          <div class="row stack">
+            <div class="head"><span>Brightness</span><output id="brightness-v">–</output></div>
+            <input type="range" class="bar" id="brightness" min="0" max="100" step="1" aria-label="Brightness">
+          </div>
+          <div class="row"><span>Colour</span>
+            <span class="seg">
+              <button class="small" data-color="0" type="button">Warm</button>
+              <button class="small" data-color="1" type="button">Standard</button>
+              <button class="small" data-color="2" type="button">Cool</button>
+            </span>
+          </div>
+          <div class="row"><span>LEDs</span>
+            <span class="seg">
+              <button class="small" id="led-power" type="button">Power</button>
+              <button class="small" id="led-status" type="button">Status</button>
+              <button class="small" id="led-blue" type="button">Blue</button>
+            </span>
+          </div>
+        </div>
+        <p class="note">Manual corners may hold better with auto keystone off.</p>
+      </section>
     </div>
   </section>
 
-  <section class="panel" data-panel="library" aria-label="Library">
-    <section class="block link-block">
-      <h2>Open a link</h2>
-      <form class="link" id="link">
-        <input id="url" type="url" placeholder="Paste a video link" autocomplete="off" required>
-        <button type="submit">Play</button>
-      </form>
-    </section>
+  <section class="panel cols" data-panel="system" aria-label="System">
+    <div class="col">
+      <section class="block">
+        <h2>Status</h2>
+        <div class="card facts">
+          <div class="fact"><span>CPU</span><b id="st-cpu">–</b></div>
+          <div class="fact"><span>GPU</span><b id="st-gpu">–</b></div>
+          <div class="fact"><span>Memory</span><b id="st-ram">–</b></div>
+          <div class="fact"><span>Storage</span><b id="st-storage">–</b></div>
+          <div class="fact"><span>Uptime</span><b id="st-uptime">–</b></div>
+          <div class="fact"><span>Tilt</span><b id="st-tilt">–</b></div>
+          <div class="fact"><span>Lamp</span><b id="st-lamp">–</b></div>
+          <div class="fact"><span>Fan guard</span><b id="st-fan">–</b></div>
+          <div class="fact wide"><span>Wi-Fi</span><b id="st-wifi">–</b></div>
+          <div class="fact wide"><span>In front</span><b id="st-app">–</b></div>
+          <div class="fact wide"><span>Version</span><b id="st-version">–</b></div>
+        </div>
+      </section>
 
-    <section class="block apps-block">
-      <h2>Apps</h2>
-      <input id="app-filter" type="search" placeholder="Filter apps" autocomplete="off">
-      <div class="app-grid" id="app-grid"><span class="hint">Loading…</span></div>
-    </section>
-
-    <section class="block videos-block">
-      <h2>Videos</h2>
-      <div class="upload">
-        <input id="media-file" type="file" accept="video/*">
-        <button id="media-upload" type="button">Upload</button>
-      </div>
-      <progress id="media-progress" max="100" value="0" hidden></progress>
-      <p class="note" id="media-usage">–</p>
-      <div class="media-list" id="media-list"></div>
-      <p class="note">Up to 500 MB per video and 2 GB total. Playback opens in VLC.</p>
-    </section>
-
-  </section>
-
-  <section class="panel" data-panel="display" aria-label="Display">
-    <h2>Picture shape</h2>
-    <div class="editor" id="editor">
-      <svg id="svg" viewBox="-50 -50 1380 820" role="img" aria-label="Projected picture shape">
-        <rect class="frame" x="0" y="0" width="1280" height="720" rx="6"/>
-        <polygon class="shape" id="shape" points=""/>
-        <g id="handles"></g>
-      </svg>
-      <div class="busy-cover"><div><b id="busy-sec">25</b>Screen restarting to apply the corners</div></div>
+      <section class="block">
+        <h2>Device</h2>
+        <div class="card">
+          <div class="row-tools">
+            <button data-a="settings" type="button">Android settings</button>
+            <button data-a="keystone" type="button">Projector menu</button>
+          </div>
+          <div class="row-tools">
+            <button id="restart-panel" type="button">Restart Panel</button>
+            <button id="reboot" type="button">Reboot</button>
+            <button class="danger" id="shutdown" type="button">Shut down</button>
+          </div>
+          <p class="note">Shut down needs the power button to come back.</p>
+        </div>
+      </section>
     </div>
 
-    <div class="corner-bar">
-      <div class="corner-info" id="corner-info">Drag a corner, or tap one and use the arrows.</div>
-      <div class="pad" aria-label="Move selected corner">
-        <button class="up" data-move="0,-1" type="button" aria-label="Move up">↑</button>
-        <button class="left" data-move="-1,0" type="button" aria-label="Move left">←</button>
-        <button class="down" data-move="0,1" type="button" aria-label="Move down">↓</button>
-        <button class="right" data-move="1,0" type="button" aria-label="Move right">→</button>
-      </div>
+    <div class="col">
+      <section class="block">
+        <h2>Phone app</h2>
+        <div class="card">
+          <p class="note" id="pwa-state">Install and sharing need HTTPS.</p>
+          <div class="row-tools">
+            <a class="btn" href="/ca.crt" download="projector-ca.crt">Certificate</a>
+            <a class="btn" id="https-link" href="#">Open HTTPS</a>
+            <button class="primary" id="install" type="button" hidden>Install app</button>
+          </div>
+          <p class="note">Install the certificate as a CA, open HTTPS, then use Chrome's Install app. Links shared to the app open in the matching app.</p>
+        </div>
+      </section>
     </div>
-
-    <div class="apply-row">
-      <button class="apply" id="apply" type="button" disabled>Apply</button>
-      <button id="discard" type="button" disabled>Discard</button>
-      <button id="undo" type="button">Undo</button>
-    </div>
-    <p class="note">Applies live. Falls back to a 25 s restart if needed.</p>
-
-    <div class="presets">
-      <h2>Presets</h2>
-      <div class="preset-save">
-        <input id="preset-name" maxlength="24" placeholder="Name this shape" autocomplete="off">
-        <button id="preset-save" type="button">Save</button>
-      </div>
-      <div class="preset-list" id="preset-list"></div>
-      <div class="preset-tools">
-        <button id="preset-export" type="button">Export</button>
-        <button id="preset-import" type="button">Import</button>
-        <input id="preset-file" type="file" accept="application/json,.json" hidden>
-      </div>
-      <button class="factory" id="factory" type="button">Reset to factory corners</button>
-    </div>
-
-    <p class="note warn" id="shape-note" hidden>The projector or a preset changed the shape. The sliders show the last manual setting.</p>
-    <div class="slider">
-      <label for="tilt">Trapezoid <output id="tilt-v"></output></label>
-      <input id="tilt" type="range" min="-44" max="44" step="1">
-      <div class="ends"><span>Bottom narrower</span><span>Top narrower</span></div>
-    </div>
-    <div class="slider">
-      <label for="scale">Size <output id="scale-v"></output></label>
-      <input id="scale" type="range" min="50" max="100" step="1">
-      <div class="ends"><span>Smaller</span><span>Full</span></div>
-    </div>
-    <p class="note">Trapezoid and size change the picture right away. They replace any corner edits.</p>
-    <p class="keys">Arrows move the selected corner, <kbd>Shift</kbd> for bigger steps.</p>
-
-    <section class="block projector-block">
-      <h2>Projector</h2>
-      <div class="row"><span>Auto keystone</span><button class="switch" id="auto-keystone" type="button">–</button></div>
-      <div class="row"><span>Auto focus</span><button class="switch" id="auto-focus" type="button">–</button></div>
-      <div class="row"><span>Focus</span>
-        <span class="step">
-          <button id="focus-up" type="button" aria-label="Focus up">−</button>
-          <b id="focus-pos">–</b>
-          <button id="focus-down" type="button" aria-label="Focus down">+</button>
-        </span>
-      </div>
-      <div class="row"><span>LEDs</span>
-        <span class="leds">
-          <button id="led-power" type="button">Pwr</button>
-          <button id="led-status" type="button">Stat</button>
-          <button id="led-blue" type="button">Blue</button>
-        </span>
-      </div>
-      <div class="row"><span>Brightness</span><output id="brightness-v">–</output></div>
-      <input type="range" class="bar" id="brightness" min="0" max="100" step="1" aria-label="Brightness">
-      <div class="row"><span>Colour</span>
-        <span class="leds">
-          <button data-color="0" type="button">Warm</button>
-          <button data-color="1" type="button">Standard</button>
-          <button data-color="2" type="button">Cool</button>
-        </span>
-      </div>
-      <p class="note">Auto keystone off may let manual corners stick; test it on the wall.</p>
-    </section>
-
-  </section>
-
-  <section class="panel" data-panel="system" aria-label="System">
-    <h2>Status</h2>
-    <div class="facts">
-      <div class="fact"><span>CPU</span><b id="st-cpu">–</b></div>
-      <div class="fact"><span>GPU</span><b id="st-gpu">–</b></div>
-      <div class="fact"><span>Memory</span><b id="st-ram">–</b></div>
-      <div class="fact"><span>Storage</span><b id="st-storage">–</b></div>
-      <div class="fact"><span>Uptime</span><b id="st-uptime">–</b></div>
-      <div class="fact"><span>Tilt</span><b id="st-tilt">–</b></div>
-      <div class="fact wide"><span>Wi-Fi</span><b id="st-wifi">–</b></div>
-      <div class="fact"><span>Lamp</span><b id="st-lamp">–</b></div>
-      <div class="fact"><span>Fan guard</span><b id="st-fan">–</b></div>
-      <div class="fact wide"><span>In front</span><b id="st-app">–</b></div>
-      <div class="fact wide"><span>Version</span><b id="st-version">–</b></div>
-    </div>
-
-    <section class="block">
-      <h2>Preview</h2>
-      <div class="preview"><img id="preview-img" alt=""><span id="preview-hint">Tap Refresh</span></div>
-      <div class="more"><button id="preview-refresh" type="button">Refresh</button></div>
-      <p class="note">Screenshot from the projector. The keystone warp is not included.</p>
-    </section>
-
-    <section class="block">
-      <h2>Device</h2>
-      <div class="more">
-        <button data-a="settings" type="button">Android settings</button>
-        <button data-a="keystone" type="button">Projector menu</button>
-      </div>
-    </section>
-
-    <section class="block">
-      <h2>Power</h2>
-      <div class="more">
-        <button id="restart-panel" type="button">Restart Panel</button>
-        <button id="reboot" type="button">Reboot</button>
-        <button id="shutdown" type="button">Shut down</button>
-      </div>
-      <p class="note">Shut down needs the physical power button to come back.</p>
-    </section>
-
-    <section class="block">
-      <h2>Phone app</h2>
-      <p class="note" id="pwa-state">Install and sharing need HTTPS.</p>
-      <div class="more">
-        <a class="btn" href="/ca.crt" download="projector-ca.crt">Certificate</a>
-        <a class="btn" id="https-link" href="#">Open HTTPS</a>
-        <button id="install" type="button" hidden>Install app</button>
-      </div>
-      <p class="note">Install the certificate as a CA, then open HTTPS and use Chrome's Install app. Sharing a YouTube link to the installed app opens it in SmartTube.</p>
-    </section>
-
   </section>
 </main>
 
@@ -1285,7 +1303,11 @@
 
   // ---- Trapezoid and size: live. One request at a time, the latest value wins.
   const tilt = $('tilt'), scale = $('scale');
-  const labels = () => { $('tilt-v').textContent = tilt.value; $('scale-v').textContent = scale.value + '%'; };
+  const fill = el => el.style.setProperty('--p', 100 * (el.value - el.min) / (el.max - el.min) + '%');
+  const labels = () => {
+    $('tilt-v').textContent = tilt.value; $('scale-v').textContent = scale.value + '%';
+    fill(tilt); fill(scale);
+  };
   let sending = false, again = false;
   async function sendShape() {
     if (sending) { again = true; return; }
@@ -1460,20 +1482,6 @@
   $('reboot').addEventListener('click', () => power('reboot', 'Reboot the projector?'));
   $('shutdown').addEventListener('click', () =>
     power('shutdown', 'Shut down? You must press the power button to turn it back on.'));
-
-  function refreshPreview() {
-    const img = $('preview-img');
-    img.src = '/preview.png?t=' + Date.now();
-    $('preview-hint').hidden = true;
-  }
-  $('preview-refresh').addEventListener('click', refreshPreview);
-  $('preview-img').addEventListener('error', () => { $('preview-hint').hidden = false; });
-  setInterval(() => {
-    if (document.hidden) return;
-    const open = window.innerWidth >= 900 ||
-      document.querySelector('[data-panel="system"]').classList.contains('active');
-    if (open) refreshPreview();
-  }, 10000);
 
   let installPrompt = null;
   window.addEventListener('beforeinstallprompt', e => {
